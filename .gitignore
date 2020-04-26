@@ -1,0 +1,14 @@
+# Node files
+node_modules
+
+# Thumbnail and view configuration files
+._*
+.DS_Store
+Desktop.ini
+Thumbs.db
+
+# External disk files
+.Spotlight-V100
+.Trashes
+.fseventsd
+.TemporaryItems

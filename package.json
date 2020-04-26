@@ -1,0 +1,30 @@
+{
+  "name": "monastery",
+  "description": "A straight forward MongoDB ODM built upon MonkJS",
+  "author": "Ricky Boyce",
+  "version": "1.0.0",
+  "license": "MIT",
+  "repository": "github:Boycce/monastery",
+  "main": "lib/index.js",
+  "keywords": [
+    "monastery",
+    "monk",
+    "mongodb",
+    "mongo",
+    "driver",
+    "monk odm",
+    "mongo odm"
+  ],
+  "scripts": {
+    "test": "jest --watchAll --runInBand"
+  },
+  "dependencies": {
+    "debug": "^4.1.1",
+    "monk": "git+https://github.com/Boycce/monk.git",
+    "validator": "^13.0.0"
+  },
+  "devDependencies": {
+    "jest": "^25.3.0",
+    "eslint": "^6.8.0"
+  }
+}
