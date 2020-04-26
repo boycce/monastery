@@ -2,7 +2,7 @@
 
 A straight forward MongoDB ODM built upon MonkJS.
 
-[![NPM](https://img.shields.io/npm/v/css-cherry.svg)](https://www.npmjs.com/package/monasteryjs)
+[![NPM](https://img.shields.io/npm/v/monastery-js.svg)](https://www.npmjs.com/package/monastery-js)
 [![Build Status](https://travis-ci.org/boycce/monastery.svg?branch=master)](https://travis-ci.org/boycce/monastery)
 
 ## Install
