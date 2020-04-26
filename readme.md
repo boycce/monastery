@@ -10,14 +10,14 @@ A straight forward MongoDB ODM built upon MonkJS.
 This repository is distributed with NPM. After installing NPM, you can install Monastery via:
 
 ```sh
-npm install --save monasteryjs
+npm install --save monastery-js
 ```
 
 ## Usage
 
 ```js
 // Require monastery
-const monastery = require('monasteryjs')
+const monastery = require('monastery-js')
 
 // Initalise a model
 let user = monastery.model('user', { fields: {
