@@ -151,6 +151,7 @@ test('Validation array errors', async () => {
   // Setup
   let user = monastery.model('user', { fields: {
     animals: {
+      cats: [{ type: 'string' }],
       dogs: [{
         name:  { type: 'string' },
         color: { type: 'string', required: true }
@@ -160,6 +161,16 @@ test('Validation array errors', async () => {
 
   // Type error within an array (string)
   await expect(user.validate({
+    animals: { cats: [1] }
+  })).rejects.toContainEqual({
+    status: '400',
+    title: '0',
+    detail: 'Value was not a string.',
+    meta: { rule: 'isString', model: 'user', path: 'animals.cats.0' }
+  })
+
+  // Type error within an array subdocument (string)
+  await expect(user.validate({
     animals: { dogs: [{ name: 'sparky', color: 1 }] }
   })).rejects.toContainEqual({
     status: '400',
@@ -168,7 +179,7 @@ test('Validation array errors', async () => {
     meta: { rule: 'isString', model: 'user', path: 'animals.dogs.0.color' }
   })
 
-  // Requried error within an array
+  // Requried error within an array subdocument
   await expect(user.validate({
     animals: { dogs: [{ name: 'sparky' }] }
   })).rejects.toContainEqual({
@@ -264,3 +275,24 @@ test('Schema options', async () => {
     meta: { rule: 'isId', model: 'user3', path: 'name' }
   })
 })
+
+test('Schema rules', async () => {
+  // Setup
+  let user = monastery.model('user', { fields: {
+    name: { type: 'string', minLength: 10 }
+  }})
+
+  // MinLength
+  await expect(user.validate({ name: 'Ip Man' })).rejects.toContainEqual({
+    detail: "Value needs to be at least 10 characters long.",
+    status: "400",
+    title: "name",
+    meta: {
+      model: "user",
+      path: "name",
+      rule: "minLength"
+    }
+  }
+)
+})
+
