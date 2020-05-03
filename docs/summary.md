@@ -1,5 +1,5 @@
 # Table of contents
 
-* [Introduction](readme.md)
+* [Introduction](../readme.md)
 * [Model](model.md)
 

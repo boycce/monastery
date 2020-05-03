@@ -5,6 +5,7 @@
   "version": "1.3.0",
   "license": "MIT",
   "repository": "github:boycce/monastery",
+  "homepage": "https://boycce.gitbook.io/monastery",
   "main": "lib/index.js",
   "keywords": [
     "monastery",

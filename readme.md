@@ -1,4 +1,4 @@
-![](.gitbook/assets/monastery.jpg)
+![](./docs/.gitbook/assets/monastery.jpg)
 
 [![NPM](https://img.shields.io/npm/v/monastery-js.svg)](https://www.npmjs.com/package/monastery-js) [![Build Status](https://travis-ci.org/boycce/monastery.svg?branch=master)](https://travis-ci.org/boycce/monastery)
 
