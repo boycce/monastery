@@ -16,4 +16,5 @@ db.log = () => {}
 // Run tests sequentially
 require('./monk')(monastery, db)
 require('./model')(monastery, db)
+require('./crud')(monastery, db)
 require('./validate')(monastery, db)

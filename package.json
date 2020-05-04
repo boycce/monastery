@@ -17,6 +17,7 @@
     "mongo odm"
   ],
   "scripts": {
+    "release": "standard-version && npm publish",
     "test": "jest",
     "watch": "jest --watchAll --runInBand"
   },
@@ -26,7 +27,16 @@
     "validator": "^13.0.0"
   },
   "devDependencies": {
+    "eslint": "^6.8.0",
     "jest": "^25.3.0",
-    "eslint": "^6.8.0"
+    "standard-version": "^7.1.0"
+  },
+  "standard-version": {
+    "releaseCommitMessageFormat": "{{currentTag}}",
+    "sign": true,
+    "skip": {
+      "changelog": true,
+      "tag": true
+    }
   }
 }
