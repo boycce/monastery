@@ -22,4 +22,12 @@ module.exports = function(monastery, db) {
     done()
   })
 
+  test('Monastery connect with promise', (done) => {
+    monastery('localhost/monastery').then(db => {
+      expect(db).toEqual(expect.any(Object))
+      db.close()
+      done()
+    })
+  })
+
 }
