@@ -13,7 +13,7 @@ module.exports = function(monastery, db) {
       status: '400',
       title: 'name',
       detail: 'This field is required.',
-      meta: { rule: 'required', model: 'user', path: 'name' }
+      meta: { rule: 'required', model: 'user', field: 'name' }
     })
 
     // Type error (string)
@@ -21,7 +21,7 @@ module.exports = function(monastery, db) {
       status: '400',
       title: 'name',
       detail: 'Value was not a string.',
-      meta: { rule: 'isString', model: 'user', path: 'name' }
+      meta: { rule: 'isString', model: 'user', field: 'name' }
     })
 
     // Type error (array)
@@ -29,7 +29,7 @@ module.exports = function(monastery, db) {
       status: '400',
       title: 'colors',
       detail: 'Value was not an array.',
-      meta: { rule: 'isArray', model: 'user', path: 'colors' }
+      meta: { rule: 'isArray', model: 'user', field: 'colors' }
     })
 
     // Type error (object)
@@ -37,7 +37,7 @@ module.exports = function(monastery, db) {
       status: '400',
       title: 'animals',
       detail: 'Value was not an object.',
-      meta: { rule: 'isObject', model: 'user', path: 'animals' }
+      meta: { rule: 'isObject', model: 'user', field: 'animals' }
     })
   })
 
@@ -55,17 +55,17 @@ module.exports = function(monastery, db) {
     // Invalid subdocument type
     await expect(user.validate({ animals: { dog: 1 }})).rejects.toContainEqual({
       status: '400',
-      title: 'dog',
+      title: 'animals.dog',
       detail: 'Value was not an object.',
-      meta: { rule: 'isObject', model: 'user', path: 'animals.dog' }
+      meta: { rule: 'isObject', model: 'user', field: 'dog' }
     })
 
     // Required subdocument property (implicit insert)
     await expect(user.validate({})).rejects.toContainEqual({
       status: '400',
-      title: 'color',
+      title: 'animals.dog.color',
       detail: 'This field is required.',
-      meta: { rule: 'required', model: 'user', path: 'animals.dog.color' }
+      meta: { rule: 'required', model: 'user', field: 'color' }
     })
 
     // Ignore required subdocument property (explicit update option)
@@ -89,9 +89,9 @@ module.exports = function(monastery, db) {
       animals: { cats: [1] }
     })).rejects.toContainEqual({
       status: '400',
-      title: '0',
+      title: 'animals.cats.0',
       detail: 'Value was not a string.',
-      meta: { rule: 'isString', model: 'user', path: 'animals.cats.0' }
+      meta: { rule: 'isString', model: 'user', field: '0' }
     })
 
     // Type error within an array subdocument (string)
@@ -99,9 +99,9 @@ module.exports = function(monastery, db) {
       animals: { dogs: [{ name: 'sparky', color: 1 }] }
     })).rejects.toContainEqual({
       status: '400',
-      title: 'color',
+      title: 'animals.dogs.0.color',
       detail: 'Value was not a string.',
-      meta: { rule: 'isString', model: 'user', path: 'animals.dogs.0.color' }
+      meta: { rule: 'isString', model: 'user', field: 'color' }
     })
 
     // Requried error within an array subdocument
@@ -109,9 +109,9 @@ module.exports = function(monastery, db) {
       animals: { dogs: [{ name: 'sparky' }] }
     })).rejects.toContainEqual({
       status: '400',
-      title: 'color',
+      title: 'animals.dogs.0.color',
       detail: 'This field is required.',
-      meta: { rule: 'required', model: 'user', path: 'animals.dogs.0.color' }
+      meta: { rule: 'required', model: 'user', field: 'color' }
     })
 
     // No item errors for empty arrays
@@ -202,25 +202,40 @@ module.exports = function(monastery, db) {
       status: '400',
       title: 'name',
       detail: 'Value was not a valid ObjectId.',
-      meta: { rule: 'isId', model: 'user4', path: 'name' }
+      meta: { rule: 'isId', model: 'user4', field: 'name' }
     })
   })
 
   test('Schema rules', async () => {
     // Setup
     let user = db.model('user', { fields: {
-      name: { type: 'string', minLength: 10 }
+      name: { type: 'string', minLength: 7 },
+      email: { type: 'string', isEmail: true }
     }})
 
     // MinLength
+    await expect(user.validate({ name: 'Good man' })).resolves.toEqual({"name": "Good man"})
     await expect(user.validate({ name: 'Ip Man' })).rejects.toContainEqual({
-      detail: "Value needs to be at least 10 characters long.",
+      detail: "Value needs to be at least 7 characters long.",
       status: "400",
       title: "name",
       meta: {
         model: "user",
-        path: "name",
+        field: "name",
         rule: "minLength"
+      }
+    })
+
+    // isEmail
+    await expect(user.validate({ email: 'good@g.com' })).resolves.toEqual({"email": "good@g.com"})
+    await expect(user.validate({ email: 'bademail' })).rejects.toContainEqual({
+      detail: "Please enter a valid email address.",
+      status: "400",
+      title: "email",
+      meta: {
+        model: "user",
+        field: "email",
+        rule: "isEmail"
       }
     })
   })
