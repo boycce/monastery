@@ -136,7 +136,7 @@ module.exports = function(monastery, db) {
     await expect(user.validate({ badprop: true })).resolves.toEqual({})
 
     // String data
-    await expect(user.validate({ name: 'Ip Man' })).resolves.toEqual({ name: 'Ip Man' })
+    await expect(user.validate({ name: 'Martin Luther' })).resolves.toEqual({ name: 'Martin Luther' })
 
     // Array data
     await expect(user.validate({ names: ['blue'] })).resolves.toEqual({ names: ['blue'] })
@@ -172,7 +172,7 @@ module.exports = function(monastery, db) {
       name: { type: 'string', 'insertOnly': true }
     }})
     let user2 = db.model('user2', { fields: {
-      name: { type: 'string', defaultOverride: true, default: 'Ip Man' }
+      name: { type: 'string', defaultOverride: true, default: 'Martin Luther' }
     }})
     let user3 = db.model('user3', { fields: {}})
     let user4 = db.model('user4', { fields: {
@@ -180,13 +180,13 @@ module.exports = function(monastery, db) {
     }})
 
     // Ignore insertOnly fields when updating
-    await expect(user.validate({ name: 'Ip Man' }, { update: true })).resolves.toEqual({})
+    await expect(user.validate({ name: 'Martin Luther' }, { update: true })).resolves.toEqual({})
 
     // Default 
-    await expect(user2.validate({})).resolves.toEqual({ name: 'Ip Man' })
+    await expect(user2.validate({})).resolves.toEqual({ name: 'Martin Luther' })
 
     // Default override
-    await expect(user2.validate({ name : 'temp' })).resolves.toEqual({ name: 'Ip Man' })
+    await expect(user2.validate({ name : 'temp' })).resolves.toEqual({ name: 'Martin Luther' })
 
     // Index, mongodb connection error
     await expect(user3._setupIndexes({ name: { type: 'string', index: 'text' }})).rejects
@@ -214,8 +214,8 @@ module.exports = function(monastery, db) {
     }})
 
     // MinLength
-    await expect(user.validate({ name: 'Good man' })).resolves.toEqual({"name": "Good man"})
-    await expect(user.validate({ name: 'Ip Man' })).rejects.toContainEqual({
+    await expect(user.validate({ name: 'Martin Luther' })).resolves.toEqual({"name": "Martin Luther"})
+    await expect(user.validate({ name: 'Carl' })).rejects.toContainEqual({
       detail: "Value needs to be at least 7 characters long.",
       status: "400",
       title: "name",
@@ -228,7 +228,7 @@ module.exports = function(monastery, db) {
 
     // isEmail
     await expect(user.validate({ email: 'good@g.com' })).resolves.toEqual({"email": "good@g.com"})
-    await expect(user.validate({ email: 'bademail' })).rejects.toContainEqual({
+    await expect(user.validate({ email: 'bad email' })).rejects.toContainEqual({
       detail: "Please enter a valid email address.",
       status: "400",
       title: "email",
