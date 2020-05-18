@@ -4,7 +4,7 @@
 
 ## Features
 
-* User friendly API design, built on the awesome [Monk](https://automattic.github.io/monk/)
+* User friendly API design, built around the awesome [Monk](https://automattic.github.io/monk/)
 * Simple CRUD methods with model population
 * Model validation deriving from your schema
 * Custom error messages can be defined in your schema
