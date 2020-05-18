@@ -19,7 +19,8 @@
   "scripts": {
     "release": "standard-version && npm publish",
     "test": "jest",
-    "watch": "jest --watchAll --runInBand"
+    "watch": "jest --watchAll --runInBand",
+    "docs": "cd docs && bundle exec jekyll serve"
   },
   "dependencies": {
     "debug": "^4.1.1",

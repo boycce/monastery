@@ -24,10 +24,10 @@ npm install --save monastery-js
 
 ```javascript
 // Require monastery
-const monastery = require('monastery-js')
+const db = require('monastery-js')
 
 // Initalise a model
-let user = monastery.model('user', {
+let user = db.model('user', {
   fields: {
     name: { type: 'string' },
     pets: [{ type: 'string' }],

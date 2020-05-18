@@ -1,0 +1,16 @@
+remote_theme: boycce/github-docs
+title: Monastery
+description: A straight forward MongoDB ODM built upon MonkJS
+
+# Aux links for the naviation
+aux_links:
+  "Monastery on GitHub":
+    - "//github.com/boycce/monastery"
+
+defaults:
+  -
+    scope:
+      path: "readme.md"
+    values:
+      title: "Introduction"
+      nav_order: 1
