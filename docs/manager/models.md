@@ -7,11 +7,11 @@ parent: Manager
 
 Setup model definitions from a folder location
 
-#### Arguments
+### Arguments
 
 1. `path` *(string)*: path to model definitions
 
-#### Returns
+### Returns
 
 An array of [model](../model) instances, the model instances will also be avaliable at:
 ```js
@@ -19,7 +19,7 @@ db.user
 db.models.user
 ```
 
-#### Example
+### Example
 
 ```js
 const user = db.models(__dirname + "models")

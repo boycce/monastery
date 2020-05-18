@@ -7,7 +7,7 @@ parent: Model
 
 Update document(s) in a collection and call related hooks: `schema.beforeUpdate`,  `schema.afterUpdate`
 
-#### Arguments
+### Arguments
 
 1. `options` *(object)*
   - `options.query` *(object\|id)*
@@ -15,12 +15,12 @@ Update document(s) in a collection and call related hooks: `schema.beforeUpdate`
   - [[`mongodb options`](http://mongodb.github.io/node-mongodb-native/3.2/api/Collection.html#update)]
 3. [`callback`] *(function)*: pass instead of return a promise
 
-#### Returns
+### Returns
 
 A promise if no callback is passed in.
 
-#### Example
+### Example
 
 ```js
-db.user.update({ query: { name: 'foo' }, data: { name: 'bar' }})
+user.update({ query: { name: 'foo' }, data: { name: 'bar' }})
 ```

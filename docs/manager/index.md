@@ -23,15 +23,15 @@ A monk manager instance with additional Monastery methods, i.e. `model` `models`
 #### Example
 
 ```js
-const db = require('monastery')('localhost/mydb', options)
+const db = require('monastery-js')('localhost/mydb', options)
 ```
 
 ```js
-const db = require('monastery')('localhost/mydb,192.168.1.1') // replica set
+const db = require('monastery-js')('localhost/mydb,192.168.1.1') // replica set
 ```
 
 ```js
-require('monastery')('localhost/mydb,192.168.1.1').then((db) => {
+require('monastery-js')('localhost/mydb,192.168.1.1').then((db) => {
   // db is the connected instance of the Manager
 }).catch((err) => {
   // error connecting to the database

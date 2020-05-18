@@ -8,31 +8,30 @@ has_children: true
 
 Created via [`manager.model`](/manager/model). 
 
-Models inherit most of the monk collection instance methods.
+Models inherit most of the [monk collection](https://automattic.github.io/monk/docs/collection/) instance methods.
 
 #### Monk collection instance methods:
-
-  * [_aggregate](/aggregate.md)
-  * [_bulkWrite](/bulkWrite.md)
-  * [_count](/count.md)
-  * [_distinct](/distinct.md)
-  * [_drop](/drop.md)
-  * [_dropIndex](/dropIndex.md)
-  * [_dropIndexes](/dropIndexes.md)
-  * [_ensureIndex](/ensureIndex.md)
-  * [_find](/find.md)
-  * [_findOne](/findOne.md)
-  * [_findOneAndDelete](/findOneAndDelete.md)
-  * [_findOneAndUpdate](/findOneAndUpdate.md)
-  * [_geoHaystackSearch](/geoHaystackSearch.md)
-  * [_geoNear](/geoNear.md)
-  * [_group](/group.md)
-  * [_indexes](/indexes.md)
-  * [_insert](/insert.md)
-  * [_mapReduce](/mapReduce.md)
-  * [_remove](/remove.md)
-  * [_stats](/stats.md)
-  * [_update](/update.md)
+  * [_aggregate](https://automattic.github.io/monk/docs/collection/aggregate.html)
+  * [_bulkWrite](https://automattic.github.io/monk/docs/collection/bulkWrite.html)
+  * [_count](https://automattic.github.io/monk/docs/collection/count.html)
+  * [_distinct](https://automattic.github.io/monk/docs/collection/distinct.html)
+  * [_drop](https://automattic.github.io/monk/docs/collection/drop.html)
+  * [_dropIndex](https://automattic.github.io/monk/docs/collection/dropIndex.html)
+  * [_dropIndexes](https://automattic.github.io/monk/docs/collection/dropIndexes.html)
+  * [_ensureIndex](https://automattic.github.io/monk/docs/collection/ensureIndex.html)
+  * [_find](https://automattic.github.io/monk/docs/collection/find.html)
+  * [_findOne](https://automattic.github.io/monk/docs/collection/findOne.html)
+  * [_findOneAndDelete](https://automattic.github.io/monk/docs/collection/findOneAndDelete.html)
+  * [_findOneAndUpdate](https://automattic.github.io/monk/docs/collection/findOneAndUpdate.html)
+  * [_geoHaystackSearch](https://automattic.github.io/monk/docs/collection/geoHaystackSearch.html)
+  * [_geoNear](https://automattic.github.io/monk/docs/collection/geoNear.html)
+  * [_group](https://automattic.github.io/monk/docs/collection/group.html)
+  * [_indexes](https://automattic.github.io/monk/docs/collection/indexes.html)
+  * [_insert](https://automattic.github.io/monk/docs/collection/insert.html)
+  * [_mapReduce](https://automattic.github.io/monk/docs/collection/mapReduce.html)
+  * [_remove](https://automattic.github.io/monk/docs/collection/remove.html)
+  * [_stats](https://automattic.github.io/monk/docs/collection/stats.html)
+  * [_update](https://automattic.github.io/monk/docs/collection/update.html)
 
 #### Monk collection
  

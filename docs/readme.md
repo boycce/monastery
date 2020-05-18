@@ -23,11 +23,11 @@ npm install --save monastery-js
 ## Usage
 
 ```javascript
-// Require and initialise a monastery manager
-// const db = require('monastery-js')('user:pass@localhost:port/mydb')
+// Initialise a monastery manager
 const db = require('monastery-js')('localhost/mydb')
+// const db = require('monastery-js')('user:pass@localhost:port/mydb')
 
-// Initalise a model
+// Define a model
 db.model('user', {
   fields: {
     name: { type: 'string' },

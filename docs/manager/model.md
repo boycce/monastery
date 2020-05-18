@@ -7,13 +7,13 @@ parent: Manager
 
 Sets up a model, retrieves a collection, and sets up any required indexes
 
-#### Arguments
+### Arguments
 
 1. `name` *(string)*: name of the mongo collection
 
-2. [`schema`] *(object)*: [Schema](/schema) (and [monk collection](https://automattic.github.io/monk/docs/manager/get.html) level options)
+2. [`schema`] *(object)*: [Schema](/schema) (and collection level options)
 
-#### Returns
+### Returns
 
 A [model](../model) instance, the model instance will also be avaliable at:
 ```js
@@ -21,7 +21,7 @@ db.user
 db.models.user
 ```
 
-#### Example
+### Example
 
 ```js
 const user = db.model('user', schema)

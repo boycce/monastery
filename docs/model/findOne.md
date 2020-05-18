@@ -7,18 +7,18 @@ parent: Model
 
 Find a single document and call related hook: `schema.afterFind`
 
-#### Arguments
+### Arguments
 
 Same argument signature as [`model.find`](/model/find).
 
-#### Returns
+### Returns
 
 A promise if no callback is passed in.
 
-#### Example
+### Example
 
 ```js
-db.user.findOne({ query: { name: "Martin Luther" }}).then(data => {
+user.findOne({ query: { name: "Martin Luther" }}).then(data => {
   // {..}
 })
 ```

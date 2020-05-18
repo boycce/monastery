@@ -61,7 +61,7 @@ schema.fields = {
 
 ### Field blacklisting
 
-You are able to provide a list of fields to blacklist per model operation. When calling `model.find`, the password field will be excluded from the returned value.
+You are able to provide a list of fields to blacklist per model operation.
 
 ```js
 // The 'password' field will be excluded from the response returned from `model.find`
@@ -84,7 +84,9 @@ let fieldName = {
   index: true,
   // Monastery will automatically create a unique mongodb index for this field
   unique: true,
-  // Practically means type = 'id', but allows plugins to hook into this flag (more soon)
+  // Practically means type = 'id', but also enables population
+  model: 'pet',
+  // Practically means type = 'id', but also allows plugins to hook into this flag (more soon)
   image: true,
   // Field will only be allowed to be set on insert when calling model.insert
   insertOnly: true,

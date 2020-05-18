@@ -27,5 +27,5 @@ nav_order: 5
   maxLength | number
   regex | see validator.matches
 
-*See [validator](https://github.com/validatorjs/validator.js) for their validator logic*
+*See [validator](https://github.com/validatorjs/validator.js#validators) for their validator logic*
 

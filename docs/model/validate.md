@@ -8,15 +8,15 @@ parent: Model
 Validate a model and call related hook: `schema.beforeValidate`
 
 
-#### Arguments
+### Arguments
 
-1. `data` *(object)*: data to validate
+1. `data` *(object)*
 
-#### Returns
+### Returns
 
 A promise
 
-#### Example
+### Example
 
 ```js
 // Initalise a model
