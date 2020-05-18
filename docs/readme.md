@@ -4,7 +4,7 @@
 
 ## Features
 
-* User friendly API design
+* User friendly API design, built on the awesome [Monk](https://automattic.github.io/monk/)
 * Simple CRUD methods with model population
 * Model validation deriving from your schema
 * Custom error messages can be defined in your schema
@@ -23,11 +23,12 @@ npm install --save monastery-js
 ## Usage
 
 ```javascript
-// Require monastery
-const db = require('monastery-js')
+// Require and initialise a monastery manager
+// const db = require('monastery-js')('user:pass@localhost:port/mydb')
+const db = require('monastery-js')('localhost/mydb')
 
 // Initalise a model
-let user = db.model('user', {
+db.model('user', {
   fields: {
     name: { type: 'string' },
     pets: [{ type: 'string' }],
@@ -37,10 +38,10 @@ let user = db.model('user', {
 })
 
 // Validate some data
-user.validate({
-  name: 'Ip Man', 
+db.user.validate({
+  name: 'Martin Luther', 
   pets: ['sparky', 'tiny'],
-  address: { city: 'Christchurch' },
+  address: { city: 'Eisleben' },
   points: [[1, 5], [3, 1]]
 
 }).then(data => {

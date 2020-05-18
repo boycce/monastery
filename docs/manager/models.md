@@ -13,8 +13,8 @@ Setup model definitions from a folder location
 
 #### Returns
 
-An array of [Model](../model) instances, the model instances will also be avaliable at:
-```javascript
+An array of [model](../model) instances, the model instances will also be avaliable at:
+```js
 db.user
 db.models.user
 ```

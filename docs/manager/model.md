@@ -5,17 +5,21 @@ parent: Manager
 
 # `manager.model`
 
-Sets up a model, and retrieves a collection
+Sets up a model, retrieves a collection, and sets up any required indexes
 
 #### Arguments
 
 1. `name` *(string)*: name of the mongo collection
 
-2. [`schema`] *(object)*: Schema (and [Monk collection](https://automattic.github.io/monk/docs/manager/get.html) level options)
+2. [`schema`] *(object)*: [Schema](/schema) (and [monk collection](https://automattic.github.io/monk/docs/manager/get.html) level options)
 
 #### Returns
 
-A [Model](../model) instance.
+A [model](../model) instance, the model instance will also be avaliable at:
+```js
+db.user
+db.models.user
+```
 
 #### Example
 
