@@ -10,7 +10,11 @@ module.exports = function(monastery, db) {
 
     // Find test
     let find = await user.find({ query: inserted._id })
-    expect(find).toEqual([{ name: 'Martin Luther', _id: inserted._id }])
+    expect(find).toEqual({ name: 'Martin Luther', _id: inserted._id })
+
+    // Find test2
+    let find2 = await user.find({ query: { name: 'Martin Luther' }})
+    expect(find2[0]).toMatchObject({ name: 'Martin Luther' })
 
     // FindOne test
     let findOne = await user.findOne({ query: inserted._id })
