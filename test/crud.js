@@ -1,6 +1,6 @@
 module.exports = function(monastery, db) {
 
-  test('Testing CRUD actions', async (done) => {
+  test('Basic operator calls', async (done) => {
     let db2 = monastery('localhost/monastery')
     let user = db2.model('user', { fields: { name: { type: 'string' }}})
 
@@ -24,9 +24,31 @@ module.exports = function(monastery, db) {
     let update = await user.update({ query: inserted._id, data: { name: 'Martin Luther2' }})
     expect(update).toEqual({ name: 'Martin Luther2' })
 
+    // Update test (empty data)
+    expect(user.update({ query: inserted._id, data: {}})).rejects
+      .toEqual('No valid data passed to user.update()')
+
     // Remove test
     let remove = await user.remove({ query: inserted._id })
     expect(remove.result).toEqual({ n: 1, ok: 1 })
+
+    db2.close()
+    done()
+  })
+
+  test('Insert defaults', async (done) => {
+    let db2 = monastery('localhost/monastery')
+    let user = db2.model('user', { fields: {
+      name: { type: 'string' },
+      names: [{ type: 'string' }],
+      animals: { 
+        dog: { type: 'string' },
+        dogs: [{ name: { type: 'string' } }]
+      }
+    }})
+
+    let inserted = await user.insert({ data: {} })
+    expect(inserted).toEqual({ _id: inserted._id })
 
     db2.close()
     done()
