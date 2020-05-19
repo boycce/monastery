@@ -6,7 +6,7 @@ has_children: true
 
 # Model
 
-Created via [`manager.model`](/manager/model). 
+Created via [`manager.model`](../manager/model).
 
 Models inherit most of the [monk collection](https://automattic.github.io/monk/docs/collection/) instance methods.
 

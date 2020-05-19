@@ -9,7 +9,7 @@ Find a single document and call related hook: `schema.afterFind`
 
 ### Arguments
 
-Same argument signature as [`model.find`](/model/find).
+Same argument signature as [`model.find`](./find).
 
 ### Returns
 

@@ -21,7 +21,7 @@ Model schema object.
 
 1. Fields may contain subdocuments, array of values, or an array of subdocuments
 2. Field values need to have the `type` rule defined
-3. Field values can contain [custom](#custom-validation-rules) and [default validation rules](/rules), e.g. `{ minLength: 2 }`
+3. Field values can contain [custom](#custom-validation-rules) and [default validation rules](./rules), e.g. `{ minLength: 2 }`
 4. Field values can contain [field options](#field-options).
 
 ```js

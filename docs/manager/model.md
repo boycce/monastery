@@ -11,7 +11,7 @@ Sets up a model, retrieves a collection, and sets up any required indexes
 
 1. `name` *(string)*: name of the mongo collection
 
-2. [`schema`] *(object)*: [Schema](/schema) (and collection level options)
+2. [`schema`] *(object)*: [Schema](../schema) (and collection level options)
 
 ### Returns
 

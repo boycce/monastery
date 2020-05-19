@@ -5,12 +5,11 @@
 ## Features
 
 * User friendly API design, built around the awesome [Monk](https://automattic.github.io/monk/)
-* Simple CRUD methods with model population
+* Simple CRUD operations with model population
 * Model validation deriving from your schema
 * Custom error messages can be defined in your schema
-* Error response ready for client consumption
-* Automatic index setup
-* Lightweight
+* Normalised error responses ready for client consumption
+* Automatic mongodb index setup
 
 ## Install
 
@@ -32,7 +31,7 @@ db.model('user', {
   fields: {
     name: { type: 'string' },
     pets: [{ type: 'string' }],
-    address: { city: { type: 'string', minLength: 20 } },
+    address: { city: { type: 'string', minLength: 10 } },
     points: [[{ type: 'number' }]]
   }
 })
@@ -68,4 +67,3 @@ Coming soon...
 ## License
 
 Copyright 2019 Ricky Boyce. Code released under the MIT license.
-

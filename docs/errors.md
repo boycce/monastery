@@ -5,7 +5,7 @@ nav_order: 6
 
 # Error Responses
 
-All monastery [model operations](/model/#table-of-contents) return errors in the [JSON API error specification](https://jsonapi.org/format/#errors) format. Error object(s) are always returned in an array.
+All monastery [model operations](./model/#table-of-contents) return errors in the [JSON API error specification](https://jsonapi.org/format/#errors) format. Error object(s) are always returned in an array.
 
 ### Example
 
