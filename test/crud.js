@@ -37,8 +37,8 @@ module.exports = function(monastery, db) {
   })
 
   test('Insert defaults', async (done) => {
-    let db2 = monastery('localhost/monastery')
-    let user = db2.model('user', { fields: {
+    let db = monastery('localhost/monastery', { defaults: true })
+    let user = db.model('user', { fields: {
       name: { type: 'string' },
       names: [{ type: 'string' }],
       animals: { 
@@ -48,9 +48,13 @@ module.exports = function(monastery, db) {
     }})
 
     let inserted = await user.insert({ data: {} })
-    expect(inserted).toEqual({ _id: inserted._id })
+    expect(inserted).toEqual({ 
+      _id: inserted._id,
+      names: [],
+      animals: { dogs: [] }
+    })
 
-    db2.close()
+    db.close()
     done()
   })
 

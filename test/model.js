@@ -64,4 +64,30 @@ module.exports = function(monastery, db) {
       }]]
     ))
   })
+
+  test('Model setup with defaults', async () => {
+    //Setup
+    let db = monastery(false, { defaults: true })
+    let user = db.model('user', { fields: {
+      name: { type: 'string' },
+      pets: [{ type: 'string' }],
+      colors: { red: { type: 'string' } },
+      points: [[{ type: 'number' }]],
+      points2: [[{ x: { type: 'number' } }]]
+    }})
+
+    // Array schema
+    expect(user.fields.pets.schema).toEqual({ 
+      type: 'array', 
+      isArray: true, 
+      default: expect.any(Function)
+    })
+
+    // Subdocument field and schema
+    expect(user.fields.colors).toEqual({
+      red: { isString: true, type: 'string' },
+      schema: { isObject: true, type: 'object', default: expect.any(Function) }
+    })
+  })
+
 }

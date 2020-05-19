@@ -115,7 +115,8 @@ module.exports = function(monastery, db) {
     })
 
     // No item errors for empty arrays
-    await expect(user.validate({ animals: { dogs: [] }})).resolves.toEqual({ animals: { dogs: [] }})
+    await expect(user.validate({ animals: { dogs: [] }}))
+      .resolves.toEqual({ animals: { dogs: [] }})
   })
 
   test('Validated data', async () => {
@@ -145,13 +146,15 @@ module.exports = function(monastery, db) {
     await expect(user.validate({ names: [] })).resolves.toEqual({ names: [] })
 
     // Subdocument data
-    await expect(user.validate({ animals: { dog: 'sparky' } })).resolves.toEqual({ animals: { dog: 'sparky' } })
+    await expect(user.validate({ animals: { dog: 'sparky' } }))
+      .resolves.toEqual({ animals: { dog: 'sparky' } })
 
     // Subdocument data (empty)
     await expect(user.validate({ animals: {} })).resolves.toEqual({ animals: {} })
 
     // Subdocument data (null)
-    await expect(user.validate({ animals: { dog: null }})).resolves.toEqual({ animals: { dog: null }})
+    await expect(user.validate({ animals: { dog: null }}))
+      .resolves.toEqual({ animals: { dog: null }})
 
     // Subdocument data (bad data)
     await expect(user.validate({ animals: { dog: 'sparky', cat: 'grumpy' } }))
@@ -238,5 +241,27 @@ module.exports = function(monastery, db) {
         rule: "isEmail"
       }
     })
+  })
+
+  test('Schema defaults', async (done) => {
+    let db = monastery('localhost/monastery', { defaults: true })
+    let base = { names: [], animals: { dogs: [] }}
+    let user = db.model('user', { fields: {
+      name: { type: 'string' },
+      names: [{ type: 'string' }],
+      animals: { 
+        dog: { type: 'string' },
+        dogs: [{ name: { type: 'string' } }]
+      }
+    }})
+
+    // Array/subdocument defaults
+    await expect(user.validate({})).resolves.toEqual({ 
+      names: [], 
+      animals: { dogs: [] }
+    })
+
+    db.close()
+    done()
   })
 }
