@@ -11,7 +11,7 @@ Remove document(s) in a collection and call related hooks: `schema.beforeRemove`
 
 1. `options` *(object)*
   - `options.query` *(object\|id)*
-  - [[`mongodb options`](http://mongodb.github.io/node-mongodb-native/3.2/api/Collection.html#remove)]
+  - [[`mongodb options`](http://mongodb.github.io/node-mongodb-native/3.2/api/Collection.html#remove)]...
 2. [`callback`] *(function)*: pass instead of return a promise
 
 ### Returns
