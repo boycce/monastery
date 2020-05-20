@@ -21,3 +21,18 @@ All monastery [model operations](./model/#table-of-contents) return errors in th
   }
 }]
 ```
+
+Error on an array item
+
+```json
+[{
+  "detail": "The title is required.",
+  "status": "400",
+  "title": "comments.0.title",
+  "meta": {
+    "field": "title",
+    "model": "user",
+    "rule": "required"
+  }
+}]
+```

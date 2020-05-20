@@ -42,12 +42,12 @@ You are able to populate document references to other collections. Behind the sc
 this uses mongodb's [$lookup](https://docs.mongodb.com/manual/reference/operator/aggregation/lookup/) aggregation operator which can also be passed full $lookup syntax for more control.
 
 Populate is first enabled by including a reference to another document in the schema via `model`.
-The value of the model reference should be an ID, e.g. `myPet = id`
+The value of the model reference should be an ID, e.g. `myBook = id`
 
 ```js
 schema.fields = {
-  myPet: {
-    model: 'pet'
+  myBook: {
+    model: 'book'
   }
 }
 ```
@@ -55,7 +55,13 @@ schema.fields = {
 You are then able to easily populate returned results via a find operation.
 
 ```js
-user.find({ query: {...}, populate: ['myPet'] })
+user.find({ query: {...}, populate: ['myBook'] })
+```
+
+You can also populate within subdocument fields. Although at this time arrays are not supported,
+you would need to use the [example below](#more-control).
+```js
+user.find({ query: {...}, populate: ['myBooks.book'] })
 ```
 
 #### More control
@@ -68,10 +74,10 @@ If you would like more control you can either use monk's native
 user.find({ 
   query: {...},
   populate: [{
-    from: 'pet',
-    localField: 'myPet',
+    from: 'book',
+    localField: 'myBook',
     foreignField: '_id',
-    as: 'myPet'
+    as: 'myBook'
   }]
 })
 ```

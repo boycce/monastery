@@ -66,7 +66,7 @@ module.exports = function(monastery, db) {
   })
 
   test('Model setup with defaults', async () => {
-    //Setup
+    // Setup
     let db = monastery(false, { defaults: true })
     let user = db.model('user', { fields: {
       name: { type: 'string' },
