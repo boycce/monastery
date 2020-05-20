@@ -64,14 +64,24 @@ schema.fields = {
 You are able to provide a list of fields to blacklist per model operation.
 
 ```js
-// The 'password' field will be excluded from the response returned from `model.find`
+// The 'password' field will be removed from the results returned from `model.find`
 schema.findBL = ['password']
 
-// The 'password' and 'createdAt' fields will be automatically removed when updating via model.update
+// The 'password' and 'createdAt' fields will be removed before updating via `model.update`
 schema.updateBl = ['createdAt', 'password']
 
-// The 'password' field will be automatically removed when inserting via model.insert
+// The 'password' field will be removed before inserting via `model.insert`
 schema.createdBl = ['password']
+```
+
+You are also able to blacklist nested fields within subdocuments and arrays of subdocuments.
+
+```js
+// Subdocument example: `address.city` will be excluded from the response
+schema.findBL = ['address.city']
+
+// Array of subdocuments example: `meta` will be removed from each comment in the array
+schema.findBL = ['comments.meta']
 ```
 
 ### Field options
@@ -80,20 +90,28 @@ Here are some other special field options that can be used alongside validation 
 
 ```js
 let fieldName = {
+
   // Monastery will automatically create a mongodb index for this field
   index: true,
+
   // Monastery will automatically create a unique mongodb index for this field
   unique: true,
-  // Practically means type = 'id', but also enables population
+
+  // Enables population, you would save the foreign document _id on this field.
   model: 'pet',
+
   // Practically means type = 'id', but also allows plugins to hook into this flag (more soon)
   image: true,
+
   // Field will only be allowed to be set on insert when calling model.insert
   insertOnly: true,
+
   // Default will always override any passed value (it has some use-cases)
   defaultOverride: true
+
   // Default value
   default: 12,
+
   // Default value return from a function
   default: () => "I'm a default value"
 }

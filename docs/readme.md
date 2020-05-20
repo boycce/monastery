@@ -36,12 +36,14 @@ db.model('user', {
   }
 })
 
-// Validate some data
-db.user.validate({
-  name: 'Martin Luther', 
-  pets: ['sparky', 'tiny'],
-  address: { city: 'Eisleben' },
-  points: [[1, 5], [3, 1]]
+// Insert some data
+db.user.insert({
+  data: {
+    name: 'Martin Luther', 
+    pets: ['sparky', 'tiny'],
+    address: { city: 'Eisleben' },
+    points: [[1, 5], [3, 1]]
+  }
 
 }).then(data => {
   // valid data..
