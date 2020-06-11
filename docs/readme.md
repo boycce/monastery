@@ -52,10 +52,10 @@ db.user.insert({
   // [{
   //   detail: "Value needs to be at least 10 characters long.",
   //   status: "400",
-  //   title: "city",
+  //   title: "address.city",
   //   meta: {
+  //     field: "city",
   //     model: "user",
-  //     path: "address.city",
   //     rule: "minLength"
   //   }
   // }]
@@ -68,4 +68,4 @@ Coming soon...
 
 ## License
 
-Copyright 2019 Ricky Boyce. Code released under the MIT license.
+Copyright 2020 Ricky Boyce. Code released under the MIT license.
