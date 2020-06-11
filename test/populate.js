@@ -25,6 +25,13 @@ module.exports = function(monastery, db) {
         myBird: bird1._id
       }
     }})
+    let user2 = await user.insert({ data: {
+      name: 'Martin Luther2',
+      myBird: bird1._id,
+      pets: {
+        myBird: bird1._id
+      }
+    }})
 
     // Basic populate
     let find1 = await user.findOne({ query: user1._id, populate: ['myBird'] })
@@ -53,6 +60,34 @@ module.exports = function(monastery, db) {
         },
       }
     })
+
+    // Populate mulitple documents
+    let find3 = await user.find({
+      query: { _id: { $in: [user1._id, user2._id] }},
+      populate: ['myBird']
+    })
+
+    expect(find3).toEqual([{
+      _id: user1._id,
+      name: 'Martin Luther',
+      myBird: {
+        _id: bird1._id,
+        name: "ponyo"
+      },
+      pets: {
+        myBird: bird1._id
+      }
+    },{
+      _id: user2._id,
+      name: 'Martin Luther2',
+      myBird: {
+        _id: bird1._id,
+        name: "ponyo"
+      },
+      pets: {
+        myBird: bird1._id
+      }
+    }])
 
     db.close()
     done()
