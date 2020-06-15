@@ -1,7 +1,7 @@
 module.exports = function(monastery, db) {
 
   test('Basic operator calls', async (done) => {
-    let db2 = monastery('localhost/monastery')
+    let db2 = monastery('localhost/monastery', { serverSelectionTimeoutMS: 2000 })
     let user = db2.model('user', { fields: { name: { type: 'string' }}})
 
     // Insert test
@@ -57,7 +57,7 @@ module.exports = function(monastery, db) {
   })
 
   test('Insert defaults', async (done) => {
-    let db = monastery('localhost/monastery', { defaults: true })
+    let db = monastery('localhost/monastery', { defaults: true, serverSelectionTimeoutMS: 2000 })
     let user = db.model('user', { fields: {
       name: { type: 'string' },
       names: [{ type: 'string' }],

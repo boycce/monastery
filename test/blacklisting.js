@@ -2,7 +2,7 @@ module.exports = function(monastery, db) {
 
   test('Model blacklisting', async (done) => {
     // Setup
-    let db = monastery('localhost/monastery')
+    let db = monastery('localhost/monastery', { serverSelectionTimeoutMS: 2000 })
     let bird = db.model('bird', { fields: { name: { type: 'string' }}})
     let user = db.model('user', { 
       findBL: [

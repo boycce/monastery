@@ -23,9 +23,15 @@ module.exports = function(monastery, db) {
   })
 
   test('Monastery connect with promise', (done) => {
-    monastery('localhost/monastery').then(db => {
+    let db = monastery('localhost/monastery', { serverSelectionTimeoutMS: 2000 })
+
+    db.then(db => {
       expect(db).toEqual(expect.any(Object))
       db.close()
+      done()
+
+    }).catch(err => {
+      console.error(err)
       done()
     })
   })
