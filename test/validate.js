@@ -243,8 +243,12 @@ module.exports = function(monastery, db) {
     })
   })
 
-  test('Schema defaults', async (done) => {
-    let db = monastery('localhost/monastery', { defaults: true, serverSelectionTimeoutMS: 2000 })
+  test('Schema default objects', async (done) => {
+    let db = monastery('localhost/monastery', {
+      defaultFields: false,
+      defaultObjects: true,
+      serverSelectionTimeoutMS: 2000
+    })
     let base = { names: [], animals: { dogs: [] }}
     let user = db.model('user', { fields: {
       name: { type: 'string' },

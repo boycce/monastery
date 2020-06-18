@@ -27,7 +27,7 @@ user.insert({ data: [{ name: 'Martin Luther' }, { name: 'Bruce Lee' }]})
 
 ### Defaults example
 
-When defaults is enabled, undefined subdocuments and arrays will default to `{}` `[]` respectively when inserting. You can enable `defaults` via the [manager options](../manager#arguments).
+When defaultObjects is enabled, undefined subdocuments and arrays will default to `{}` `[]` respectively when inserting. You can enable `defaultObjects` via the [manager options](../manager#arguments).
 
 ```js
 db.model({ fields: {

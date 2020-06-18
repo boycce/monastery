@@ -3,7 +3,7 @@ module.exports = function(monastery, db) {
   test('Model conflicts', async () => {})
 
   test('Model setup', async () => {
-    //Setup
+    // Setup
     let user = db.model('user', { fields: {
       name: { type: 'string' },
       pets: [{ type: 'string' }],
@@ -12,22 +12,8 @@ module.exports = function(monastery, db) {
       points2: [[{ x: { type: 'number' } }]]
     }})
 
-    // Default fields
-    expect(db.model('user2').fields).toEqual({
-      createdAt: {
-        default: expect.any(Function),
-        defaultOverride: true,
-        insertOnly: true,
-        isInteger: true,
-        type: "integer"
-      },
-      updatedAt: {
-        default: expect.any(Function),
-        defaultOverride: true,
-        isInteger: true,
-        type: "integer"
-      }
-    })
+    // no fields defined
+    expect(db.model('user2').fields).toEqual({})
 
     // Has model name
     expect(user.name).toEqual('user')
@@ -65,9 +51,29 @@ module.exports = function(monastery, db) {
     ))
   })
 
-  test('Model setup with defaults', async () => {
+  test('Model setup with default fields', async () => {
     // Setup
-    let db = monastery(false, { defaults: true })
+    let db = monastery(false, { defaultObjects: true })
+
+    // Default fields
+    expect(db.model('user2').fields).toEqual({
+      createdAt: {
+        default: expect.any(Function),
+        insertOnly: true,
+        isInteger: true,
+        type: "integer"
+      },
+      updatedAt: {
+        default: expect.any(Function),
+        isInteger: true,
+        type: "integer"
+      }
+    })
+  })
+
+  test('Model setup with default objects', async () => {
+    // Setup
+    let db = monastery(false, { defaultObjects: true })
     let user = db.model('user', { fields: {
       name: { type: 'string' },
       pets: [{ type: 'string' }],

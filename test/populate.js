@@ -2,7 +2,10 @@ module.exports = function(monastery, db) {
 
   test('Model populate', async (done) => {
     // Setup
-    let db = monastery('localhost/monastery', { serverSelectionTimeoutMS: 2000 })
+    let db = monastery('localhost/monastery', { 
+      defaultFields: false, 
+      serverSelectionTimeoutMS: 2000
+    })
     let bird = db.model('bird', { 
       fields: { 
         name: { type: 'string' }

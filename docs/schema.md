@@ -44,7 +44,7 @@ schema.fields = {
 }
 ```
 
-These fields are always enabled by default
+These fields are always set when [defaultFields](./manager) is true
 
 ```js
 schema.fields = {

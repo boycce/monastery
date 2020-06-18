@@ -13,7 +13,8 @@ Monastery constructor, same as the [monk constructor](https://automattic.github.
 1. `uri` *(string\|array)*: A [mongo connection string URI](https://docs.mongodb.com/manual/reference/connection-string/). Replica sets can be an array or comma separated.
 
 2. [`options`] *(object)*:
-    - [`defaults`] *(boolean)*: see [model.insert](../model/insert.html#defaults-example)
+    - [`defaultFields = true`] *(boolean)*: whether to use [schema field defaults](../schema.html#fields)
+    - [`defaultObjects = false`] *(boolean)*: when [inserting](../model/insert.html#defaults-example), undefined subdocuments and arrays are defined
     - [`mongo options`](http://mongodb.github.io/node-mongodb-native/3.2/reference/connecting/connection-settings/)...
 
 3. [`callback`] *(function)*: You may optionally specify a callback which will be called once the connection to the mongo database is opened or throws an error.
