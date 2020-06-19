@@ -4,12 +4,24 @@ module.exports = function(monastery, db) {
     let db2 = monastery('localhost/monastery', { defaultFields: false, serverSelectionTimeoutMS: 2000 })
     let user = db2.model('user', { fields: { name: { type: 'string' }}})
 
-    // Insert test
+    // Insert one
     let inserted = await user.insert({ data: { name: 'Martin Luther' }})
     expect(inserted).toEqual({
       _id: expect.any(Object),
       name: 'Martin Luther'
     })
+
+    // Insert multiple
+    let inserted2 = await user.insert({ data: [{ name: 'Martin Luther1' }, { name: 'Martin Luther2' }]})
+    expect(inserted2).toEqual([
+      {
+        _id: expect.any(Object),
+        name: 'Martin Luther1'
+      }, {
+        _id: expect.any(Object),
+        name: 'Martin Luther2'
+      }
+    ])
 
     // Find test
     let find = await user.find({ query: inserted._id })
