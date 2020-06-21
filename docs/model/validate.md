@@ -10,7 +10,7 @@ Validate a model and call related hook: `schema.beforeValidate`
 
 ### Arguments
 
-1. `data` *(object)*
+`data` *(object)*
 
 ### Returns
 

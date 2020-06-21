@@ -58,8 +58,13 @@ module.exports = function(monastery, db) {
     expect(typeof findOne2).toEqual('object')
 
     // Update test
-    let update = await user.update({ query: inserted._id, data: { name: 'Martin Luther2' }})
-    expect(update).toEqual({ name: 'Martin Luther2' })
+    let update = await user.update({ 
+      query: inserted._id, 
+      data: { name: 'Martin Luther2' }
+    })
+    expect(update).toEqual({
+      name: 'Martin Luther2'
+    })
 
     // Update test (empty data object)
     expect(user.update({ query: inserted._id, data: {}})).rejects
@@ -68,6 +73,25 @@ module.exports = function(monastery, db) {
     // Update test (no data object)
     expect(user.update({ query: inserted._id })).rejects
       .toEqual('No valid data passed to user.update()')
+
+    // Update multiple
+    let updated2 = await user.update({ 
+      query: { _id: { $in: [inserted2[0]._id, inserted2[1]._id] }},
+      data: { name: 'Martin Luther3' },
+      multi: true
+    })
+    let findUpdated2 = await user.find({
+      query: { _id: { $in: [inserted2[0]._id, inserted2[1]._id] }}
+    })
+    expect(findUpdated2).toEqual([
+      {
+        _id: expect.any(Object),
+        name: 'Martin Luther3'
+      }, {
+        _id: expect.any(Object),
+        name: 'Martin Luther3'
+      }
+    ])
 
     // Remove test
     let remove = await user.remove({ query: inserted._id })

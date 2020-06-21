@@ -9,12 +9,14 @@ Find document(s) in a collection and call related hook: `schema.afterFind`
 
 ### Arguments
 
-1. `options` *(object)*
-  - `options.query` *(object\|id)*
-  - [`options.whitelist`] *(boolean\|array)*: override `schema.findBl`. `true` will remove all blacklisting
-  - [[`options.populate`](#populate)] *(array)*
-  - [[`mongodb options`](http://mongodb.github.io/node-mongodb-native/3.2/api/Collection.html#find)]...
-2. [`callback`] *(function)*: pass instead of return a promise
+`options` *(object)*
+
+- `options.query` *(object\|id)*
+- [`options.whitelist`] *(boolean\|array)*: override `schema.findBl`. `true` will remove all blacklisting
+- [[`options.populate`](#populate)] *(array)*
+- [[`any mongodb option`](http://mongodb.github.io/node-mongodb-native/3.2/api/Collection.html#find)] *(any)*
+
+[`callback`] *(function)*: pass instead of return a promise
 
 ### Returns
 

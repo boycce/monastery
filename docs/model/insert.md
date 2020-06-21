@@ -9,10 +9,12 @@ Validate and insert document(s) in a collection and call related hooks: `schema.
 
 ### Arguments
 
-1. `options` *(object)*
-  - `options.data` *(object\|array)*
-  - [[`mongodb options`](http://mongodb.github.io/node-mongodb-native/3.2/api/Collection.html#insert)]...
-3. [`callback`] *(function)*: pass instead of return a promise
+`options` *(object)*
+
+- `options.data` *(object\|array)*
+- [[`any mongodb option`](http://mongodb.github.io/node-mongodb-native/3.2/api/Collection.html#insert)] *(any)*
+
+[`callback`] *(function)*: pass instead of return a promise
 
 ### Returns
 
