@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "debug": "^4.1.1",
-    "monk": "git+https://github.com/boycce/monk.git",
+    "monk": "^7.3.0",
     "validator": "^13.0.0"
   },
   "devDependencies": {
