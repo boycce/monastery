@@ -91,12 +91,6 @@ Here are some other special field options that can be used alongside validation 
 ```js
 let fieldName = {
 
-  // Monastery will automatically create a mongodb index for this field
-  index: true,
-
-  // Monastery will automatically create a unique mongodb index for this field
-  unique: true,
-
   // Enables population, you would save the foreign document _id on this field.
   model: 'pet',
 
@@ -107,13 +101,28 @@ let fieldName = {
   insertOnly: true,
 
   // Default will always override any passed value (it has some use-cases)
-  defaultOverride: true
+  defaultOverride: true,
 
   // Default value
   default: 12,
 
   // Default value return from a function
-  default: () => "I'm a default value"
+  default: () => "I'm a default value",
+
+  // Monastery will automatically create a mongodb index for this field
+  index: true|1|-1|'2dsphere'|'text'|'unique'...,
+
+  // Text indexes are handled a little different in which all the fields on the model 
+  // schema that have a `index: 'text` set are collated into one index.
+  index: 'text'
+
+  // The same as `index: 1` with the mongodb unique index option set
+  index: 'unique'
+
+  // You can also pass an object if you need to use mongodb's index options
+  // https://docs.mongodb.com/manual/reference/command/createIndexes/
+  // https://mongodb.github.io/node-mongodb-native/2.1/api/Collection.html#createIndexes
+  index: { type: 1, ...(any mongodb index option) },
 }
 ```
 
