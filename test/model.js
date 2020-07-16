@@ -96,4 +96,24 @@ module.exports = function(monastery, db) {
     })
   })
 
+  test('Model indexes', async (done) => {
+    // Setup
+    // Need to test different types of indexes
+    // Need to test and allow index changes i.e. line 110
+    let db = monastery('localhost/monastery', { serverSelectionTimeoutMS: 2000 })
+    let user = db.model('user', {})
+
+    let setupIndex1 = await user._setupIndexes({
+      name: { type: 'string', index: 'text' }
+    })
+
+    await expect(user._setupIndexes({
+      name: { type: 'string', index: 'text' },
+      name2: { type: 'string', index: 'text' }
+    })).rejects.toEqual(new Error("Index with name: text already exists with different options"))
+
+    db.close()
+    done()
+  })
+
 }
