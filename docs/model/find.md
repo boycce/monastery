@@ -13,7 +13,7 @@ Find document(s) in a collection and call related hook: `schema.afterFind`
 
 - `options.query` *(object\|id)*
 - [`options.whitelist`] *(boolean\|array)*: override `schema.findBl`. `true` will remove all blacklisting
-- [`options.sort`] *(string\|object\|array)*: same as the mongodb option, but  allows for string parsing e.g. 'name', 'name:-1'
+- [`options.sort`] *(string\|object\|array)*: same as the mongodb option, but  allows for string parsing e.g. 'name', 'name:1'
 - [[`options.populate`](#populate)] *(array)*
 - [[`any mongodb option`](http://mongodb.github.io/node-mongodb-native/3.2/api/Collection.html#find)] *(any)*
 
