@@ -13,6 +13,7 @@ Update document(s) in a collection and call related hooks: `schema.beforeUpdate`
 
 - `options.query` *(object\|id)*
 - `options.data` *(object)* - mongodb operations which are wrapped in `{ $set: .. }`
+- [`options.sort`] *(string\|object\|array)*: same as the mongodb option, but  allows for string parsing e.g. 'name', 'name:-1'
 - [[`any mongodb option`](http://mongodb.github.io/node-mongodb-native/3.2/api/Collection.html#update)] *(any)*
 
 [`callback`] *(function)*: pass instead of return a promise
