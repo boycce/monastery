@@ -12,6 +12,7 @@ Model schema object.
 - [Fields](#fields)
 - [Field blacklisting](#field-blacklisting)
 - [Field options](#field-options)
+- [MongoDB indexes](#mongodb-indexes)
 - [Custom validation rules](#custom-validation-rules)
 - [Custom error messages](#custom-error-messages)
 - [Operation hooks](#operation-hooks)
@@ -27,8 +28,8 @@ Model schema object.
 ```js
 schema.fields = {
   name: { // value
-    type: 'string', 
-    required: true 
+    type: 'string',
+    required: true
   },
   address: { // subdocument
     line1: { type: 'string', required: true },
@@ -109,15 +110,34 @@ let fieldName = {
   // Default value return from a function
   default: () => "I'm a default value",
 
-  // Monastery will automatically create a mongodb index for this field
-  index: true|1|-1|'2dsphere'|'text'|'unique'...,
+  // Monastery will automatically create a mongodb index for this field, see "MongoDB indexes"
+  // below for more information
+  index: true|1|-1|'2dsphere'|'text'|'unique'|Object,
+}
+```
 
-  // Text indexes are handled a little different in which all the fields on the model 
-  // schema that have a `index: 'text` set are collated into one index.
+### MongoDB indexes
+
+You are able to automatically setup MongoDB indexes via the `index` field option. At this time,
+if you make any changes to a index you will need to remove the old indexes manually.
+
+```js
+let fieldName = {
+  // This will create an ascending / descending index for this field
+  index: true|1|-1,
+
+  // This will create an ascending unique index which translates:
+  // { key: { [fieldName]: 1 }, unique: true }
+  index: 'unique',
+
+  // This will create an ascending 2dsphere index which translates:
+  // { key: { [fieldName]: '2dsphere' }}
+  index: '2dsphere',
+
+  // Text indexes are handled a little differently in which all the fields on the model
+  // schema that have a `index: 'text` set are collated into one index, e.g.
+  // { key: { [fieldName1]: 'text', [fieldName2]: 'text', .. }}
   index: 'text'
-
-  // The same as `index: 1` with the mongodb unique index option set
-  index: 'unique'
 
   // You can also pass an object if you need to use mongodb's index options
   // https://docs.mongodb.com/manual/reference/command/createIndexes/
