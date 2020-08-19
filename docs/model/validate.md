@@ -12,6 +12,10 @@ Validate a model and call related hook: `schema.beforeValidate`
 
 `data` *(object)*
 
+[`options`] *(object)*
+
+- [`options.skipValidation`] (string\|array): skip validation for this field name(s)
+
 ### Returns
 
 A promise

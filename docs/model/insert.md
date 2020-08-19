@@ -12,6 +12,8 @@ Validate and insert document(s) in a collection and call related hooks: `schema.
 `options` *(object)*
 
 - `options.data` *(object\|array)*
+- [`options.whitelist`] (boolean\|array): override schema.insertBl, `true` will remove all blacklisting
+- [`options.skipValidation`] (string\|array): skip validation for this field name(s)
 - [[`any mongodb option`](http://mongodb.github.io/node-mongodb-native/3.2/api/Collection.html#insert)] *(any)*
 
 [`callback`] *(function)*: pass instead of return a promise
@@ -34,7 +36,7 @@ When defaultObjects is enabled, undefined subdocuments and arrays will default t
 ```js
 db.model({ fields: {
   names: [{ type: 'string' }],
-  pets: { 
+  pets: {
     name: { type: 'string' },
     colors: [{ type: 'string' }]
   }
