@@ -1,4 +1,4 @@
-/** 
+/**
  * Todo:
  *   - Test custom model rules
  *   - Test custom messages
@@ -8,7 +8,7 @@
  * Notes:
  *   - expect().toEqual:  strict deep match
  *   - expect().toMatchObject:  received object can have random properties
- *   - expect.objectContaining:  
+ *   - expect.objectContaining:
  */
 
 let monastery = require('../lib')

@@ -124,7 +124,7 @@ module.exports = function(monastery, db) {
     let user = db.model('user', { fields: {
       name: { type: 'string' },
       names: [{ type: 'string' }],
-      animals: { 
+      animals: {
         dog: { type: 'string' },
         dogs: [{ name: { type: 'string' } }]
       }
@@ -185,7 +185,7 @@ module.exports = function(monastery, db) {
     // Ignore insertOnly fields when updating
     await expect(user.validate({ name: 'Martin Luther' }, { update: true })).resolves.toEqual({})
 
-    // Default 
+    // Default
     await expect(user2.validate({})).resolves.toEqual({ name: 'Martin Luther' })
 
     // Default override
@@ -253,19 +253,56 @@ module.exports = function(monastery, db) {
     let user = db.model('user', { fields: {
       name: { type: 'string' },
       names: [{ type: 'string' }],
-      animals: { 
+      animals: {
         dog: { type: 'string' },
         dogs: [{ name: { type: 'string' } }]
       }
     }})
 
     // Array/subdocument defaults
-    await expect(user.validate({})).resolves.toEqual({ 
-      names: [], 
+    await expect(user.validate({})).resolves.toEqual({
+      names: [],
       animals: { dogs: [] }
     })
 
     db.close()
     done()
+  })
+
+  test('Validation options', async () => {
+    let user = db.model('user', { fields: {
+      name: { type: 'string', required: true }
+    }})
+    let user2 = db.model('user2', { fields: {
+      my: {
+        name: {
+          is: { type: 'string', required: true }
+        }
+      }
+    }})
+    let user3 = db.model('user3', { fields: {
+      people: [{
+        name: { type: 'string', required: true }
+      }]
+    }})
+
+    // Skip validation on the required fields
+    await expect(user.validate({}, { skipValidation: ['name'] })).resolves.toEqual({})
+    await expect(user2.validate({}, { skipValidation: ['my.name'] })).resolves.toEqual({})
+    await expect(user3.validate({ people: [{}] }, { skipValidation: ['people.name'] })).resolves.toEqual({
+      people: [{}]
+    })
+
+    // Non existing validation field entries
+    await expect(user3.validate({ people: [{}] }, { skipValidation: ['people.badField'] })).rejects.toContainEqual({
+      detail: "This field is required.",
+      status: "400",
+      title: "people.0.name",
+      meta: {
+        model: "user3",
+        field: "name",
+        rule: "required"
+      }
+    })
   })
 }
