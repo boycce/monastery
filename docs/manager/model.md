@@ -18,7 +18,7 @@ Sets up a model, retrieves a collection, and sets up any required indexes
 A [model](../model) instance, the model instance will also be avaliable at:
 ```js
 db.user
-db.models.user
+db.model.user
 ```
 
 ### Example

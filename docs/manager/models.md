@@ -16,7 +16,7 @@ Setup model definitions from a folder location
 An array of [model](../model) instances, the model instances will also be avaliable at:
 ```js
 db.{model-name}
-db.models.{model-name}
+db.model.{model-name}
 ```
 
 ### Example
