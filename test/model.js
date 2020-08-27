@@ -17,7 +17,7 @@ module.exports = function(monastery, db) {
 
     // Has model name
     expect(user.name).toEqual('user')
-    
+
     // Basic field
     expect(user.fields.name).toEqual({ type: 'string', isString: true })
 
@@ -45,7 +45,7 @@ module.exports = function(monastery, db) {
     // Array array subdocument field (no array properties)
     expect(JSON.stringify(user.fields.points2)).toEqual(JSON.stringify(
       [[{
-        x: { type: 'number', isNumber: true }, 
+        x: { type: 'number', isNumber: true },
         schema: { type: 'object', isObject: true }
       }]]
     ))
@@ -83,9 +83,9 @@ module.exports = function(monastery, db) {
     }})
 
     // Array schema
-    expect(user.fields.pets.schema).toEqual({ 
-      type: 'array', 
-      isArray: true, 
+    expect(user.fields.pets.schema).toEqual({
+      type: 'array',
+      isArray: true,
       default: expect.any(Function)
     })
 

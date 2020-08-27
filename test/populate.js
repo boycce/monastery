@@ -2,12 +2,12 @@ module.exports = function(monastery, db) {
 
   test('Model populate', async (done) => {
     // Setup
-    let db = monastery('localhost/monastery', { 
-      defaultFields: false, 
+    let db = monastery('localhost/monastery', {
+      defaultFields: false,
       serverSelectionTimeoutMS: 2000
     })
-    let bird = db.model('bird', { 
-      fields: { 
+    let bird = db.model('bird', {
+      fields: {
         name: { type: 'string' }
       }
     })
@@ -99,7 +99,7 @@ module.exports = function(monastery, db) {
   test('Model populate/blacklisting via $lookup', async (done) => {
     // Setup
     let db = monastery('localhost/monastery', {
-      defaultFields: false, 
+      defaultFields: false,
       serverSelectionTimeoutMS: 2000
     })
     let user = db.model('user', {
@@ -112,8 +112,8 @@ module.exports = function(monastery, db) {
         'anyModel.name'
       ]
     })
-    let bird = db.model('bird', { 
-      fields: { 
+    let bird = db.model('bird', {
+      fields: {
         name: { type: 'string' },
         color: { type: 'string' },
         owner: { model: 'user' }
@@ -128,8 +128,8 @@ module.exports = function(monastery, db) {
     let bird1 = await bird.insert({ data: { color: 'red', name: 'ponyo', owner: id, anyModel: id }})
     let bird2 = await bird.insert({ data: { color: 'blue', name: 'carla', owner: id, anyModel: id }})
 
-    // Multiple $lookup 
-    let find1 = await user.findOne({ 
+    // Multiple $lookup
+    let find1 = await user.findOne({
       query: user1._id,
       populate: [{
         "as": "birds",

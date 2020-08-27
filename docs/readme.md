@@ -39,7 +39,7 @@ db.model('user', {
 // Insert some data
 db.user.insert({
   data: {
-    name: 'Martin Luther', 
+    name: 'Martin Luther',
     pets: ['sparky', 'tiny'],
     address: { city: 'Eisleben' },
     points: [[1, 5], [3, 1]]

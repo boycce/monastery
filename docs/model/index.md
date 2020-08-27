@@ -35,7 +35,7 @@ Additionally models inherit most of the [monk collection](https://automattic.git
   * model.[_update](https://automattic.github.io/monk/docs/collection/update.html)
 
 #### Monk collection
- 
+
 If you wish to access the raw monk collection, you can do so via:
 ```js
 model._collection
