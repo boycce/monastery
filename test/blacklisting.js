@@ -107,7 +107,7 @@ module.exports = function(monastery, db) {
         dog: 'Max'
       },
       deepModel: {
-        myBird: bird1._id
+        myBird: bird1._id // expect.any(Object)
       }
     })
 
@@ -129,8 +129,8 @@ module.exports = function(monastery, db) {
 
     db.close()
     done()
-  })
 
+  })
 
   test('Validate blacklisting', async (done) => {
     // Setup
@@ -255,6 +255,5 @@ module.exports = function(monastery, db) {
     db.close()
     done()
   })
-
 
 }

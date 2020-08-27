@@ -1,3 +1,5 @@
+let util = require('../lib/util')
+
 module.exports = function(monastery, db) {
 
   test('Basic operator calls', async (done) => {
@@ -58,8 +60,8 @@ module.exports = function(monastery, db) {
     expect(typeof findOne2).toEqual('object')
 
     // Update test
-    let update = await user.update({ 
-      query: inserted._id, 
+    let update = await user.update({
+      query: inserted._id,
       data: { name: 'Martin Luther2' }
     })
     expect(update).toEqual({
@@ -75,7 +77,7 @@ module.exports = function(monastery, db) {
       .toEqual('No valid data passed to user.update()')
 
     // Update multiple
-    let updated2 = await user.update({ 
+    let updated2 = await user.update({
       query: { _id: { $in: [inserted2[0]._id, inserted2[1]._id] }},
       data: { name: 'Martin Luther3' },
       multi: true
@@ -100,7 +102,7 @@ module.exports = function(monastery, db) {
     db2.close()
     done()
   })
-  
+
   test('Insert defaults', async (done) => {
     let db = monastery('localhost/monastery', {
       // default: defaultFields: true
@@ -110,7 +112,7 @@ module.exports = function(monastery, db) {
     let user = db.model('user', { fields: {
       name: { type: 'string' },
       names: [{ type: 'string' }],
-      animals: { 
+      animals: {
         dog: { type: 'string' },
         dogs: [{ name: { type: 'string' } }]
       },
@@ -127,7 +129,7 @@ module.exports = function(monastery, db) {
 
     // No data object
     let inserted2 = await user.insert({})
-    expect(inserted2).toEqual({ 
+    expect(inserted2).toEqual({
       _id: inserted2._id,
       names: [],
       animals: { dogs: [] },
@@ -137,7 +139,7 @@ module.exports = function(monastery, db) {
 
     // No arguments
     let inserted3 = await user.insert()
-    expect(inserted3).toEqual({ 
+    expect(inserted3).toEqual({
       _id: inserted3._id,
       names: [],
       animals: { dogs: [] },
@@ -148,7 +150,7 @@ module.exports = function(monastery, db) {
     db.close()
     done()
   })
-  
+
   test('Insert with id casting', async (done) => {
     let db = monastery('localhost/monastery', { defaultFields: false })
     let company = db.model('company', { fields: {
@@ -163,7 +165,7 @@ module.exports = function(monastery, db) {
     let id = '5edf17ff7e2d5020913f98cc'
     let inserted = await user.insert({ data: { randomId: id, company: id, companies: [id] } })
 
-    expect(inserted).toEqual({ 
+    expect(inserted).toEqual({
       _id: inserted._id,
       randomId: db.id(id),
       company: db.id(id),
@@ -173,5 +175,24 @@ module.exports = function(monastery, db) {
     db.close()
     done()
   })
-  
+
+  test('Parsing of FormData ', async () => {
+    let data = {
+      "user[name]": "Martin",
+      "users[0][first]": "Martin",
+      "users[0][last]": "Luther",
+      "users[1][first]": "Bruce",
+      "users[1][last]": "Lee",
+    }
+    expect(await util.parseFormData(data)).toEqual({
+      user: { name: "Martin" },
+      users: [
+        { "first": "Martin", "last": "Luther" },
+        { "first": "Bruce", "last": "Lee" },
+      ]
+    })
+    expect(util.parseFormData({ "users[]": 'Martin' })).rejects
+      .toEqual('Bracket notation data needs array index numbers, e.g. users[0][name]')
+  })
+
 }

@@ -12,7 +12,7 @@ Update document(s) in a collection and call related hooks: `schema.beforeUpdate`
 `options` *(object)*
 
 - `options.query` *(object\|id)*
-- `options.data` *(object)* - mongodb operations which are wrapped in `{ $set: .. }`
+- `options.data` *(object)* - mongodb operations which are wrapped in `{ $set: .. }`. An object with key names in dot or bracket notation are supported (FormData)
 - [`options.skipValidation`] (string\|array): skip validation for this field name(s)
 - [`options.sort`] *(string\|object\|array)*: same as the mongodb option, but  allows for string parsing e.g. 'name', 'name:1'
 - [`options.whitelist`] (boolean\|array): override schema.updateBl, `true` will remove all blacklisting
