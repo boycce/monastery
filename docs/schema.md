@@ -95,9 +95,6 @@ let fieldName = {
   // Enables population, you would save the foreign document _id on this field.
   model: 'pet',
 
-  // Practically means type = 'id', but also allows plugins to hook into this flag (more soon)
-  image: true,
-
   // Field will only be allowed to be set on insert when calling model.insert
   insertOnly: true,
 
@@ -112,7 +109,7 @@ let fieldName = {
 
   // Monastery will automatically create a mongodb index for this field, see "MongoDB indexes"
   // below for more information
-  index: true|1|-1|'2dsphere'|'text'|'unique'|Object,
+  index: true|1|-1|'2dsphere'|'text'|'unique'|Object
 }
 ```
 

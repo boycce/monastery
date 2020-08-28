@@ -10,7 +10,7 @@ nav_order: 5
   Rule | Rule argument
   - | -
   required | boolean
-  type | string ('string', 'boolean', 'number', 'integer', 'id', 'any')
+  type | string - 'string', 'boolean', 'number', 'integer', 'id', 'any', '[image](#image-type)'
   isAfter | see validator.isAfter
   isBefore | see validator.isBefore
   isCreditCard | see validator.isCreditCard
@@ -27,5 +27,9 @@ nav_order: 5
   maxLength | number
   regex | see validator.matches
 
-*See [validator](https://github.com/validatorjs/validator.js#validators) for their validator logic*
+  *See [validator](https://github.com/validatorjs/validator.js#validators) for their validator logic*
+
+### Image type
+
+  `type: 'image'` will be converted to `type: 'any'` upon initialisation without any image plugins. This type allows plugins to hook into field type. See the corresponding plugins for more details.
 

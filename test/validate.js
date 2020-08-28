@@ -32,8 +32,24 @@ module.exports = function(monastery, db) {
       meta: { rule: 'isArray', model: 'user', field: 'colors' }
     })
 
+    // Type error (array)
+    await expect(user.validate({ colors: null })).rejects.toContainEqual({
+      status: '400',
+      title: 'colors',
+      detail: 'Value was not an array.',
+      meta: { rule: 'isArray', model: 'user', field: 'colors' }
+    })
+
     // Type error (object)
     await expect(user.validate({ animals: [] })).rejects.toContainEqual({
+      status: '400',
+      title: 'animals',
+      detail: 'Value was not an object.',
+      meta: { rule: 'isObject', model: 'user', field: 'animals' }
+    })
+
+    // Type error (object)
+    await expect(user.validate({ animals: null })).rejects.toContainEqual({
       status: '400',
       title: 'animals',
       detail: 'Value was not an object.',
@@ -121,20 +137,26 @@ module.exports = function(monastery, db) {
 
   test('Validated data', async () => {
     // Setup
-    let user = db.model('user', { fields: {
+    let fields = {
       name: { type: 'string' },
       names: [{ type: 'string' }],
       animals: {
         dog: { type: 'string' },
         dogs: [{ name: { type: 'string' } }]
       }
-    }})
+    }
+    fields.names.schema = { nullObject: true }
+    fields.animals.schema = { nullObject: true }
+    let user = db.model('user', { fields: fields })
 
     // No data
     await expect(user.validate({})).resolves.toEqual({})
 
     // Ignores invalid data
-    await expect(user.validate({ badprop: true })).resolves.toEqual({})
+    await expect(user.validate({ badprop: true, schema: {} })).resolves.toEqual({})
+
+    // Allows null data
+    await expect(user.validate({ name: null })).resolves.toEqual({ name: null })
 
     // String data
     await expect(user.validate({ name: 'Martin Luther' })).resolves.toEqual({ name: 'Martin Luther' })
@@ -152,11 +174,14 @@ module.exports = function(monastery, db) {
     // Subdocument data (empty)
     await expect(user.validate({ animals: {} })).resolves.toEqual({ animals: {} })
 
-    // Subdocument data (null)
+    // Subdocument data (null/string)
+    await expect(user.validate({ animals: '', names: null })).resolves.toEqual({ animals: null, names: null })
+
+    // Subdocument property data (null)
     await expect(user.validate({ animals: { dog: null }}))
       .resolves.toEqual({ animals: { dog: null }})
 
-    // Subdocument data (bad data)
+    // Subdocument property data (bad data)
     await expect(user.validate({ animals: { dog: 'sparky', cat: 'grumpy' } }))
       .resolves.toEqual({ animals: { dog: 'sparky' } })
 
@@ -264,6 +289,27 @@ module.exports = function(monastery, db) {
       names: [],
       animals: { dogs: [] }
     })
+
+    db.close()
+    done()
+  })
+
+  test('Schema nullObjects', async (done) => {
+    let db = monastery('localhost/monastery', {
+      defaultFields: false,
+      nullObjects: true,
+      serverSelectionTimeoutMS: 2000
+    })
+    let user = db.model('user', { fields: {
+      names: [{ type: 'string' }],
+      animals: {
+        dog: { type: 'string' },
+        dogs: [{ name: { type: 'string' } }]
+      }
+    }})
+
+    // Subdocument data (null/string)
+    await expect(user.validate({ animals: '', names: null })).resolves.toEqual({ animals: null, names: null })
 
     db.close()
     done()
