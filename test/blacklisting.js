@@ -89,13 +89,6 @@ module.exports = function(monastery, db) {
       }
     }})
 
-    // For testing mongodb projection syntax
-    // let find0 = await user._findOne(user1._id, { projection: {
-    //   'pets': 1,
-    //   'pets.name': 1
-    // }})
-    // console.log(find0.pets)
-
     // Test mongodb projections
     let find1 = await user.findOne({ query: user1._id })
     expect(find1).toEqual({
@@ -103,33 +96,13 @@ module.exports = function(monastery, db) {
       list: [44, 54],
       pet: 'Freddy',
       pets: [{ name: 'Pluto' }, { name: 'Milo' }],
-      animals: {
-        dog: 'Max'
-      },
-      deepModel: {
-        myBird: bird1._id // expect.any(Object)
-      }
-    })
-
-    // Test _removeBlacklisted which is used when populating
-    let find2 = await user._findOne({ _id: user1._id })
-    let res = user._removeBlacklisted(find2)
-    expect(res).toEqual({
-      _id: user1._id,
-      list: [44, 54],
-      pet: 'Freddy',
-      pets: [{ name: 'Pluto' }, { name: 'Milo' }],
-      animals: {
-        dog: 'Max'
-      },
-      deepModel: {
-        myBird: bird1._id
-      }
+      animals: { dog: 'Max' },
+      deep: { deep2: {} },
+      deepModel: { myBird: bird1._id }
     })
 
     db.close()
     done()
-
   })
 
   test('Validate blacklisting', async (done) => {

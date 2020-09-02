@@ -3,8 +3,8 @@ let util = require('../lib/util')
 module.exports = function(monastery, db) {
 
   test('Basic operator calls', async (done) => {
-    let db2 = monastery('localhost/monastery', { defaultFields: false, serverSelectionTimeoutMS: 2000 })
-    let user = db2.model('user', { fields: { name: { type: 'string' }}})
+    let db = monastery('localhost/monastery', { defaultFields: false, serverSelectionTimeoutMS: 2000 })
+    let user = db.model('user', { fields: { name: { type: 'string' }}})
 
     // Insert one
     let inserted = await user.insert({ data: { name: 'Martin Luther' }})
@@ -99,7 +99,7 @@ module.exports = function(monastery, db) {
     let remove = await user.remove({ query: inserted._id })
     expect(remove.result).toEqual({ n: 1, ok: 1 })
 
-    db2.close()
+    db.close()
     done()
   })
 
