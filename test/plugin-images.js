@@ -128,6 +128,10 @@ module.exports = function(monastery, db) {
     expect(plugin._addImageObjectsToData('user.logo', { user: { logo: null }}, image))
       .toEqual({ user: { logo: image }})
 
+    // lvl 2 array property
+    expect(plugin._addImageObjectsToData('user.1.logo', {}, image))
+      .toEqual({ user: [undefined, { logo: image }]})
+
     // lvl 5 property
     expect(plugin._addImageObjectsToData('user.a.b.c.logo', {}, image))
       .toEqual({ user: { a: { b: { c: { logo: image }}}}})
@@ -165,20 +169,63 @@ module.exports = function(monastery, db) {
           expect(validFiles).toEqual([
             expect.any(Array),
             expect.any(Array),
+            expect.any(Array),
             expect.any(Array)
           ])
           // Valid imageField
           expect(validFiles[0].imageField).toEqual(expect.any(Object))
           expect(validFiles[1].imageField).toEqual(expect.any(Object))
           expect(validFiles[2].imageField).toEqual(expect.any(Object))
+          expect(validFiles[3].imageField).toEqual(expect.any(Object))
           // Valid inputPath
           expect(validFiles[0].inputPath).toEqual('logo')
           expect(validFiles[1].inputPath).toEqual('logos.0')
           expect(validFiles[2].inputPath).toEqual('users.0.logo')
+          expect(validFiles[3].inputPath).toEqual('users.2.logo')
           // Valid type
           expect(validFiles[0][0].type).toEqual('png')
           expect(validFiles[1][0].type).toEqual('png')
           expect(validFiles[2][0].type).toEqual('png')
+          expect(validFiles[3][0].type).toEqual('png')
+
+          return plugin.addImages({ model: user, req: req, query: { _id: 1234 }}, req.body, true)
+        })
+        .then(res => {
+          expect(res[0]).toEqual({
+            name: 'my awesome avatar',
+            logo: {
+              bucket: 'fake',
+              date: expect.any(Number),
+              filename: 'logo.png',
+              filesize: expect.any(Number),
+              path: expect.any(String),
+              uid: expect.any(String)
+            },
+            logos: [ expect.any(Object) ],
+            users: [
+              {
+                logo: {
+                  bucket: 'fake',
+                  date: expect.any(Number),
+                  filename: 'logo2.png',
+                  filesize: expect.any(Number),
+                  path: expect.any(String),
+                  uid: expect.any(String)
+                }
+              },
+              undefined, // !this will be converted to null on insert/update
+              {
+                logo: {
+                  bucket: 'fake',
+                  date: expect.any(Number),
+                  filename: 'logo2.png',
+                  filesize: expect.any(Number),
+                  path: expect.any(String),
+                  uid: expect.any(String)
+                }
+              }
+            ]
+          })
         })
         .finally(() => {
           res.json()
@@ -194,6 +241,7 @@ module.exports = function(monastery, db) {
       .attach('logo', `${__dirname}/assets/logo.png`)
       .attach('logos.0', `${__dirname}/assets/logo2.png`)
       .attach('users.0.logo', `${__dirname}/assets/logo2.png`)
+      .attach('users.2.logo', `${__dirname}/assets/logo2.png`)
       .expect(200)
       .end((err, res) => { if (err) console.log(err) })
   })
@@ -218,8 +266,15 @@ module.exports = function(monastery, db) {
     }
     let user1 = await db.user._insert({
       logo: { ...image, uid: 'test1', path: 'dir/test1.png' },
-      logos: [{ ...image, uid: 'test2', path: 'dir/test2.png' }, { ...image, uid: 'test3', path: 'dir/test3.png' }],
-      users: [{ logo: { ...image, uid: 'test4', path: 'dir/test4.png' }}]
+      logos: [
+        { ...image, uid: 'test2', path: 'dir/test2.png' },
+        { ...image, uid: 'test3', path: 'dir/test3.png' }
+      ],
+      users: [
+        { logo: { ...image, uid: 'test4', path: 'dir/test4.png' }},
+        null,
+        { logo: { ...image, uid: 'test4', path: 'dir/test4.png' }}
+      ]
     })
 
     let plugin = db.imagePluginFile
@@ -236,8 +291,13 @@ module.exports = function(monastery, db) {
 
       plugin.removeImages(options, req.body, true)
         .then(res => {
-          expect(res[0]).toEqual({ test1: 1, test2: -1, test3: 1, test4: 0 })
+          expect(res[0]).toEqual({ test1: 0, test2: -1, test3: 1, test4: 0 })
           expect(res[1]).toEqual([
+            { Key: 'dir/test1.png' },
+            { Key: 'small/test1.jpg' },
+            { Key: 'medium/test1.jpg' },
+            { Key: 'large/test1.jpg' },
+
             { Key: 'dir/test2.png' },
             { Key: 'small/test2.jpg' },
             { Key: 'medium/test2.jpg' },
@@ -248,6 +308,9 @@ module.exports = function(monastery, db) {
             { Key: 'medium/test4.jpg' },
             { Key: 'large/test4.jpg' }
           ])
+        })
+        .catch(err => {
+          console.log(err)
         })
         .finally(() => {
           res.json()
@@ -261,7 +324,11 @@ module.exports = function(monastery, db) {
       .post('/')
       .field('name', 'my awesome avatar')
       .field('logos', JSON.stringify([ null, { ...image, uid: 'test3', path: 'dir/test3.png' } ]))
-      .field('users', JSON.stringify([{ logo: { ...image, uid: 'test1', path: 'dir/test1.png' } }]))
+      .field('users', JSON.stringify([
+        { logo: { ...image, uid: 'test1', path: 'dir/test1.png' }},
+        null,
+        null
+      ]))
       .attach('logo', `${__dirname}/assets/logo.png`)
       .attach('logos.0', `${__dirname}/assets/logo2.png`)
       .expect(200)

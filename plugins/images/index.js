@@ -108,9 +108,9 @@ let plugin = module.exports = {
       return Promise.all(files.map(filesArr => {
         return Promise.all(filesArr.map(file => {
           return new Promise((resolve, reject) => {
-            let uid = nanoid()
+            let uid = nanoid.nanoid()
             let image = {
-              bucket: config.awsBucket,
+              bucket: this.awsBucket,
               date: Math.floor(Date.now() / 1000),
               filename: file.name,
               filesize: file.size,
@@ -123,7 +123,7 @@ let plugin = module.exports = {
               resolve()
             } else {
               plugin.s3.upload({
-                Bucket: config.awsBucket,
+                Bucket: this.awsBucket,
                 Key: image.path,
                 Body: file.data,
                 ACL: 'public-read'
@@ -139,6 +139,7 @@ let plugin = module.exports = {
 
     // Save the data against the matching document(s)
     }).then(() => {
+      if (test) return [data]
       return model._update(
         idquery,
         { "$set": data },
@@ -380,12 +381,8 @@ let plugin = module.exports = {
     for (let i=0, l=chunks.length; i<l; i++) {
       let newDataPath = `${dataPath}.${chunks[i]}`.replace(/^\./, '')
 
-      // Undefined parent or value
-      if (typeof target[chunks[i]] === 'undefined') {
-        break
-
       // loop data arrays
-      } else if (chunks[i].match(/^[0-9]+$/) && util.isArray(target)) {
+      if (chunks[i].match(/^[0-9]+$/) && util.isArray(target)) {
         for (let m=0, n=target.length; m<n; m++) {
           if (`${dataPath}.${m}`.match(imageField.fullPathRegex)) {
             list.push({ imageField: imageField, dataPath: `${dataPath}.${m}`, image: target[m] })
@@ -402,11 +399,11 @@ let plugin = module.exports = {
       // More chunks?
       } else if (i !== l-1) {
         dataPath = newDataPath
-        target = target[chunks[i]]
+        target = target? target[chunks[i]] : null
 
       // Last chunk, does it match?
       } else if (newDataPath.match(imageField.fullPathRegex)) {
-        list.push({ imageField: imageField, dataPath: newDataPath, image: target[chunks[i]] })
+        list.push({ imageField: imageField, dataPath: newDataPath, image: target? target[chunks[i]] : null })
       }
     }
 

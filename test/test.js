@@ -16,6 +16,7 @@ let db = monastery(false, { defaultFields: false })
 db.log = () => {}
 
 // Run tests sequentially
+require('./util')(monastery, db)
 require('./monk')(monastery, db)
 require('./model')(monastery, db)
 require('./crud')(monastery, db)
