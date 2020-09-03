@@ -172,6 +172,11 @@ let plugin = module.exports = {
     let preExistingImages = []
     let useCount = {}
 
+    // Req not passed to the update/remove?
+    if (!options.req) {
+      return Promise.reject('The image plugin requires `req` to be set, e.g. db.model.update({ data,.., req })')
+    }
+
     // Find all documents from the same query
     return options.model._find(options.query, options)
       .then(docs => {
@@ -213,7 +218,7 @@ let plugin = module.exports = {
         }
         // Check upload errors and find valid uploaded images. If any file is overriding a
         // pre-existing image, push to unused
-        return plugin._findValidImages(options.req.files, options.model).then(files => {
+        return plugin._findValidImages(options.req.files || [], options.model).then(files => {
           for (let filesArray of files) {
             if (pre = preExistingImages.find(o => o.dataPath == filesArray.inputPath)) {
               useCount[pre.image.uid]--
