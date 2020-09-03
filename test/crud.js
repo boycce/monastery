@@ -176,23 +176,4 @@ module.exports = function(monastery, db) {
     done()
   })
 
-  test('Parsing of FormData ', async () => {
-    let data = {
-      "user[name]": "Martin",
-      "users[0][first]": "Martin",
-      "users[0][last]": "Luther",
-      "users[1][first]": "Bruce",
-      "users[1][last]": "Lee",
-    }
-    expect(await util.parseFormData(data)).toEqual({
-      user: { name: "Martin" },
-      users: [
-        { "first": "Martin", "last": "Luther" },
-        { "first": "Bruce", "last": "Lee" },
-      ]
-    })
-    expect(util.parseFormData({ "users[]": 'Martin' })).rejects
-      .toEqual('Bracket notation data needs array index numbers, e.g. users[0][name]')
-  })
-
 }
