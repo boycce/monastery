@@ -188,7 +188,7 @@ module.exports = function(monastery, db) {
           expect(validFiles[2][0].type).toEqual('png')
           expect(validFiles[3][0].type).toEqual('png')
 
-          return plugin.addImages({ model: user, req: req, query: { _id: 1234 }}, req.body, true)
+          return plugin.addImages({ model: user, files: req.files, query: { _id: 1234 }}, req.body, true)
         })
         .then(res => {
           expect(res[0]).toEqual({
@@ -287,7 +287,7 @@ module.exports = function(monastery, db) {
     app.post('/', function(req, res) {
       req.body.users = JSON.parse(req.body.users)
       req.body.logos = JSON.parse(req.body.logos)
-      let options = { req: req, model: user, query: { _id: user1._id }}
+      let options = { files: req.files, model: user, query: { _id: user1._id }}
 
       plugin.removeImages(options, req.body, true)
         .then(res => {

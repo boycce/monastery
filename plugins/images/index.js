@@ -75,13 +75,13 @@ let plugin = module.exports = {
      * 2mb: 1864ms, 1164ms
      * 0.1mb: 480ms
      *
-     * @param {object} options - monastery operation options {model, query, req, ..}
+     * @param {object} options - monastery operation options {model, query, files, ..}
      * @param {object} data -
      * @param {boolean} test -
      * @return promise
      */
-    let { model, query, req } = options
-    if (req && !req.files) return Promise.resolve([])
+    let { model, query, files } = options
+    if (!files) return Promise.resolve([])
 
     // Build an ID query from query/data. Inserts add _id to the data automatically.
     let idquery = query && query._id? query : { _id: data._id }
@@ -94,17 +94,10 @@ let plugin = module.exports = {
     // will not suffice when updating the document(s) against the same query again.
     } else if (!data._id && (!query || !query._id)) {
       return Promise.reject('Adding images requires the update operation to query via _id\'s.')
-
-    // Req not passed to the update/insert?
-    } else if (!req) {
-      return Promise.reject('The image plugin requires `req` to be set, e.g. db.model.insert({ data,.., req })')
-
-    } else if (!req.files) {
-      return Promise.reject('The image plugin requires `req.files` to be set')
     }
 
     // Find valid images and upload to S3, and update data with image objects
-    return plugin._findValidImages(req.files, model).then(files => {
+    return plugin._findValidImages(files, model).then(files => {
       return Promise.all(files.map(filesArr => {
         return Promise.all(filesArr.map(file => {
           return new Promise((resolve, reject) => {
@@ -157,25 +150,21 @@ let plugin = module.exports = {
   removeImages: function(options, data, test) {
     /**
      * Hook before update/remove
-     * Removes images not found in data, or replaces passed image ids to existing image objects
+     * Removes images not found in data, this means you will need to pass the image objects to every update
      *
      * Function logic
      * 1. Find all pre-existing image objects in the documents from the same query
-     * 2. Loop data and show errors on any non pre-existing image objects
-     * 3. Remove from S3 delete array if there are any exact image object matches
+     * 3. Check if data contains null or valid pre-existing images and update useCount accordingly
      * 3. delete leftovers from S3
      *
-     * @param {object} options - monastery operation options {query, model, update|insert, req, multi, ..}
      * @ref https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#deleteObjects-property
+     * @param {object} options - monastery operation options {query, model, files, multi, ..}
+     * @return promise
      */
     let pre
     let preExistingImages = []
     let useCount = {}
-
-    // Req not passed to the update/remove?
-    if (!options.req) {
-      return Promise.reject('The image plugin requires `req` to be set, e.g. db.model.update({ data,.., req })')
-    }
+    if (typeof options.files == 'undefined') return Promise.resolve()
 
     // Find all documents from the same query
     return options.model._find(options.query, options)
@@ -218,7 +207,7 @@ let plugin = module.exports = {
         }
         // Check upload errors and find valid uploaded images. If any file is overriding a
         // pre-existing image, push to unused
-        return plugin._findValidImages(options.req.files || [], options.model).then(files => {
+        return plugin._findValidImages(options.files || {}, options.model).then(files => {
           for (let filesArray of files) {
             if (pre = preExistingImages.find(o => o.dataPath == filesArray.inputPath)) {
               useCount[pre.image.uid]--
