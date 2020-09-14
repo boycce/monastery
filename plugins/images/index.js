@@ -13,6 +13,7 @@ let plugin = module.exports = {
      *
      * @param {object} monastery manager instance
      * @param {options} options - plugin options
+     * @this plugin
      */
 
     // Settings
@@ -38,23 +39,32 @@ let plugin = module.exports = {
     })
 
     // Add before model hook
-    manager.beforeModel.push(this.setupModel)
+    manager.beforeModel.push(this.setupModel.bind(this))
   },
 
   setupModel: function(model) {
     /**
      * Cache all model image paths for a model and add monastery operation hooks
      * @param {object} model
+     * @this plugin
      */
     model.imageFields = plugin._findAndTransformImageFields(model.fields, '')
 
     if (model.imageFields.length) {
       // Update image fields and whitelists with the new object schema
       // model._setupFieldsAndWhitelists(model.fields)
-      model.beforeUpdate.push(function(data, n) { plugin.removeImages(this, data).finally(n) })
-      model.beforeRemove.push(function(data, n) { plugin.removeImages(this, data).finally(n) })
-      model.afterUpdate.push(function(data, n) { plugin.addImages(this, data).finally(n) })
-      model.afterInsert.push(function(data, n) { plugin.addImages(this, data).finally(n) })
+      model.beforeUpdate.push(function(data, n) {
+        plugin.removeImages(this, data).then(() => n(null, data)).catch(e => n(e))
+      })
+      model.beforeRemove.push(function(data, n) {
+        plugin.removeImages(this, data).then(() => n(null, data)).catch(e => n(e))
+      })
+      model.afterUpdate.push(function(data, n) {
+        plugin.addImages(this, data).then(() => n(null, data)).catch(e => n(e))
+      })
+      model.afterInsert.push(function(data, n) {
+        plugin.addImages(this, data).then(() => n(null, data)).catch(e => n(e))
+      })
     }
   },
 
@@ -79,6 +89,7 @@ let plugin = module.exports = {
      * @param {object} data -
      * @param {boolean} test -
      * @return promise
+     * @this plugin
      */
     let { model, query, files } = options
     if (!files) return Promise.resolve([])
@@ -160,6 +171,7 @@ let plugin = module.exports = {
      * @ref https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#deleteObjects-property
      * @param {object} options - monastery operation options {query, model, files, multi, ..}
      * @return promise
+     * @this plugin
      */
     let pre
     let preExistingImages = []
