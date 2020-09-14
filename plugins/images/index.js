@@ -184,7 +184,7 @@ let plugin = module.exports = {
         // Find all pre-existing image objects in documents
         for (let doc of util.toArray(docs)) { //x2
           for (let imageField of options.model.imageFields) { //x5
-            let images = plugin._findImagesInData(doc, imageField, 0, '').filter(o => o.image !== null)
+            let images = plugin._findImagesInData(doc, imageField, 0, '').filter(o => o.image)
             for (let image of images) {
               preExistingImages.push(image)
               useCount[image.image.uid] = (useCount[image.image.uid] || 0) + 1

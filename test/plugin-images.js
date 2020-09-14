@@ -255,7 +255,8 @@ module.exports = function(monastery, db) {
     let user = db.model('user', { fields: {
       logo: { type: 'image' },
       logos: [{ type: 'image' }],
-      users: [{ logo: { type: 'image' } }]
+      users: [{ logo: { type: 'image' } }],
+      deep: { logo: { type: 'image' }}
     }})
     let image = {
       bucket: 'test',
@@ -274,7 +275,8 @@ module.exports = function(monastery, db) {
         { logo: { ...image, uid: 'test4', path: 'dir/test4.png' }},
         null,
         { logo: { ...image, uid: 'test4', path: 'dir/test4.png' }}
-      ]
+      ],
+      deep: {}
     })
 
     let plugin = db.imagePluginFile
