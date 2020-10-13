@@ -122,6 +122,9 @@ let plugin = module.exports = {
               // sizes: ['large', 'medium', 'small'],
               uid: uid
             }
+            this.manager.debug(
+              `Uploading '${image.filename}' to '${image.bucket}/${image.path}'`
+            )
             if (test) {
               plugin._addImageObjectsToData(filesArr.inputPath, data, image)
               resolve()
@@ -239,6 +242,9 @@ let plugin = module.exports = {
             { Key: `small/${key}.jpg` },
             { Key: `medium/${key}.jpg` },
             { Key: `large/${key}.jpg` }
+          )
+          this.manager.debug(
+            `Removing '${pre.image.filename}' from '${pre.image.bucket}/${pre.image.path}'`
           )
         }
         if (test) return Promise.resolve([useCount, unused])

@@ -16,7 +16,7 @@
 This repository is distributed with NPM. After installing NPM, you can install Monastery via:
 
 ```bash
-npm install --save monastery-js
+$ npm install --save monastery-js
 ```
 
 ## Usage
@@ -60,6 +60,16 @@ db.user.insert({
   //   }
   // }]
 })
+```
+## Debugging
+
+This package uses [Debug](https://github.com/visionmedia/debug) which allows you to see different levels of output:
+
+```bash
+$ DEBUG=monastery:log
+$ DEBUG=monastery:debug
+# or show all levels of output
+$ DEBUG=monastery:*
 ```
 
 ## Contributing

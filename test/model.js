@@ -56,7 +56,6 @@ module.exports = function(monastery, db) {
   test('Model setup with default fields', async () => {
     // Setup
     let db = monastery(false, { defaultObjects: true })
-    db.log = () => {}
 
     // Default fields
     expect(db.model('user2').fields).toEqual({
@@ -77,7 +76,6 @@ module.exports = function(monastery, db) {
   test('Model setup with default objects', async () => {
     // Setup
     let db = monastery(false, { defaultObjects: true })
-    db.log = () => {}
     let user = db.model('user', { fields: {
       name: { type: 'string' },
       pets: [{ type: 'string' }],

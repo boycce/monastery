@@ -13,7 +13,6 @@
 
 let monastery = require('../lib')
 let db = monastery(false, { defaultFields: false })
-db.log = () => {}
 
 // Run tests sequentially
 require('./util')(monastery, db)
