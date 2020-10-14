@@ -14,7 +14,7 @@ nav_order: 7
         awsAccessKeyId: 'your-key-here',
         awsSecretAccessKey: 'your-key-here',
         bucketDir: 'full', // default
-        formats: ['jpg', 'jpeg', 'png', 'ico'] // optional
+        formats: ['jpg', 'jpeg', 'png', 'ico'] // optional, doesnt support txt based files e.g. svg, txt, ..
       }
     })
   ```
