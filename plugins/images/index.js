@@ -21,7 +21,6 @@ let plugin = module.exports = {
     this.awsAccessKeyId = options.awsAccessKeyId
     this.awsSecretAccessKey = options.awsSecretAccessKey
     this.bucketDir = options.bucketDir || 'full'
-    this.types = options.types || ['png', 'jpg', 'jpeg',  'bmp', 'tiff', 'gif']
     this.formats = options.formats || ['png', 'jpg', 'jpeg',  'bmp', 'tiff', 'gif']
     this.manager = manager
 
