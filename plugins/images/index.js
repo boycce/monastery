@@ -168,7 +168,7 @@ let plugin = module.exports = {
      *
      * Function logic
      * 1. Find all pre-existing image objects in the documents from the same query
-     * 3. Check if data contains null or valid pre-existing images and update useCount accordingly
+     * 3. Check if data contains null/missing or valid pre-existing images and update useCount accordingly
      * 3. delete leftovers from S3
      *
      * @ref https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#deleteObjects-property
@@ -194,16 +194,31 @@ let plugin = module.exports = {
             }
           }
         }
+
+        //console.log(1, useCount)
+
+        // Assign pre-existing images within undefined deep objects and missing array items to null
+        // ignore undefined root images
+        let dataFilled = util.deepCopy(data)
+        for (let key in dataFilled) {
+          for (let pre of preExistingImages) {
+            if (!pre.dataPath.match(new RegExp('^' + key + '(\\.|$)'))) continue
+            util.setDeepValue(dataFilled, pre.dataPath, null, true)
+          }
+        }
+
         // Loop all schema image fields
         for (let imageField of options.model.imageFields) { //x5
-          let images = plugin._findImagesInData(data, imageField, 0, '')
+          let images = plugin._findImagesInData(dataFilled, imageField, 0, '')
           if (!images.length) continue
+
           // Data contains null images that once had a pre-existing image
           for (let image of images) {
             if (image.image == null && (pre = preExistingImages.find(o => o.dataPath == image.dataPath))) {
               useCount[pre.image.uid]--
             }
           }
+
           // Data contains valid (pre-existing) image-objects? And are we overriding a pre-existing image?
           for (let image of images) {
             if (image.image != null) {
@@ -233,6 +248,7 @@ let plugin = module.exports = {
       }).then(() => {
         // Retrieve all the unused files
         let unused = []
+        // console.log(3, useCount)
         for (let key in useCount) {
           if (useCount[key] > 0) continue
           let pre = preExistingImages.find(o => o.image.uid == key)

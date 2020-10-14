@@ -255,7 +255,7 @@ module.exports = function(monastery, db) {
     let user = db.model('user', { fields: {
       logo: { type: 'image' },
       logos: [{ type: 'image' }],
-      users: [{ logo: { type: 'image' } }],
+      users: [{ userlogo: { type: 'image' } }],
       deep: { logo: { type: 'image' }}
     }})
     let image = {
@@ -272,9 +272,10 @@ module.exports = function(monastery, db) {
         { ...image, uid: 'test3', path: 'dir/test3.png' }
       ],
       users: [
-        { logo: { ...image, uid: 'test4', path: 'dir/test4.png' }},
+        { userlogo: { ...image, uid: 'test4', path: 'dir/test4.png' }},
         null,
-        { logo: { ...image, uid: 'test4', path: 'dir/test4.png' }}
+        { userlogo: { ...image, uid: 'test4', path: 'dir/test4.png' }},
+        { userlogo: { ...image, uid: 'test4', path: 'dir/test4.png' }}
       ],
       deep: {}
     })
@@ -287,8 +288,8 @@ module.exports = function(monastery, db) {
     app.use(upload({ limits: { fileSize: 1 * 1024 * 1024, files: 10 }}))
 
     app.post('/', function(req, res) {
-      req.body.users = JSON.parse(req.body.users)
       req.body.logos = JSON.parse(req.body.logos)
+      req.body.users = JSON.parse(req.body.users)
       let options = { files: req.files, model: user, query: { _id: user1._id }}
 
       plugin.removeImages(options, req.body, true)
@@ -327,9 +328,10 @@ module.exports = function(monastery, db) {
       .field('name', 'my awesome avatar')
       .field('logos', JSON.stringify([ null, { ...image, uid: 'test3', path: 'dir/test3.png' } ]))
       .field('users', JSON.stringify([
-        { logo: { ...image, uid: 'test1', path: 'dir/test1.png' }},
+        { userlogo: { ...image, uid: 'test1', path: 'dir/test1.png' }},
         null,
-        null
+        null,
+        //null // undefined
       ]))
       .attach('logo', `${__dirname}/assets/logo.png`)
       .attach('logos.0', `${__dirname}/assets/logo2.png`)
