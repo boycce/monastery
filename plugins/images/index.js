@@ -333,7 +333,7 @@ let plugin = module.exports = {
       return Promise.all(filesArr.map((file, i) => {
         return new Promise((resolve, reject) => {
           fileType.fromBuffer(file.data).then(res => {
-            file.type = res.ext
+            file.type = res? res.ext : 'unknown'
             if (file.truncated) reject({
               title: filesArr.inputPath + (i? `.${i}` : ''),
               detail: `The file size for '${file.name}' is too big.`
@@ -343,8 +343,6 @@ let plugin = module.exports = {
               detail: `The file type '${file.type}' is not supported`
             })
             else resolve()
-          }).catch(err => {
-            reject(err)
           })
         })
       }))

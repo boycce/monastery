@@ -227,7 +227,13 @@ module.exports = function(monastery, db) {
             ]
           })
         })
-        .finally(() => {
+        .then(() => {
+          res.json()
+          db.close()
+          done()
+        })
+        .catch(errs => {
+          console.error(errs)
           res.json()
           db.close()
           done()
@@ -315,7 +321,13 @@ module.exports = function(monastery, db) {
         .catch(err => {
           console.log(err)
         })
-        .finally(() => {
+        .then(() => {
+          res.json()
+          db.close()
+          done()
+        })
+        .catch(errs => {
+          console.error(errs)
           res.json()
           db.close()
           done()
@@ -337,6 +349,51 @@ module.exports = function(monastery, db) {
       .attach('logos.0', `${__dirname}/assets/logo2.png`)
       .expect(200)
       .end((err, res) => { if (err) console.log(err) })
+  })
+
+  test('images: addImages formats', async (done) => {
+    let db = monastery('localhost/monastery', {
+      defaultFields: false,
+      serverSelectionTimeoutMS: 2000,
+      imagePlugin: {
+        awsBucket: 'fake',
+        awsAccessKeyId: 'fake',
+        awsSecretAccessKey: 'fake',
+        types: ['png', 'jpg', 'jpeg',  'bmp', 'tiff', 'gif', 'webp']
+      }
+    })
+    let user = db.model('user', { fields: {
+      imageWebp: { type: 'image' },
+      imageSvg: { type: 'image' },
+    }})
+
+    let plugin = db.imagePluginFile
+    let supertest = require('supertest')
+    let express = require('express')
+    let upload = require('express-fileupload')
+    let app = express()
+    app.use(upload({ limits: { fileSize: 1 * 1024 * 1024, files: 10 }}))
+
+    app.post('/', async (req, res) => {
+      // Webp will throw an error first if it's not a valid type
+      await expect(plugin._findValidImages(req.files, user)).rejects.toEqual({
+        title: 'imageSvg',
+        detail: 'The file type \'unknown\' is not supported'
+      })
+      res.json()
+    })
+
+    // Start tests
+    supertest(app)
+      .post('/')
+      .attach('imageWebp', `${__dirname}/assets/image.webp`)
+      .attach('imageSvg', `${__dirname}/assets/bad.svg`)
+      .expect(200)
+      .end((err, res) => {
+        if (err) console.log(err)
+        db.close()
+        done()
+      })
   })
 
 }
