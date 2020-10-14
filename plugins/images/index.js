@@ -334,18 +334,21 @@ let plugin = module.exports = {
         return new Promise((resolve, reject) => {
           fileType.fromBuffer(file.data).then(res => {
             let maxSize = filesArr.imageField.fileSize
-            file.format = res? res.ext : 'unknown'
+            file.format = res? res.ext : ''
+            file.ext = file.format || (file.name.match(/\.(.*)$/) || [])[1] || 'unknown'
+            file.nameClipped = file.name.length > 14? file.name.substring(0, 14) + '..' : file.name
+
             if (file.truncated) reject({
               title: filesArr.inputPath + (i? `.${i}` : ''),
-              detail: `The file size for '${file.name}' is too big.`
+              detail: `The file size for '${file.nameClipped}' is too big.`
             })
             else if (maxSize && maxSize < file.size) reject({ // file.size == bytes
               title: filesArr.inputPath + (i? `.${i}` : ''),
-              detail: `The file size for '${file.name}' is bigger than ${(maxSize/1000/1000).toFixed(1)}MB.`
+              detail: `The file size for '${file.nameClipped}' is bigger than ${(maxSize/1000/1000).toFixed(1)}MB.`
             })
             else if (!util.inArray(filesArr.imageField.formats || plugin.formats, file.format)) reject({
               title: filesArr.inputPath + (i? `.${i}` : ''),
-              detail: `The file format '${file.format}' is not supported`
+              detail: `The file format '${file.ext}' for '${file.nameClipped}' is not supported`
             })
             else resolve()
           })

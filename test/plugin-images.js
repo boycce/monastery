@@ -370,7 +370,7 @@ module.exports = function(monastery, db) {
       // ico/Webp will throw an error first if it's not a valid type
       await expect(plugin._findValidImages(req.files, user)).rejects.toEqual({
         title: 'imageSvg',
-        detail: 'The file format \'unknown\' is not supported'
+        detail: 'The file format \'svg\' for \'bad.svg\' is not supported'
       })
       await expect(plugin._findValidImages(imageSize1, user)).rejects.toEqual({
         title: 'imageSize1',
