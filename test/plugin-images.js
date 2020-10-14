@@ -158,7 +158,7 @@ module.exports = function(monastery, db) {
     let express = require('express')
     let upload = require('express-fileupload')
     let app = express()
-    app.use(upload({ limits: { fileSize: 1 * 1024 * 1024, files: 10 }}))
+    app.use(upload({ limits: { fileSize: 1 * 1000 * 1000, files: 10 }}))
 
     app.post('/', function(req, res) {
       // Files exist
@@ -183,10 +183,10 @@ module.exports = function(monastery, db) {
           expect(validFiles[2].inputPath).toEqual('users.0.logo')
           expect(validFiles[3].inputPath).toEqual('users.2.logo')
           // Valid type
-          expect(validFiles[0][0].type).toEqual('png')
-          expect(validFiles[1][0].type).toEqual('png')
-          expect(validFiles[2][0].type).toEqual('png')
-          expect(validFiles[3][0].type).toEqual('png')
+          expect(validFiles[0][0].format).toEqual('png')
+          expect(validFiles[1][0].format).toEqual('png')
+          expect(validFiles[2][0].format).toEqual('png')
+          expect(validFiles[3][0].format).toEqual('png')
 
           return plugin.addImages({ model: user, files: req.files, query: { _id: 1234 }}, req.body, true)
         })
@@ -227,13 +227,7 @@ module.exports = function(monastery, db) {
             ]
           })
         })
-        .then(() => {
-          res.json()
-          db.close()
-          done()
-        })
-        .catch(errs => {
-          console.error(errs)
+        .finally(() => {
           res.json()
           db.close()
           done()
@@ -291,7 +285,7 @@ module.exports = function(monastery, db) {
     let express = require('express')
     let upload = require('express-fileupload')
     let app = express()
-    app.use(upload({ limits: { fileSize: 1 * 1024 * 1024, files: 10 }}))
+    app.use(upload({ limits: { fileSize: 1 * 1000 * 1000, files: 10 }}))
 
     app.post('/', function(req, res) {
       req.body.logos = JSON.parse(req.body.logos)
@@ -318,16 +312,7 @@ module.exports = function(monastery, db) {
             { Key: 'large/test4.jpg' }
           ])
         })
-        .catch(err => {
-          console.log(err)
-        })
-        .then(() => {
-          res.json()
-          db.close()
-          done()
-        })
-        .catch(errs => {
-          console.error(errs)
+        .finally(() => {
           res.json()
           db.close()
           done()
@@ -351,7 +336,7 @@ module.exports = function(monastery, db) {
       .end((err, res) => { if (err) console.log(err) })
   })
 
-  test('images: addImages formats', async (done) => {
+  test('images: addImages formats & filesizes', async (done) => {
     let db = monastery('localhost/monastery', {
       defaultFields: false,
       serverSelectionTimeoutMS: 2000,
@@ -359,12 +344,15 @@ module.exports = function(monastery, db) {
         awsBucket: 'fake',
         awsAccessKeyId: 'fake',
         awsSecretAccessKey: 'fake',
-        types: ['png', 'jpg', 'jpeg',  'bmp', 'tiff', 'gif', 'webp']
+        formats: ['jpg', 'jpeg', 'png', 'ico']
       }
     })
     let user = db.model('user', { fields: {
-      imageWebp: { type: 'image' },
-      imageSvg: { type: 'image' },
+      imageIco:  { type: 'image' },
+      imageWebp: { type: 'image', formats: ['webp'] },
+      imageSvg:  { type: 'image' },
+      imageSize1: { type: 'image', fileSize: 1000 * 100 },
+      imageSize2: { type: 'image' },
     }})
 
     let plugin = db.imagePluginFile
@@ -372,13 +360,25 @@ module.exports = function(monastery, db) {
     let express = require('express')
     let upload = require('express-fileupload')
     let app = express()
-    app.use(upload({ limits: { fileSize: 1 * 1024 * 1024, files: 10 }}))
+    app.use(upload({ limits: { fileSize: 1000 * 200, files: 10 }}))
 
     app.post('/', async (req, res) => {
-      // Webp will throw an error first if it's not a valid type
+      let imageSize1 = { imageSize1: req.files.imageSize1 }
+      let imageSize2 = { imageSize2: req.files.imageSize2 }
+      delete req.files.imageSize1
+      delete req.files.imageSize2
+      // ico/Webp will throw an error first if it's not a valid type
       await expect(plugin._findValidImages(req.files, user)).rejects.toEqual({
         title: 'imageSvg',
-        detail: 'The file type \'unknown\' is not supported'
+        detail: 'The file format \'unknown\' is not supported'
+      })
+      await expect(plugin._findValidImages(imageSize1, user)).rejects.toEqual({
+        title: 'imageSize1',
+        detail: 'The file size for \'lion1.png\' is bigger than 0.1MB.'
+      })
+      await expect(plugin._findValidImages(imageSize2, user)).rejects.toEqual({
+        title: 'imageSize2',
+        detail: 'The file size for \'lion2.jpg\' is too big.'
       })
       res.json()
     })
@@ -386,8 +386,11 @@ module.exports = function(monastery, db) {
     // Start tests
     supertest(app)
       .post('/')
+      .attach('imageIco', `${__dirname}/assets/image.ico`)
       .attach('imageWebp', `${__dirname}/assets/image.webp`)
       .attach('imageSvg', `${__dirname}/assets/bad.svg`)
+      .attach('imageSize1', `${__dirname}/assets/lion1.png`)
+      .attach('imageSize2', `${__dirname}/assets/lion2.jpg`)
       .expect(200)
       .end((err, res) => {
         if (err) console.log(err)

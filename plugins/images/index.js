@@ -22,6 +22,7 @@ let plugin = module.exports = {
     this.awsSecretAccessKey = options.awsSecretAccessKey
     this.bucketDir = options.bucketDir || 'full'
     this.types = options.types || ['png', 'jpg', 'jpeg',  'bmp', 'tiff', 'gif']
+    this.formats = options.formats || ['png', 'jpg', 'jpeg',  'bmp', 'tiff', 'gif']
     this.manager = manager
 
     if (!options.awsBucket || !options.awsAccessKeyId || !options.awsSecretAccessKey) {
@@ -333,14 +334,19 @@ let plugin = module.exports = {
       return Promise.all(filesArr.map((file, i) => {
         return new Promise((resolve, reject) => {
           fileType.fromBuffer(file.data).then(res => {
-            file.type = res? res.ext : 'unknown'
+            let maxSize = filesArr.imageField.fileSize
+            file.format = res? res.ext : 'unknown'
             if (file.truncated) reject({
               title: filesArr.inputPath + (i? `.${i}` : ''),
               detail: `The file size for '${file.name}' is too big.`
             })
-            else if (!util.inArray(plugin.types, file.type)) reject({
+            else if (maxSize && maxSize < file.size) reject({ // file.size == bytes
               title: filesArr.inputPath + (i? `.${i}` : ''),
-              detail: `The file type '${file.type}' is not supported`
+              detail: `The file size for '${file.name}' is bigger than ${(maxSize/1000/1000).toFixed(1)}MB.`
+            })
+            else if (!util.inArray(filesArr.imageField.formats || plugin.formats, file.format)) reject({
+              title: filesArr.inputPath + (i? `.${i}` : ''),
+              detail: `The file format '${file.format}' is not supported`
             })
             else resolve()
           })
@@ -373,6 +379,8 @@ let plugin = module.exports = {
 
       // Image field. Test for field.image as field.type may be 'any'
       } else if (field.type == 'image' || field.image) {
+        let formats = field.formats
+        let fileSize = field.fileSize
         // Convert image field to subdocument
         fields[fieldName] = {
           bucket: { type: 'string' },
@@ -385,7 +393,9 @@ let plugin = module.exports = {
         }
         list.push({
           fullPath: path2,
-          fullPathRegex: new RegExp('^' + path2.replace(/\.[0-9]+/g, '.[0-9]+').replace(/\./g, '\\.') + '$')
+          fullPathRegex: new RegExp('^' + path2.replace(/\.[0-9]+/g, '.[0-9]+').replace(/\./g, '\\.') + '$'),
+          formats: formats,
+          fileSize: fileSize
         })
       }
     })
