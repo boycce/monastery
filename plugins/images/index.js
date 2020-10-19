@@ -118,7 +118,7 @@ let plugin = module.exports = {
               date: Math.floor(Date.now() / 1000),
               filename: file.name,
               filesize: file.size,
-              path: `${plugin.bucketDir}/${uid}.${file.type}`,
+              path: `${plugin.bucketDir}/${uid}.${file.format}`,
               // sizes: ['large', 'medium', 'small'],
               uid: uid
             }
