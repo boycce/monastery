@@ -135,6 +135,66 @@ module.exports = function(monastery, db) {
       .resolves.toEqual({ animals: { dogs: [] }})
   })
 
+  test('Validation messages', async () => {
+    // Setup
+    let user = db.model('user', {
+      fields: {
+        name: { type: 'string', minLength: 4 },
+        dog: { name: { type: 'string', minLength: 4 }},
+        dogNames: [{ type: 'string', minLength: 4 }],
+        animals: [{
+          name: { type: 'string', minLength: 4 }
+        }]
+      },
+      messages: {
+        'name': { minLength: 'Oops min length is 4' },
+        'dog.name': { minLength: 'Oops min length is 4' },
+        'dogNames.0': { minLength: 'Oops min length is 4' },
+        'animals.0.name': { minLength: 'Oops min length is 4' }
+      }
+    })
+
+    // Basic error
+    await expect(user.validate({
+      name: 'ben'
+    })).rejects.toContainEqual({
+      status: '400',
+      title: 'name',
+      detail: 'Oops min length is 4',
+      meta: { rule: 'minLength', model: 'user', field: 'name' }
+    })
+
+    // subdocument error
+    await expect(user.validate({
+      dog: { name: 'ben' }
+    })).rejects.toContainEqual({
+      status: '400',
+      title: 'dog.name',
+      detail: 'Oops min length is 4',
+      meta: { rule: 'minLength', model: 'user', field: 'name' }
+    })
+
+    // array error
+    await expect(user.validate({
+      dogNames: ['ben']
+    })).rejects.toContainEqual({
+      status: '400',
+      title: 'dogNames.0',
+      detail: 'Oops min length is 4',
+      meta: { rule: 'minLength', model: 'user', field: '0' }
+    })
+
+    // subdocument in an array error
+    await expect(user.validate({
+      animals: [{ name: 'ben' }]
+    })).rejects.toContainEqual({
+      status: '400',
+      title: 'animals.0.name',
+      detail: 'Oops min length is 4',
+      meta: { rule: 'minLength', model: 'user', field: 'name' }
+    })
+  })
+
   test('Validated data', async () => {
     // Setup
     let fields = {
@@ -351,4 +411,5 @@ module.exports = function(monastery, db) {
       }
     })
   })
+
 }
