@@ -149,8 +149,8 @@ module.exports = function(monastery, db) {
       messages: {
         'name': { minLength: 'Oops min length is 4' },
         'dog.name': { minLength: 'Oops min length is 4' },
-        'dogNames.0': { minLength: 'Oops min length is 4' },
-        'animals.0.name': { minLength: 'Oops min length is 4' }
+        'dogNames.[]': { minLength: 'Oops min length is 4' },
+        'animals.[].name': { minLength: 'Oops min length is 4' }
       }
     })
 
@@ -190,6 +190,16 @@ module.exports = function(monastery, db) {
     })).rejects.toContainEqual({
       status: '400',
       title: 'animals.0.name',
+      detail: 'Oops min length is 4',
+      meta: { rule: 'minLength', model: 'user', field: 'name' }
+    })
+
+    // subdocument in an array error (different index)
+    await expect(user.validate({
+      animals: [{ name: 'carla' }, { name: 'ben' }]
+    })).rejects.toContainEqual({
+      status: '400',
+      title: 'animals.1.name',
       detail: 'Oops min length is 4',
       meta: { rule: 'minLength', model: 'user', field: 'name' }
     })

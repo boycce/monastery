@@ -165,7 +165,7 @@ schema.rules = {
 
 ### Custom error messages
 
-You are able to define custom error messages for each validation rule. Arrays are always referenced by a `0`.
+You are able to define custom error messages for each validation rule.
 
 ```js
 schema.messages = {
@@ -178,7 +178,7 @@ schema.messages = {
       return `Is your city of residence really only ${ruleArgument} characters long?`
     }
   },
-  "pets.0.name": {
+  "pets.[].name": {
     required: `Your pet's name needs to be a string, like it is so.`
   }
 }
