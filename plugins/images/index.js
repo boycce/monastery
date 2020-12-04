@@ -25,7 +25,7 @@ let plugin = module.exports = {
     this.manager = manager
 
     if (!options.awsBucket || !options.awsAccessKeyId || !options.awsSecretAccessKey) {
-      manager.log('Monastery imagePlugin: awsBucket, awsAccessKeyId, or awsSecretAccessKey is not defined')
+      manager.error('Monastery imagePlugin: awsBucket, awsAccessKeyId, or awsSecretAccessKey is not defined')
       delete manager.imagePlugin
       return
     }
@@ -122,7 +122,7 @@ let plugin = module.exports = {
               // sizes: ['large', 'medium', 'small'],
               uid: uid
             }
-            this.manager.debug(
+            this.manager.info(
               `Uploading '${image.filename}' to '${image.bucket}/${image.path}'`
             )
             if (test) {
@@ -259,7 +259,7 @@ let plugin = module.exports = {
             { Key: `medium/${key}.jpg` },
             { Key: `large/${key}.jpg` }
           )
-          this.manager.debug(
+          this.manager.info(
             `Removing '${pre.image.filename}' from '${pre.image.bucket}/${pre.image.path}'`
           )
         }

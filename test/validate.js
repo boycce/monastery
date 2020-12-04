@@ -288,7 +288,7 @@ module.exports = function(monastery, db) {
 
     // Index, mongodb connection error
     await expect(user3._setupIndexes({ name: { type: 'string', index: 'text' }})).rejects
-      .toEqual("Skipping createIndex on the 'user3' model, no mongodb connection found.")
+      .toEqual({ type: "info", detail: "Skipping createIndex on the 'user3' model, no mongodb connection found." })
 
     // Model id (Monk ObjectId)
     let data = await user4.validate({ name: "5d4356299d0f010017602f6b" })

@@ -19,7 +19,7 @@
   "scripts": {
     "release": "standard-version && npm publish",
     "test": "jest",
-    "watch": "DEBUG=monastery:debug jest --watchAll --runInBand",
+    "watch": "DEBUG=-monastery:info jest --watchAll --runInBand",
     "docs": "cd docs && bundle exec jekyll serve --livereload --livereload-port 4001"
   },
   "dependencies": {

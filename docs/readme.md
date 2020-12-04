@@ -66,9 +66,8 @@ db.user.insert({
 This package uses [Debug](https://github.com/visionmedia/debug) which allows you to see different levels of output:
 
 ```bash
-$ DEBUG=monastery:log
-$ DEBUG=monastery:debug
-# or show all levels of output
+$ DEBUG=monastery:info
+# or show all levels of output, currently shows the same output as above
 $ DEBUG=monastery:*
 ```
 
