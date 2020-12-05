@@ -115,8 +115,7 @@ let fieldName = {
 
 ### MongoDB indexes
 
-You are able to automatically setup MongoDB indexes via the `index` field option. At this time,
-if you make any changes to a index you will need to remove the old indexes manually.
+You are able to automatically setup MongoDB indexes via the `index` field option.
 
 ```js
 let fieldName = {
