@@ -103,15 +103,22 @@ module.exports = function(monastery, db) {
     // Need to test different types of indexes
     let db = monastery('localhost/monastery', { serverSelectionTimeoutMS: 2000 })
     let user = db.model('user', {})
+    let zuser = db.model('zuser', {})
 
+    // Text index setup
     let setupIndex1 = await user._setupIndexes({
       name: { type: 'string', index: 'text' }
     })
 
-    // No error, i.e. new Error("Index with name: text already exists with different options")
+    // No text index change error, i.e. new Error("Index with name: text already exists with different options")
     await expect(user._setupIndexes({
       name: { type: 'string', index: 'text' },
       name2: { type: 'string', index: 'text' }
+    })).resolves.toEqual(undefined)
+
+    // Text index on a different model
+    await expect(zuser._setupIndexes({
+      name: { type: 'string', index: 'text' }
     })).resolves.toEqual(undefined)
 
     db.close()
