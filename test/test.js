@@ -5,6 +5,7 @@
  *   - Test for index and unique schema fields
  *   - Test blacklisting
  *   - Test deep/array population
+ *   - Test default limit
  * Notes:
  *   - expect().toEqual:  strict deep match
  *   - expect().toMatchObject:  received object can have random properties
