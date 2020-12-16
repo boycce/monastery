@@ -1,6 +1,7 @@
 # Node files
 node_modules
 .resources
+package-lock.json
 
 # Thumbnail and view configuration files
 ._*
