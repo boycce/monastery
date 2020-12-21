@@ -3,6 +3,7 @@ module.exports = function(monastery, db) {
   test('Validation basic errors', async () => {
     // Setup
     let user = db.model('user', { fields: {
+      date: { type: 'date' },
       name: { type: 'string', required: true },
       colors: [{ type: 'string' }],
       animals: { dog: { type: 'string' }}
@@ -24,8 +25,16 @@ module.exports = function(monastery, db) {
       meta: { rule: 'isString', model: 'user', field: 'name' }
     })
 
+    // Type error (date)
+    await expect(user.validate({ name: 'a', date: 'fe' })).rejects.toContainEqual({
+      status: '400',
+      title: 'date',
+      detail: 'Value was not a unix timestamp.',
+      meta: { rule: 'isDate', model: 'user', field: 'date' }
+    })
+
     // Type error (array)
-    await expect(user.validate({ colors: 1 })).rejects.toContainEqual({
+    await expect(user.validate({ name: 'a', colors: 1 })).rejects.toContainEqual({
       status: '400',
       title: 'colors',
       detail: 'Value was not an array.',
@@ -33,7 +42,7 @@ module.exports = function(monastery, db) {
     })
 
     // Type error (array)
-    await expect(user.validate({ colors: null })).rejects.toContainEqual({
+    await expect(user.validate({ name: 'a', colors: null })).rejects.toContainEqual({
       status: '400',
       title: 'colors',
       detail: 'Value was not an array.',
@@ -41,7 +50,7 @@ module.exports = function(monastery, db) {
     })
 
     // Type error (object)
-    await expect(user.validate({ animals: [] })).rejects.toContainEqual({
+    await expect(user.validate({ name: 'a', animals: [] })).rejects.toContainEqual({
       status: '400',
       title: 'animals',
       detail: 'Value was not an object.',
@@ -49,7 +58,7 @@ module.exports = function(monastery, db) {
     })
 
     // Type error (object)
-    await expect(user.validate({ animals: null })).rejects.toContainEqual({
+    await expect(user.validate({ name: 'a', animals: null })).rejects.toContainEqual({
       status: '400',
       title: 'animals',
       detail: 'Value was not an object.',

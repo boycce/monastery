@@ -10,7 +10,7 @@ nav_order: 5
   Rule | Rule argument
   - | -
   required | boolean
-  type | string - 'string', 'boolean', 'number', 'integer', 'id', 'any', '[image](#image-type)'
+  type | string - 'string', 'boolean', 'number', 'integer', 'date', 'id', 'any', '[image](#image-type)'
   isAfter | see validator.isAfter
   isBefore | see validator.isBefore
   isCreditCard | see validator.isCreditCard
@@ -28,6 +28,8 @@ nav_order: 5
   regex | see validator.matches
 
   *See [validator](https://github.com/validatorjs/validator.js#validators) for their validator logic*
+
+  *Dates are unix timestamps, we hope to support for other timestamp variations soon..*
 
 ### Image type
 
