@@ -109,7 +109,7 @@ let fieldName = {
 
   // Monastery will automatically create a mongodb index for this field, see "MongoDB indexes"
   // below for more information
-  index: true|1|-1|'2dsphere'|'text'|'unique'|Object
+  index: true|1|-1|'text'|'unique'|Object
 }
 ```
 
@@ -126,10 +126,6 @@ let fieldName = {
   // { key: { [fieldName]: 1 }, unique: true }
   index: 'unique',
 
-  // This will create an ascending 2dsphere index which translates:
-  // { key: { [fieldName]: '2dsphere' }}
-  index: '2dsphere',
-
   // Text indexes are handled a little differently in which all the fields on the model
   // schema that have a `index: 'text` set are collated into one index, e.g.
   // { key: { [fieldName1]: 'text', [fieldName2]: 'text', .. }}
@@ -141,6 +137,30 @@ let fieldName = {
   index: { type: 1, ...(any mongodb index option) },
 }
 ```
+
+And here's how you would use a 2dsphere index, e.g.
+
+```js
+schema.fields = {
+  name: {
+    type: 'string',
+    required: true
+  },
+  location: {
+    index: '2dsphere',
+    type: { type: 'string', default: 'Point' },
+    coordinates: [{ type: 'number' }] // lng, lat
+  }
+}
+
+// Inserting a 2dsphere point
+await db.user.insert({
+  data: {
+    location: { coordinates: [170.2628528648167, -43.59467883784971] }
+  }
+}
+```
+
 
 ### Custom validation rules
 

@@ -103,7 +103,7 @@ module.exports = function(monastery, db) {
     // Need to test different types of indexes
     let db = monastery('localhost/monastery', { serverSelectionTimeoutMS: 2000 })
     let user = db.model('user', {})
-    let zuser = db.model('zuser', {})
+    let user2 = db.model('user2', {})
 
     // Text index setup
     let setupIndex1 = await user._setupIndexes({
@@ -117,13 +117,77 @@ module.exports = function(monastery, db) {
     })).resolves.toEqual(undefined)
 
     // Text index on a different model
-    await expect(zuser._setupIndexes({
+    await expect(user2._setupIndexes({
       name: { type: 'string', index: 'text' }
     })).resolves.toEqual(undefined)
 
     db.close()
     done()
   })
+
+  test('Model 2dsphere indexes', async (done) => {
+    // Setup. The tested model needs to be unique as race condition issue arises when the same model
+    // with text indexes are setup at the same time
+    let db = monastery('localhost/monastery', { serverSelectionTimeoutMS: 2000 })
+    await db.model('user3', {
+      promise: true,
+      fields: {
+        location: {
+          index: '2dsphere',
+          type: { type: 'string', default: 'Point' },
+          coordinates: [{ type: 'number' }] // lat, lng
+        },
+        location2: {
+          index: { type: '2dsphere' }, // opts...
+          type: { type: 'string', default: 'Point' },
+          coordinates: [{ type: 'number' }] // lat, lng
+        }
+      }
+    })
+
+    // Schema check
+    expect(db.user3.fields.location).toEqual({
+      type: { type: 'string', default: 'Point', isString: true },
+      coordinates: expect.any(Array),
+      schema: {
+        default: undefined,
+        index: "2dsphere",
+        isObject: true,
+        nullObject: undefined,
+        type: "object"
+      }
+    })
+    expect(db.user3.fields.location2).toEqual({
+      type: { type: 'string', default: 'Point', isString: true },
+      coordinates: expect.any(Array),
+      schema: {
+        default: undefined,
+        index: { type: "2dsphere" },
+        isObject: true,
+        nullObject: undefined,
+        type: "object"
+      }
+    })
+
+    // Insert 2dsphere point data
+    await expect(db.user3.insert({
+      data: {
+        location: { coordinates: [172.5880385, -43.3311608] }
+      }
+    })).resolves.toEqual({
+       _id: expect.any(Object),
+       createdAt: expect.any(Number),
+       location: {
+         coordinates: [172.5880385, -43.3311608],
+         type: "Point"
+       },
+       updatedAt: expect.any(Number),
+    })
+
+    db.close()
+    done()
+  })
+
 
   test('Model findWL, findBLProject', async (done) => {
     let db = monastery('localhost/monastery', {
