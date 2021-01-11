@@ -9,8 +9,7 @@ nav_order: 5
 
   Rule | Rule argument
   - | -
-  required | boolean
-  type | string - 'string', 'boolean', 'number', 'integer', 'date', 'id', 'any', '[image](#image-type)'
+  enum | array of strings (for the 'string' type only)
   isAfter | see validator.isAfter
   isBefore | see validator.isBefore
   isCreditCard | see validator.isCreditCard
@@ -26,6 +25,8 @@ nav_order: 5
   minLength | number
   maxLength | number
   regex | see validator.matches
+  required | boolean
+  type | string - 'string', 'boolean', 'number', 'integer', 'date', 'id', 'any', '[image](#image-type)'
 
   *See [validator](https://github.com/validatorjs/validator.js#validators) for their validator logic*
 

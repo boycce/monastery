@@ -317,7 +317,8 @@ module.exports = function(monastery, db) {
     // Setup
     let user = db.model('user', { fields: {
       name: { type: 'string', minLength: 7 },
-      email: { type: 'string', isEmail: true }
+      email: { type: 'string', isEmail: true },
+      names: { type: 'string', enum: ['Martin', 'Luther'] }
     }})
 
     // MinLength
@@ -343,6 +344,19 @@ module.exports = function(monastery, db) {
         model: "user",
         field: "email",
         rule: "isEmail"
+      }
+    })
+
+    // Enum
+    await expect(user.validate({ names: 'Martin' })).resolves.toEqual({ "names": "Martin" })
+    await expect(user.validate({ names: 'bad name' })).rejects.toContainEqual({
+      detail: "Invalid enum value",
+      status: "400",
+      title: "names",
+      meta: {
+        model: "user",
+        field: "names",
+        rule: "enum"
       }
     })
   })
