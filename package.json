@@ -1,5 +1,5 @@
 {
-  "name": "monastery-js",
+  "name": "monastery",
   "description": "⛪ A straight forward MongoDB ODM built around Monk",
   "author": "Ricky Boyce",
   "version": "1.10.9",
@@ -17,7 +17,8 @@
     "mongo odm"
   ],
   "scripts": {
-    "release": "standard-version && npm publish",
+    "minor": "standard-version --release-as minor && npm publish",
+    "patch": "standard-version && npm publish",
     "test": "jest",
     "watch": "DEBUG=-monastery:info jest --watchAll --runInBand",
     "docs": "cd docs && bundle exec jekyll serve --livereload --livereload-port 4001"

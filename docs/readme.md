@@ -1,6 +1,6 @@
 ![](./assets/imgs/monastery.jpg)
 
-[![NPM](https://img.shields.io/npm/v/monastery-js.svg)](https://www.npmjs.com/package/monastery-js) [![Build Status](https://travis-ci.org/boycce/monastery.svg?branch=master)](https://travis-ci.org/boycce/monastery)
+[![NPM](https://img.shields.io/npm/v/monastery.svg)](https://www.npmjs.com/package/monastery) [![Build Status](https://travis-ci.org/boycce/monastery.svg?branch=master)](https://travis-ci.org/boycce/monastery)
 
 ## Features
 
@@ -16,15 +16,15 @@
 This repository is distributed with NPM. After installing NPM, you can install Monastery via:
 
 ```bash
-$ npm install --save monastery-js
+$ npm install --save monastery
 ```
 
 ## Usage
 
 ```javascript
 // Initialise a monastery manager
-const db = require('monastery-js')('localhost/mydb')
-// const db = require('monastery-js')('user:pass@localhost:port/mydb')
+const db = require('monastery')('localhost/mydb')
+// const db = require('monastery')('user:pass@localhost:port/mydb')
 
 // Define a model
 db.model('user', {
@@ -74,6 +74,10 @@ $ DEBUG=monastery:*
 ## Contributing
 
 Coming soon...
+
+## Special Thanks
+
+[Jerome Gravel-Niquet](https://github.com/jeromegn)
 
 ## License
 
