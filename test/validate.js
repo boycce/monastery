@@ -439,8 +439,33 @@ module.exports = function(monastery, db) {
     await expect(user2.validate({}, { skipValidation: ['my.name'] })).resolves.toEqual({})
     await expect(user3.validate({ people: [{}] }, { skipValidation: ['people.name'] }))
       .resolves.toEqual({ people: [{}] })
-    await expect(user3.validate({ people2: [{ people3: [{}] }] }, { skipValidation: ['people2.people3.name'] }))
-      .resolves.toEqual({ people2: [{ people3: [{}] }] })
+
+    // Skip all array items
+    await expect(user3.validate(
+      { people2: [{ people3: [{}, {}] }] },
+      { skipValidation: ['people2.$.people3.$.name'] }
+    )).resolves.toEqual({ people2: [{ people3: [{}, {}] }] })
+
+    // Skip all array items (array expanding)
+    await expect(user3.validate(
+      { people2: [{ people3: [{}, {}] }] },
+      { skipValidation: ['people2.people3.name'] }
+    )).resolves.toEqual({ people2: [{ people3: [{}, {}] }] })
+
+    // Skip a certain array index
+    await expect(user3.validate(
+      { people2: [{ people3: [{}, {}] }] },
+      { skipValidation: ['people2.$.people3.0.name'] }
+    )).rejects.toContainEqual({
+      detail: "This field is required.",
+      status: "400",
+      title: "people2.0.people3.1.name",
+      meta: {
+        field: "name",
+        model: "user3",
+        rule: "required"
+      }
+    })
 
     // Non existing validation field entries
     await expect(user3.validate({ people: [{}] }, { skipValidation: ['people.badField'] })).rejects.toContainEqual({
