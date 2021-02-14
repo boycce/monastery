@@ -367,6 +367,7 @@ module.exports = function(monastery, db) {
       defaultObjects: true,
       serverSelectionTimeoutMS: 2000
     })
+
     let base = { names: [], animals: { dogs: [] }}
     let user = db.model('user', { fields: {
       name: { type: 'string' },
@@ -376,6 +377,9 @@ module.exports = function(monastery, db) {
         dogs: [{ name: { type: 'string' } }]
       }
     }})
+
+    // Mongodb throws an error if this is the only test otherwise, connection error ...
+    await db.user.find({})
 
     // Array/subdocument defaults
     await expect(user.validate({})).resolves.toEqual({
@@ -422,15 +426,21 @@ module.exports = function(monastery, db) {
     let user3 = db.model('user3', { fields: {
       people: [{
         name: { type: 'string', required: true }
+      }],
+      people2: [{
+        people3: [{
+          name: { type: 'string', required: true }
+        }]
       }]
     }})
 
     // Skip validation on the required fields
     await expect(user.validate({}, { skipValidation: ['name'] })).resolves.toEqual({})
     await expect(user2.validate({}, { skipValidation: ['my.name'] })).resolves.toEqual({})
-    await expect(user3.validate({ people: [{}] }, { skipValidation: ['people.name'] })).resolves.toEqual({
-      people: [{}]
-    })
+    await expect(user3.validate({ people: [{}] }, { skipValidation: ['people.name'] }))
+      .resolves.toEqual({ people: [{}] })
+    await expect(user3.validate({ people2: [{ people3: [{}] }] }, { skipValidation: ['people2.people3.name'] }))
+      .resolves.toEqual({ people2: [{ people3: [{}] }] })
 
     // Non existing validation field entries
     await expect(user3.validate({ people: [{}] }, { skipValidation: ['people.badField'] })).rejects.toContainEqual({
