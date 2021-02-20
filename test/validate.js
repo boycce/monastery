@@ -433,6 +433,13 @@ module.exports = function(monastery, db) {
         }]
       }]
     }})
+    let user4 = db.model('user4', { fields: {
+      code: { type: 'string', required: true },
+      address: {
+        city: { type: 'string', required: true },
+        country: { type: 'string', required: true }
+      }
+    }})
 
     // Skip validation on the required fields
     await expect(user.validate({}, { skipValidation: ['name'] })).resolves.toEqual({})
@@ -465,6 +472,14 @@ module.exports = function(monastery, db) {
         model: "user3",
         rule: "required"
       }
+    })
+
+    // Skip multiple fields
+    await expect(user4.validate(
+      { address: { city: 'christchurch', country: 'ewf' }},
+      { skipValidation: ['code'] }
+    )).resolves.toEqual({
+      address: { city: 'christchurch', country: 'ewf' }
     })
 
     // Non existing validation field entries
