@@ -84,6 +84,7 @@ module.exports = function(monastery, db) {
     expect(user.fields.logos[0]).toEqual(expected)
     expect(user.fields.users[0].logo).toEqual(expected)
 
+    await user.find({ query: {} }) // wait for db to open before closing
     db.close()
     done()
   })
