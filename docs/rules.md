@@ -30,7 +30,7 @@ nav_order: 5
 
   *See [validator](https://github.com/validatorjs/validator.js#validators) for their validator logic*
 
-  *Dates are unix timestamps, we hope to support for other timestamp variations soon..*
+  *Dates are unix timestamps in seconds, you change this to milliseconds via the [manager configurations](./manager). We hope to support other string based timestamp variations soon..*
 
 ### Image type
 

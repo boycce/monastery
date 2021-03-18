@@ -115,7 +115,7 @@ let plugin = module.exports = {
             let uid = nanoid.nanoid()
             let image = {
               bucket: this.awsBucket,
-              date: Math.floor(Date.now() / 1000),
+              date: this.manager.useMilliseconds? Date.now() : Math.floor(Date.now() / 1000),
               filename: file.name,
               filesize: file.size,
               path: `${plugin.bucketDir}/${uid}.${file.format}`,

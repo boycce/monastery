@@ -109,6 +109,11 @@ module.exports = function(monastery, db) {
       defaultObjects: true,
       serverSelectionTimeoutMS: 2000
     })
+    let db2 = monastery('localhost/monastery', {
+      // default: defaultFields: true,
+      useMilliseconds: true,
+      serverSelectionTimeoutMS: 2000
+    })
     let user = db.model('user', { fields: {
       name: { type: 'string' },
       names: [{ type: 'string' }],
@@ -117,6 +122,7 @@ module.exports = function(monastery, db) {
         dogs: [{ name: { type: 'string' } }]
       },
     }})
+    let user2 = db2.model('user2', { fields: {}})
 
     let inserted = await user.insert({ data: {} })
     expect(inserted).toEqual({
@@ -147,7 +153,16 @@ module.exports = function(monastery, db) {
       updatedAt: expect.any(Number)
     })
 
+    // Milliseconds
+    let inserted4 = await user2.insert()
+    expect(inserted4).toEqual({
+      _id: inserted4._id,
+      createdAt: expect.any(Number),
+      updatedAt: expect.any(Number)
+    })
+
     db.close()
+    db2.close()
     done()
   })
 

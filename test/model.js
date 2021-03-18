@@ -188,7 +188,6 @@ module.exports = function(monastery, db) {
     done()
   })
 
-
   test('Model findWL, findBLProject', async (done) => {
     let db = monastery('localhost/monastery', {
       defaultFields: false,
