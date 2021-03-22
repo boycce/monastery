@@ -13,8 +13,9 @@ Find document(s) in a collection and call related hook: `schema.afterFind`
 
 - `options.query` *(object\|id)*
 - [[`options.populate`](#populate)] *(array)*
-- [`options.sort`] *(string\|object\|array)*: same as the mongodb option, but  allows for string parsing e.g. 'name', 'name:1'
-- [`options.whitelist`] *(boolean\|array)*: override `schema.findBL`. `true` will remove all blacklisting
+- [`options.sort`] *(string\|array\|object)*: same as the mongodb option, but allows string parsing e.g. 'name', 'name:1'
+- [`options.blacklist`] *(array|string|false)*: augment `schema.findBL`. `false` will remove all blacklisting
+- [`options.project`] *(array|string)*: return only these fields, ignores blacklisting
 - [[`any mongodb option`](http://mongodb.github.io/node-mongodb-native/3.2/api/Collection.html#find)] *(any)*
 
 [`callback`] *(function)*: pass instead of return a promise
@@ -37,6 +38,17 @@ user.find({ query: { name: "Martin Luther" }}).then(data => {
 user.find({ query: { name: "Martin Luther" }, limit: 100 }).then(data => {
   // [{..}]
 })
+```
+
+### Blacklisting
+
+You can augment the model's `schema.findBL` blacklist by passing a custom `blacklist`:
+
+```js
+// Prevents `name` and `pets.$.name` (array) from being returned.
+user.find({ query: {}, blacklist: ['name', 'pets.name'] })
+// You can also whitelist any blacklisted fields found in schema.findBL
+user.find({ query: {}, blacklist: ['-name', '-pet'] })
 ```
 
 ### Populate

@@ -15,6 +15,8 @@ Validate a model and call related hook: `schema.beforeValidate`
 [`options`] *(object)*
 
 - [`options.skipValidation`] (string\|array): skip validation for this field name(s)
+- [`options.blacklist`] *(array|string|false)*: augment the model's blacklist. `false` will remove all blacklisting
+- [`options.update`] *(boolean)*: If true, required rules will be skipped, defaults to false
 
 ### Returns
 
@@ -55,4 +57,15 @@ db.user.validate({
   //   }
   // }]
 })
+
+```
+### Blacklisting
+
+Depending on the `update` option, you can augment the model's `schema.insertBL` or `schema.updateBL` by passing a custom `blacklist`:
+
+```js
+// Prevents `name` and `pets.$.name` (array) from being returned.
+user.validate({}, { blacklist: ['name', 'pets.name'] })
+// You can also whitelist any blacklisted fields found in schema's blacklist
+user.validate({}, { blacklist: ['-name', '-pet'] })
 ```

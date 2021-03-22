@@ -161,7 +161,6 @@ await db.user.insert({
 }
 ```
 
-
 ### Custom validation rules
 
 You are able to define custom validation rules to use.
@@ -178,6 +177,23 @@ schema.rules = {
     fn: function(value, ruleArgument) {
       return (value == 'Martin Luther')? true : false
     }
+  }
+}
+
+// And referencing is the same as any other builtin rule
+schema.fields = {
+  user: {
+    name: {
+      type: 'string'
+      isGrandMaster: true // true is the ruleArgument
+    }
+  }
+}
+
+// Additionally, you can define custom messages here
+schema.messages = {
+  'user.name': {
+    isGrandMaster: 'Only grand masters are permitted'
   }
 }
 ```

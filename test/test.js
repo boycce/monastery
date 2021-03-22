@@ -15,7 +15,7 @@
 let monastery = require('../lib')
 let db = monastery(false, { defaultFields: false })
 
-// Run tests sequentially
+/* Run tests sequentially */
 require('./util')(monastery, db)
 require('./monk')(monastery, db)
 require('./model')(monastery, db)

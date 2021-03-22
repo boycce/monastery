@@ -188,7 +188,7 @@ module.exports = function(monastery, db) {
     done()
   })
 
-  test('Model findWL, findBLProject', async (done) => {
+  test('Model findBL, findBLProject', async (done) => {
     let db = monastery('localhost/monastery', {
       defaultFields: false,
       serverSelectionTimeoutMS: 2000
@@ -249,16 +249,16 @@ module.exports = function(monastery, db) {
       }
     })
 
-    // Test findWL
-    expect(user.findWL).toEqual([
-      'list',
-      'pet',
-      'anyPet',
-      'pets.name',
-      'animals.dog',
-      'deepModel.myBird',
-      'deepModel2.myBird'
-    ])
+    // Test find whitelist
+    // expect(user.fieldlist.filter(o => !user.findBL.includes(o))).toEqual([
+    //   'list',
+    //   'pet',
+    //   'anyPet',
+    //   'pets.name',
+    //   'animals.dog',
+    //   'deepModel.myBird',
+    //   'deepModel2.myBird'
+    // ])
 
     // Test findBLProject
     expect(user.findBLProject).toEqual({
@@ -299,7 +299,7 @@ module.exports = function(monastery, db) {
     })
 
     // Test whitelisting
-    expect(user._addWhitelist(findBLProject, ['pets', 'deep.deep2.hiddenDeep3'])).toEqual({
+    expect(user._addBlacklist(findBLProject, ['-pets', '-deep.deep2.hiddenDeep3'])).toEqual({
       // 'pets.hiddenAge': 0,
       // 'deep.deep2.hiddenDeep3': 0,
       'animals.hiddenCat': 0,
@@ -310,8 +310,8 @@ module.exports = function(monastery, db) {
       'hiddenDeepModel': 0,
       'hiddenDeepModels': 0,
       // Deep model blacklists
-      "deepModel.myBird.password": 0,
-      "deepModel2.myBird.password": 0
+      'deepModel.myBird.password': 0,
+      'deepModel2.myBird.password': 0
     })
 
     // Test aggregate with projection exclusions. This is mainly to test how $lookup reacts

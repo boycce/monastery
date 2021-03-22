@@ -13,7 +13,7 @@ Validate and insert document(s) in a collection and call related hooks: `schema.
 
 - `options.data` *(object\|array)* - An object with key names in dot or bracket notation are supported (FormData)
 - [`options.skipValidation`] (string\|array): skip validation for this field name(s)
-- [`options.whitelist`] (boolean\|array): override schema.insertBL, `true` will remove all blacklisting
+- [`options.blacklist`] *(array|string|false)*: augment `schema.insertBL`. `false` will remove all blacklisting
 - [[`any mongodb option`](http://mongodb.github.io/node-mongodb-native/3.2/api/Collection.html#insert)] *(any)*
 
 [`callback`] *(function)*: pass instead of return a promise
@@ -27,6 +27,17 @@ A promise if no callback is passed in.
 ```js
 user.insert({ data: { name: 'Martin Luther' }})
 user.insert({ data: [{ name: 'Martin Luther' }, { name: 'Bruce Lee' }]})
+```
+
+### Blacklisting
+
+You can augment the model's `schema.insertBL` blacklist by passing a custom `blacklist`:
+
+```js
+// Prevents `name` and `pets.$.name` (array) from being returned.
+user.insert({ data: {}, blacklist: ['name', 'pets.name'] })
+// You can also whitelist any blacklisted fields found in schema.insertBL
+user.insert({ data: {}, blacklist: ['-name', '-pet'] })
 ```
 
 ### Defaults example

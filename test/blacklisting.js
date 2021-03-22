@@ -89,8 +89,12 @@ module.exports = function(monastery, db) {
       }
     }})
 
-    // Test mongodb projections
-    let find1 = await user.findOne({ query: user1._id })
+    // NOte: testing mongodb projections
+
+    // Test initial blacklist
+    let find1 = await user.findOne({
+      query: user1._id
+    })
     expect(find1).toEqual({
       _id: user1._id,
       list: [44, 54],
@@ -101,25 +105,57 @@ module.exports = function(monastery, db) {
       deepModel: { myBird: bird1._id }
     })
 
+    // Test augmented blacklist
+    let find2 = await user.findOne({
+      query: user1._id,
+      blacklist: ['pet', 'pet', 'deep', 'deepModel', '-dog', '-animals.cat']
+    })
+    expect(find2).toEqual({
+      _id: user1._id,
+      dog: 'Bruce',
+      list: [44, 54],
+      pets: [{ name: 'Pluto' }, { name: 'Milo' }],
+      animals: { dog: 'Max', cat: 'Ginger' }
+    })
+
+    // Test positive projection
+    let find3 = await user.findOne({
+      query: user1._id,
+      project: ['dog', 'list', 'pets']
+    })
+    expect(find3).toEqual({
+      _id: user1._id,
+      dog: 'Bruce',
+      list: [44, 54],
+      pets: [{ name: 'Pluto', age: 5 }, { name: 'Milo', age: 4 }]
+    })
+
+    // Test negative projection
+    let find4 = await user.findOne({
+      query: user1._id,
+      project: [
+        '-list', '-hiddenDeepModel', '-pet', '-pet', '-pets', '-deep', '-deeper', '-deepModel',
+        '-dog', '-animals.cat'
+      ]
+    })
+    expect(find4).toEqual({
+      _id: user1._id,
+      animals: { dog: 'Max' },
+      hiddenList: [12, 23],
+      hiddenPets: [{ name: 'secretPet' }]
+    })
+
     db.close()
     done()
   })
 
-  test('Validate blacklisting', async (done) => {
+  test('Insert/update blacklisting (validate)', async (done) => {
     // Setup
     let db = monastery('localhost/monastery', {
       defaultFields: false,
       serverSelectionTimeoutMS: 2000
     })
     let user = db.model('user', {
-      insertBL: [
-        'dog',
-        'animals.cat',
-        'pets.age',
-        'hiddenPets',
-        'hiddenList',
-        'deep.deep2.deep3'
-      ],
       fields: {
         list: [{ type: 'number' }],
         dog: { type: 'string' },
@@ -140,11 +176,17 @@ module.exports = function(monastery, db) {
             }
           }
         }
-      }
+      },
+      insertBL: [
+        'dog',
+        'animals.cat',
+        'pets.age',
+        'hiddenPets',
+        'hiddenList',
+        'deep.deep2.deep3'
+      ]
     })
-
-    // Blacklisting
-    let user1 = await user.validate({
+    let doc1 = {
       list: [44, 54],
       dog: 'Bruce',
       pet: 'Freddy',
@@ -164,7 +206,10 @@ module.exports = function(monastery, db) {
           }
         }
       }
-    })
+    }
+
+    // Default insert validation
+    let user1 = await user.validate(doc1)
     expect(user1).toEqual({
       list: [44, 54],
       pet: 'Freddy',
@@ -177,41 +222,21 @@ module.exports = function(monastery, db) {
       }
     })
 
-    // Whitelisting
-    let user2 = await user.validate({
-      list: [44, 54],
-      dog: 'Bruce',
-      pet: 'Freddy',
-      pets: [{ name: 'Pluto', age: 5 }, { name: 'Milo', age: 4 }],
-      animals: {
-        cat: 'Ginger',
-        dog: 'Max'
-      },
-      hiddenPets: [{
-        name: 'secretPet'
-      }],
-      hiddenList: [12, 23],
-      deep: {
-        deep2: {
-          deep3: {
-            deep4: 'hideme'
-          }
-        }
-      }
-    }, {
-      whitelist: [
-        'dog',
-        'animals.dog', // wrong property
-        'pets.age',
-        'hiddenList',
-        'deep' // whitelist a parent
+    // Custom blacklist (remove and add to the current schema blacklist)
+    let user2 = await user.validate(doc1, {
+      blacklist: [
+        '-dog',
+        '-animals.dog', // wrong property
+        'pets.name',
+        '-hiddenList',
+        '-deep' // blacklist a parent
       ],
     })
     expect(user2).toEqual({
       list: [44, 54],
       dog: 'Bruce',
       pet: 'Freddy',
-      pets: [{ name: 'Pluto', age: 5 }, { name: 'Milo', age: 4 }],
+      pets: [ {}, {} ],
       animals: {
         dog: 'Max'
       },
@@ -225,6 +250,7 @@ module.exports = function(monastery, db) {
       }
     })
 
+    await db.user.find() // wait for db to open before closing
     db.close()
     done()
   })
