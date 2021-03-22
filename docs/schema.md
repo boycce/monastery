@@ -68,11 +68,11 @@ You are able to provide a list of fields to blacklist per model operation.
 // The 'password' field will be removed from the results returned from `model.find`
 schema.findBL = ['password']
 
+// The 'password' field will be removed before inserting via `model.insert`
+schema.insertBL = ['password']
+
 // The 'password' and 'createdAt' fields will be removed before updating via `model.update`
 schema.updateBL = ['createdAt', 'password']
-
-// The 'password' field will be removed before inserting via `model.insert`
-schema.createdBL = ['password']
 ```
 
 You are also able to blacklist nested fields within subdocuments and arrays of subdocuments.
