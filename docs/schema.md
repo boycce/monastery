@@ -226,9 +226,11 @@ You are able provide an array of callbacks to these model operation hooks. `afte
 ```js
 schema.afterFind = [(opts, data) => { /*synchronous*/ }]
 schema.afterInsert = [function(data, next) {}]
+schema.afterInsertUpdate = [function(data, next) {}]
 schema.afterUpdate = [function(data, next) {}]
 schema.afterRemove = [function(data, next) {}]
 schema.beforeInsert = [function(data, next) {}]
+schema.beforeInsertUpdate = [function(data, next) {}]
 schema.beforeUpdate = [function(data, next) {}]
 schema.beforeRemove = [function(data, next) {}]
 schema.beforeValidate = [function(data, next) {}]
