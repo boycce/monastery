@@ -15,7 +15,7 @@ Validate a model and call related hook: `schema.beforeValidate`
 [`options`] *(object)*
 
 - [`options.skipValidation`] (string\|array): skip validation for this field name(s)
-- [`options.blacklist`] *(array|string|false)*: augment the model's blacklist. `false` will remove all blacklisting
+- [`options.blacklist`] *(array\|string\|false)*: augment the model's blacklist. `false` will remove all blacklisting
 - [`options.update`] *(boolean)*: If true, required rules will be skipped, defaults to false
 
 ### Returns

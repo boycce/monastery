@@ -8,8 +8,6 @@ has_children: true
 
 Monastery constructor, same as the [monk constructor](https://automattic.github.io/monk/docs/manager/).
 
-*Dates are unix timestamps in seconds, you change this to milliseconds via the [manager configurations](./manager). We hope to support other string based timestamp variations soon..*
-
 ### Arguments
 
 1. `uri` *(string\|array)*: A [mongo connection string URI](https://docs.mongodb.com/manual/reference/connection-string/). Replica sets can be an array or comma separated.
@@ -44,3 +42,5 @@ require('monastery')('localhost/mydb,192.168.1.1').then((db) => {
   // error connecting to the database
 })
 ```
+
+*Dates are unix timestamps in seconds, you change this to milliseconds via the [manager configurations](./manager). We hope to support other string based timestamp variations soon..*
