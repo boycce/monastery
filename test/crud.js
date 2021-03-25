@@ -196,10 +196,9 @@ module.exports = function(monastery, db) {
     let user = db.model('user', {
       fields: {
         name: { type: 'string'},
-        addresses: [{ city: { type: 'string' }, country: { type: 'string' } }],
+        addresses: [{ city: { type: 'string' }, country: { type: 'string' }}],
         pet:  { dog: { model: 'dog' }},
         dogs: [{ model: 'dog' }], // virtual association
-
       }
     })
     let dog = db.model('dog', {
@@ -212,7 +211,10 @@ module.exports = function(monastery, db) {
     // Insert documents and add
     let inserted = await dog.insert({ data: {} })
     let inserted2 = await user.insert({ data: {
-      addresses: [{ city: 'Frankfurt' }, { city: 'Berlin' }],
+      addresses: [
+        { city: 'Frankfurt' },
+        { city: 'Christchurch', country: 'New Zealand' }
+      ],
       pet: { dog: inserted._id }
     }})
     let updated = await dog.update({
@@ -238,6 +240,7 @@ module.exports = function(monastery, db) {
     })
 
     // Default field population test
+    // Note that addresses.1.country shouldn't be overriden
     let find1 = await user.findOne({
       query: inserted2._id,
       populate: ['pet.dog', {
@@ -250,7 +253,7 @@ module.exports = function(monastery, db) {
     expect(find1).toEqual({
       _id: inserted2._id,
       name: 'Martin Luther',
-      addresses: [{ city: 'Frankfurt', country: 'Germany' }, { city: 'Berlin', country: 'Germany' }],
+      addresses: [{ city: 'Frankfurt', country: 'Germany' }, { city: 'Christchurch', country: 'New Zealand' }],
       address: { country: 'Germany' },
       pet: { dog: { _id: inserted._id, name: 'Scruff', user: inserted2._id }},
       dogs: [{ _id: inserted._id, name: 'Scruff', user: inserted2._id }]
@@ -270,7 +273,7 @@ module.exports = function(monastery, db) {
     expect(find2).toEqual({
       _id: inserted2._id,
       name: 'Martin Luther',
-      addresses: [{ city: 'Frankfurt' }, { city: 'Berlin' }],
+      addresses: [{ city: 'Frankfurt' }, { city: 'Christchurch' }],
       pet: { dog: { _id: inserted._id, name: 'Scruff', user: inserted2._id }},
       dogs: [{ _id: inserted._id, user: inserted2._id }]
     })
