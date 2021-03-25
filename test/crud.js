@@ -191,4 +191,92 @@ module.exports = function(monastery, db) {
     done()
   })
 
+  test('Find default field population', async (done) => {
+    let db = monastery('localhost/monastery', { defaultFields: false, serverSelectionTimeoutMS: 2000 })
+    let user = db.model('user', {
+      fields: {
+        name: { type: 'string'},
+        addresses: [{ city: { type: 'string' }, country: { type: 'string' } }],
+        pet:  { dog: { model: 'dog' }},
+        dogs: [{ model: 'dog' }], // virtual association
+
+      }
+    })
+    let dog = db.model('dog', {
+      fields: {
+        name: { type: 'string' },
+        user: { model: 'user' }
+      }
+    })
+
+    // Insert documents and add
+    let inserted = await dog.insert({ data: {} })
+    let inserted2 = await user.insert({ data: {
+      addresses: [{ city: 'Frankfurt' }, { city: 'Berlin' }],
+      pet: { dog: inserted._id }
+    }})
+    let updated = await dog.update({
+      query: inserted._id,
+      data: { user: inserted2._id }
+    })
+
+    // Update models
+    db.model('user', {
+      fields: {
+        name: { type: 'string', default: 'Martin Luther' },
+        addresses: [{ city: { type: 'string' }, country: { type: 'string', default: 'Germany' } }],
+        address: { country:  { type: 'string', default: 'Germany' }},
+        pet:  { dog: { model: 'dog' }},
+        dogs: [{ model: 'dog' }], // virtual association
+      }
+    })
+    db.model('dog', {
+      fields: {
+        name: { type: 'string', default: 'Scruff' },
+        user: { model: 'user' }
+      }
+    })
+
+    // Default field population test
+    let find1 = await user.findOne({
+      query: inserted2._id,
+      populate: ['pet.dog', {
+        from: 'dog',
+        localField: '_id',
+        foreignField: 'user',
+        as: 'dogs'
+      }]
+    })
+    expect(find1).toEqual({
+      _id: inserted2._id,
+      name: 'Martin Luther',
+      addresses: [{ city: 'Frankfurt', country: 'Germany' }, { city: 'Berlin', country: 'Germany' }],
+      address: { country: 'Germany' },
+      pet: { dog: { _id: inserted._id, name: 'Scruff', user: inserted2._id }},
+      dogs: [{ _id: inserted._id, name: 'Scruff', user: inserted2._id }]
+    })
+
+    // Blacklisted default field population test
+    let find2 = await user.findOne({
+      query: inserted2._id,
+      populate: ['pet.dog', {
+        from: 'dog',
+        localField: '_id',
+        foreignField: 'user',
+        as: 'dogs'
+      }],
+      blacklist: ['address', 'addresses.country', 'dogs.name']
+    })
+    expect(find2).toEqual({
+      _id: inserted2._id,
+      name: 'Martin Luther',
+      addresses: [{ city: 'Frankfurt' }, { city: 'Berlin' }],
+      pet: { dog: { _id: inserted._id, name: 'Scruff', user: inserted2._id }},
+      dogs: [{ _id: inserted._id, user: inserted2._id }]
+    })
+
+    db.close()
+    done()
+  })
+
 }
