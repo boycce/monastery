@@ -146,10 +146,13 @@ let plugin = module.exports = {
 
     // Save the data against the matching document(s)
     }).then(() => {
-      if (test) return [data]
+      // Remove update's _output object
+      let prunedData = { ...data }
+      delete prunedData._output
+      if (test) return [prunedData]
       return model._update(
         idquery,
-        { "$set": data },
+        { "$set": prunedData },
         { "multi": options.multi || options.create }
       )
 
