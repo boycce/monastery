@@ -1,5 +1,7 @@
 module.exports = function(monastery, db) {
 
+  // Data no images doesn't throw error
+
   test('images: no initialisation', async (done) => {
     let db = monastery('localhost/monastery', {
       defaultFields: false,
@@ -335,6 +337,61 @@ module.exports = function(monastery, db) {
       .attach('logos.0', `${__dirname}/assets/logo2.png`)
       .expect(200)
       .end((err, res) => { if (err) console.log(err) })
+  })
+
+  test('images: removeImages with no data', async (done) => {
+    // NOTE: Redundent, leaving for now (test was needed to fix a project issue)
+    let db = monastery('localhost/monastery', {
+      defaultFields: false,
+      serverSelectionTimeoutMS: 2000,
+      imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
+    })
+    let user = db.model('user', { fields: {
+      logo: { type: 'image' }
+    }})
+    let image = {
+      bucket: 'test',
+      date: 1234,
+      filename: 'test.png',
+      filesize: 1234,
+      path: 'test/test123'
+    }
+    let user1 = await db.user._insert({
+      logo: null
+    })
+
+    let plugin = db.imagePluginFile
+    let supertest = require('supertest')
+    let express = require('express')
+    let upload = require('express-fileupload')
+    let app = express()
+    app.use(upload({ limits: { fileSize: 1 * 1000 * 1000, files: 10 }}))
+
+    app.post('/', function(req, res) {
+      try {
+        let options = { files: req.files, model: user, query: { _id: user1._id }}
+        plugin.removeImages(options, req.body, true)
+          .then(res => {
+            expect(res[0]).toEqual({})
+            expect(res[1]).toEqual([])
+          })
+          .finally(() => {
+            res.json()
+            db.close()
+            done()
+          })
+      } catch(e) {
+        console.log(e)
+        res.error(e)
+      }
+    })
+
+    // Start tests
+    supertest(app)
+      .post('/')
+      .attach('logo', `${__dirname}/assets/logo.png`)
+      .expect(200)
+      .end((err, res) => { if (err) console.log(err, res.text) })
   })
 
   test('images: addImages formats & filesizes', async (done) => {
