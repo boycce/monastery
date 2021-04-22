@@ -167,7 +167,7 @@ let plugin = module.exports = {
   removeImages: function(options, data, test) {
     /**
      * Hook before update/remove
-     * Removes images not found in data, this means you will need to pass the image objects to every update
+     * Removes images not found in data, this means you will need to pass the image objects to every update operation
      *
      * Function logic
      * 1. Find all pre-existing image objects in the documents from the same query
@@ -198,7 +198,7 @@ let plugin = module.exports = {
           }
         }
 
-        //console.log(1, useCount)
+        // console.log(1, useCount, preExistingImages)
 
         // Assign pre-existing images within undefined deep objects and missing array items to null
         // ignore undefined root images
@@ -214,6 +214,7 @@ let plugin = module.exports = {
         for (let imageField of options.model.imageFields) { //x5
           let images = plugin._findImagesInData(dataFilled, imageField, 0, '')
           if (!images.length) continue
+          // console.log(images)
 
           // Data contains null images that once had a pre-existing image
           for (let image of images) {

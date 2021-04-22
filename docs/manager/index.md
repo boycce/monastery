@@ -43,4 +43,13 @@ require('monastery')('localhost/mydb,192.168.1.1').then((db) => {
 })
 ```
 
+### Methods
+
+- `manager.id(<String|ObjectId>)`: Create or convert a valid MongoDB ObjectId string into an ObjectId
+- `manager.isId(String|ObjectId)`: Checks if the passed variable is a valid MongoDB ObjectId or ObjectId string
+- `manager.model()`: [see model](./model.html)
+- `manager.models()`: [see models](./models.html)
+
+### Dates
+
 *Dates are unix timestamps in seconds, you change this to milliseconds via the [manager configurations](./manager). We hope to support other string based timestamp variations soon..*
