@@ -31,4 +31,11 @@ module.exports = function(monastery, db) {
       .toEqual(`Array items in bracket notation need array indexes "users[]['name']", e.g. users[0][name]`)
   })
 
+  test('Utilities: isId', async () => {
+    expect(db.isId('')).toEqual(false)
+    expect(db.isId(1234)).toEqual(false)
+    expect(db.isId('1234')).toEqual(false)
+    expect(db.isId('5ff50fe955da2c00170de734')).toEqual(true)
+  })
+
 }
