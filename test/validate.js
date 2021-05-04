@@ -379,7 +379,7 @@ module.exports = function(monastery, db) {
     }})
 
     // Mongodb throws an error if this is the only test otherwise, connection error ...
-    await db.user.find({})
+    await db.user.find({ query: {} })
 
     // Array/subdocument defaults
     await expect(user.validate({})).resolves.toEqual({

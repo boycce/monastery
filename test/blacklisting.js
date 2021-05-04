@@ -250,7 +250,7 @@ module.exports = function(monastery, db) {
       }
     })
 
-    await db.user.find() // wait for db to open before closing
+    await db.user.find({ query: {}}) // wait for db to open before closing
     db.close()
     done()
   })

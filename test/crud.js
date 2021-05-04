@@ -32,34 +32,45 @@ module.exports = function(monastery, db) {
       name: 'Martin Luther'
     })
 
-    // Find test2
+    // Find (basic match)
     let find2 = await user.find({ query: { name: 'Martin Luther' }})
     expect(find2[0]).toMatchObject({ name: 'Martin Luther' })
 
-    // Find test (empty query)
+    // Find (empty query)
     let find3 = await user.find({ query: {} })
     expect(find3.length).toBeGreaterThan(0)
 
-    // Find test (empty options)
-    let find4 = await user.find({})
-    expect(find4.length).toBeGreaterThan(0)
+    // Find (id)
+    let find4 = await user.find(inserted2[0]._id)
+    expect(find4).toEqual({ _id: inserted2[0]._id, name: 'Martin Luther1' })
 
-    // Find test (no args)
-    let find5 = await user.find()
-    expect(find5.length).toBeGreaterThan(0)
+    // Find (id string)
+    let find5 = await user.find(inserted2[0]._id.toString())
+    expect(find5).toEqual({ _id: inserted2[0]._id, name: 'Martin Luther1' })
 
-    // FindOne test
+    // Missing parameters
+    await expect(user.find()).rejects.toThrow(`Please pass an object or MongoId to options.query`)
+    await expect(user.find({})).rejects.toThrow(`Please pass an object or MongoId to options.query`)
+    await expect(user.find({ query: null })).rejects.toThrow(`Please pass an object or MongoId to options.query`)
+    await expect(user.find(1)).rejects.toThrow(`Please pass an object or MongoId to options.query`)
+
+    // Bad MongoID
+    await expect(user.find('bad-id')).rejects.toThrow(`Please pass a valid MongoId to options.query`)
+    await expect(user.find('')).rejects.toThrow(`Please pass a valid MongoId to options.query`)
+
+    // FindOne (query id)
     let findOne = await user.findOne({ query: inserted._id })
-    expect(findOne).toEqual({
-      _id: inserted._id,
-      name: 'Martin Luther'
-    })
+    expect(findOne).toEqual({ _id: inserted._id, name: 'Martin Luther' })
 
-    // FindOne test (no args)
-    let findOne2 = await user.findOne()
-    expect(typeof findOne2).toEqual('object')
+    // Findone (id)
+    let findOne2 = await user.findOne(inserted2[0]._id)
+    expect(findOne2).toEqual({ _id: inserted2[0]._id, name: 'Martin Luther1' })
 
-    // Update test
+    // Findone (id string)
+    let findOne3 = await user.findOne(inserted2[0]._id.toString())
+    expect(findOne3).toEqual({ _id: inserted2[0]._id, name: 'Martin Luther1' })
+
+    // Update
     let update = await user.update({
       query: inserted._id,
       data: { name: 'Martin Luther2' }
@@ -68,13 +79,12 @@ module.exports = function(monastery, db) {
       name: 'Martin Luther2'
     })
 
-    // Update test (empty data object)
-    expect(user.update({ query: inserted._id, data: {}})).rejects
-      .toEqual('No valid data passed to user.update()')
+    // Update (no/empty data object)
+    await expect(user.update({ query: inserted._id, data: {}}))
+      .rejects.toThrow(`No valid data passed to user.update()`)
 
-    // Update test (no data object)
-    expect(user.update({ query: inserted._id })).rejects
-      .toEqual('No valid data passed to user.update()')
+    await expect(user.update({ query: inserted._id }))
+      .rejects.toThrow(`No valid data passed to user.update()`)
 
     // Update multiple
     let updated2 = await user.update({
@@ -95,7 +105,7 @@ module.exports = function(monastery, db) {
       }
     ])
 
-    // Remove test
+    // Remove
     let remove = await user.remove({ query: inserted._id })
     expect(remove.result).toEqual({ n: 1, ok: 1 })
 
