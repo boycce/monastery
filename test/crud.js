@@ -25,28 +25,29 @@ module.exports = function(monastery, db) {
       }
     ])
 
-    // Find test
-    let find = await user.find({ query: inserted._id })
-    expect(find).toEqual({
-      _id: inserted._id,
-      name: 'Martin Luther'
-    })
-
     // Find (basic match)
-    let find2 = await user.find({ query: { name: 'Martin Luther' }})
-    expect(find2[0]).toMatchObject({ name: 'Martin Luther' })
+    let find = await user.find({ query: { name: 'Martin Luther' }})
+    expect(find[0]).toMatchObject({ name: 'Martin Luther' })
 
     // Find (empty query)
-    let find3 = await user.find({ query: {} })
-    expect(find3.length).toBeGreaterThan(0)
+    let find2 = await user.find({ query: {} })
+    expect(find2.length).toBeGreaterThan(0)
 
     // Find (id)
-    let find4 = await user.find(inserted2[0]._id)
-    expect(find4).toEqual({ _id: inserted2[0]._id, name: 'Martin Luther1' })
+    let find3 = await user.find({ query: inserted._id })
+    expect(find3).toEqual({ _id: inserted._id, name: 'Martin Luther' })
 
     // Find (id string)
-    let find5 = await user.find(inserted2[0]._id.toString())
+    let find4 = await user.find({ query: inserted._id.toString() })
+    expect(find4).toEqual({ _id: inserted._id, name: 'Martin Luther' })
+
+    // Find (id expansion)
+    let find5 = await user.find(inserted2[0]._id)
     expect(find5).toEqual({ _id: inserted2[0]._id, name: 'Martin Luther1' })
+
+    // Find (id string expansion)
+    let find6 = await user.find(inserted2[0]._id.toString())
+    expect(find6).toEqual({ _id: inserted2[0]._id, name: 'Martin Luther1' })
 
     // Missing parameters
     await expect(user.find()).rejects.toThrow(`Please pass an object or MongoId to options.query`)
@@ -55,8 +56,9 @@ module.exports = function(monastery, db) {
     await expect(user.find(1)).rejects.toThrow(`Please pass an object or MongoId to options.query`)
 
     // Bad MongoID
-    await expect(user.find('bad-id')).rejects.toThrow(`Please pass a valid MongoId to options.query`)
-    await expect(user.find('')).rejects.toThrow(`Please pass a valid MongoId to options.query`)
+    await expect(user.find({ query: '' })).resolves.toEqual(null)
+    await expect(user.find('bad-id')).resolves.toEqual(null)
+    await expect(user.find('')).resolves.toEqual(null)
 
     // FindOne (query id)
     let findOne = await user.findOne({ query: inserted._id })
