@@ -121,28 +121,98 @@ module.exports = function(monastery, db) {
     // Test positive projection
     let find3 = await user.findOne({
       query: user1._id,
-      project: ['dog', 'list', 'pets']
+      project: ['dog', 'list', 'pets.age']
     })
     expect(find3).toEqual({
       _id: user1._id,
       dog: 'Bruce',
       list: [44, 54],
-      pets: [{ name: 'Pluto', age: 5 }, { name: 'Milo', age: 4 }]
+      pets: [{ age: 5 }, { age: 4 }]
     })
 
     // Test negative projection
-    let find4 = await user.findOne({
+    let find5 = await user.findOne({
       query: user1._id,
       project: [
         '-list', '-hiddenDeepModel', '-pet', '-pet', '-pets', '-deep', '-deeper', '-deepModel',
         '-dog', '-animals.cat'
       ]
     })
-    expect(find4).toEqual({
+    expect(find5).toEqual({
       _id: user1._id,
       animals: { dog: 'Max' },
       hiddenList: [12, 23],
       hiddenPets: [{ name: 'secretPet' }]
+    })
+
+    db.close()
+    done()
+  })
+
+
+  test('Find blacklisting (populate)', async (done) => {
+    // Setup
+    let db = monastery('localhost/monastery', {
+      defaultFields: false,
+      serverSelectionTimeoutMS: 2000
+    })
+    let bird = db.model('bird', {
+      fields: {
+        name: { type: 'string' },
+        age: { type: 'number' }
+      }
+    })
+    let user = db.model('user', {
+      fields: {
+        dog: { type: 'string' },
+        myBird: { model: 'bird' },
+        myBird2: { model: 'bird' }
+      }
+    })
+    let bird1 = await bird.insert({ data: {
+      name: 'ponyo',
+      age: 3
+    }})
+    let user1 = await user.insert({ data: {
+      dog: 'Bruce',
+      myBird: bird1._id,
+      myBird2: bird1._id
+    }})
+
+    // Test project
+    let find1 = await user.findOne({
+      query: user1._id,
+      populate: ['myBird', 'myBird2'],
+      project: ['myBird', 'myBird2.age']
+    })
+    expect(find1).toEqual({
+      _id: user1._id,
+      myBird: { _id: bird1._id, age: 3, name: 'ponyo' },
+      myBird2: { age: 3 }
+    })
+
+    // Test blacklisting
+    let find2 = await user.findOne({
+      query: user1._id,
+      populate: ['myBird', 'myBird2'],
+      blacklist: ['dog', 'myBird2.name', 'myBird2._id']
+    })
+    expect(find2).toEqual({
+      _id: user1._id,
+      myBird: { _id: bird1._id, age: 3, name: 'ponyo' },
+      myBird2: { age: 3 }
+    })
+
+    // Test blacklisting overrides
+    let find3 = await user.findOne({
+      query: user1._id,
+      populate: ['myBird', 'myBird2'],
+      blacklist: ['dog', 'myBird2.name', 'myBird2._id', '-myBird2']
+    })
+    expect(find3).toEqual({
+      _id: user1._id,
+      myBird: { _id: bird1._id, age: 3, name: 'ponyo' },
+      myBird2: { _id: bird1._id, age: 3, name: 'ponyo' }
     })
 
     db.close()
