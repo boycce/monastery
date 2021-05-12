@@ -11,7 +11,7 @@ Validate and insert document(s) in a collection and call related hooks: `schema.
 
 `options` *(object)*
 
-- `options.data` *(object\|array)* - An object with key names in dot or bracket notation are supported (FormData)
+- `options.data` *(object\|array)* - Data that is validated against the model schema. Key names can be in dot or bracket notation which is handy for HTML FormData.
 - [`options.skipValidation`] (string\|array): skip validation for this field name(s)
 - [`options.blacklist`] *(array\|string\|false)*: augment `schema.insertBL`. `false` will remove all blacklisting
 - [[`any mongodb option`](http://mongodb.github.io/node-mongodb-native/3.2/api/Collection.html#insert)] *(any)*

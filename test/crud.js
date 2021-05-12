@@ -88,6 +88,17 @@ module.exports = function(monastery, db) {
     await expect(user.update({ query: inserted._id }))
       .rejects.toThrow(`No valid data passed to user.update()`)
 
+    // Update (no/empty data object, but has update opertators
+    await expect(user.update({ query: inserted._id, $set: { name: 'bruce' }}))
+      .resolves.toEqual({ name: 'bruce' })
+
+    await expect(user.update({ query: inserted._id, $pull: { name: 'bruce' }}))
+      .rejects.toThrow('Cannot apply $pull to a non-array value') // gets passed no valid data check
+
+    // Update (data & $set)
+    await expect(user.update({ query: inserted._id, data: {}, $set: { name: 'bruce' }}))
+      .rejects.toThrow('Please only pass options.$set or options.data to user.update()')
+
     // Update multiple
     let updated2 = await user.update({
       query: { _id: { $in: [inserted2[0]._id, inserted2[1]._id] }},
