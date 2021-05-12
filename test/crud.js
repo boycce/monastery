@@ -4,7 +4,10 @@ module.exports = function(monastery, db) {
 
   test('Basic operator calls', async (done) => {
     let db = monastery('localhost/monastery', { defaultFields: false, serverSelectionTimeoutMS: 2000 })
-    let user = db.model('user', { fields: { name: { type: 'string' }}})
+    let user = db.model('user', {
+      fields: { name: { type: 'string' }},
+      beforeValidate: [(data, next) => { beforeValidateHookCalled = true; next() }]
+    })
 
     // Insert one
     let inserted = await user.insert({ data: { name: 'Martin Luther' }})
@@ -88,7 +91,7 @@ module.exports = function(monastery, db) {
     await expect(user.update({ query: inserted._id }))
       .rejects.toThrow(`No valid data passed to user.update()`)
 
-    // Update (no/empty data object, but has update opertators
+    // Update (no/empty data object, but has update operators
     await expect(user.update({ query: inserted._id, $set: { name: 'bruce' }}))
       .resolves.toEqual({ name: 'bruce' })
 
@@ -98,6 +101,14 @@ module.exports = function(monastery, db) {
     // Update (data & $set)
     await expect(user.update({ query: inserted._id, data: {}, $set: { name: 'bruce' }}))
       .rejects.toThrow('Please only pass options.$set or options.data to user.update()')
+
+    // Update (with operators. Make sure beforeValidate isn't called)
+    var beforeValidateHookCalled = false
+    await user.update({ query: inserted._id, data: { name: 'bruce' }})
+    expect(beforeValidateHookCalled).toEqual(true)
+    beforeValidateHookCalled = false
+    await user.update({ query: inserted._id, $set: { name: 'bruce' }})
+    expect(beforeValidateHookCalled).toEqual(false)
 
     // Update multiple
     let updated2 = await user.update({
