@@ -54,8 +54,11 @@ module.exports = function(monastery, db) {
 
     // Missing parameters
     await expect(user.find()).rejects.toThrow(`Please pass an object or MongoId to options.query`)
+    await expect(user.find(undefined)).rejects.toThrow(`Please pass an object or MongoId to options.query`)
     await expect(user.find({})).rejects.toThrow(`Please pass an object or MongoId to options.query`)
     await expect(user.find({ query: null })).rejects.toThrow(`Please pass an object or MongoId to options.query`)
+    await expect(user.find({ query: undefined })).rejects.toThrow(`Please pass an object or MongoId to options.query`)
+    await expect(user.find({ query: { _id: undefined }})).rejects.toThrow(`Please pass an object or MongoId to options.query`)
     await expect(user.find(1)).rejects.toThrow(`Please pass an object or MongoId to options.query`)
 
     // Bad MongoID
