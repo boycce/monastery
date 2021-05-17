@@ -319,4 +319,55 @@ module.exports = function(monastery, db) {
     done()
   })
 
+  test('Hooks', async (done) => {
+    let db = monastery('localhost/monastery', { defaultFields: false, serverSelectionTimeoutMS: 2000 })
+    let user = db.model('user', {
+      fields: {
+        name: { type: 'string'}
+      },
+      beforeInsert: [(data, next) => {
+        if (!data.name) next(new Error('beforeInsert error..'))
+        else next()
+      }],
+      beforeUpdate: [(data, next) => {
+        setTimeout(function() {
+          if (!data.name) next(new Error('beforeUpdate error..'))
+          else next()
+        }, 100)
+      }],
+      beforeRemove: [(next) => {
+        throw new Error('beforeRemove error..')
+      }],
+      afterFind: [(data, next) => {
+        next()
+      }],
+    })
+    let userDoc = await user.insert({ data: { name: 'Martin' }})
+
+    // Catch synchronous errors through `next(err)`
+    await expect(user.insert({ data: {} })).rejects.toThrow(`beforeInsert error..`)
+    await expect(user.insert({ data: { name: 'Martin' } })).resolves.toEqual({
+      _id: expect.any(Object),
+      name: 'Martin'
+    })
+
+    // Catch asynchronously errors through `next(err)`
+    await expect(user.update({ query: userDoc._id, data: { name: '' } })).rejects.toThrow(`beforeUpdate error..`)
+    await expect(user.update({ query: userDoc._id, data: { name: 'Martin' } })).resolves.toEqual({
+      name: 'Martin'
+    })
+
+    // Catch synchronous errors thrown in the function
+    await expect(user.remove({ query: userDoc._id })).rejects.toThrow(`beforeRemove error..`)
+
+    // After find
+    await expect(user.find({ query: userDoc._id })).resolves.toEqual({
+      _id: expect.any(Object),
+      name: 'Martin'
+    })
+
+    db.close()
+    done()
+  })
+
 }

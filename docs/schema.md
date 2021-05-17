@@ -221,18 +221,18 @@ schema.messages = {
 
 ### Operation hooks
 
-You are able provide an array of callbacks to these model operation hooks. `afterFind` is the only callback that is synchronous where `next()` doesn't need to be called. You can also access the operation details via `this` in each callback.
+You are able provide an array of callbacks to these model operation hooks. If you need to throw an error asynchronously, please pass an error as the first argument to `next()`, e.g. `next(new Error('Your error here'))`. You can also access the operation details via `this` in each callback.
 
 ```js
-schema.afterFind = [(opts, data) => { /*synchronous*/ }]
+schema.afterFind = [function(data, next) {}]
 schema.afterInsert = [function(data, next) {}]
 schema.afterInsertUpdate = [function(data, next) {}]
 schema.afterUpdate = [function(data, next) {}]
-schema.afterRemove = [function(data, next) {}]
+schema.afterRemove = [function(next) {}]
 schema.beforeInsert = [function(data, next) {}]
 schema.beforeInsertUpdate = [function(data, next) {}]
 schema.beforeUpdate = [function(data, next) {}]
-schema.beforeRemove = [function(data, next) {}]
+schema.beforeRemove = [function(next) {}]
 schema.beforeValidate = [function(data, next) {}]
 ```
 
