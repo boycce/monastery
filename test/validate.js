@@ -495,4 +495,54 @@ module.exports = function(monastery, db) {
     })
   })
 
+  test('Validation hooks', async (done) => {
+    let db = monastery('localhost/monastery', { defaultFields: false, serverSelectionTimeoutMS: 2000 })
+    let user = db.model('user', {
+      fields: {
+        first: { type: 'string'},
+        last: { type: 'string'}
+      },
+      beforeValidate: [(data, next) => {
+        if (!data.first) {
+          next(new Error('beforeValidate error 1..'))
+        } else if (!data.last) {
+          setTimeout(function() {
+            next(new Error('beforeValidate error 2..'))
+          }, 100)
+        } else {
+          next()
+        }
+      }],
+    })
+    let userDoc = await user.insert({ data: { first: 'Martin', last: 'Luther' }})
+
+    // Catch validate (a)synchronous errors thrown in function or through `next(err)`
+    await expect(user.validate({ first: '' })).rejects.toThrow(`beforeValidate error 1..`)
+    await expect(user.validate({ first: 'Martin' })).rejects.toThrow(`beforeValidate error 2..`)
+    await expect(user.validate({ first: 'Martin', last: 'Luther' })).resolves.toEqual({
+      first: 'Martin',
+      last: 'Luther'
+    })
+
+    // Catch insert (a)synchronous errors thrown in function or through `next(err)`
+    await expect(user.insert({ data: { first: '' } })).rejects.toThrow(`beforeValidate error 1..`)
+    await expect(user.insert({ data: { first: 'Martin' } })).rejects.toThrow(`beforeValidate error 2..`)
+    await expect(user.insert({ data: { first: 'Martin', last: 'Luther' } })).resolves.toEqual({
+      _id: expect.any(Object),
+      first: 'Martin',
+      last: 'Luther'
+    })
+
+    // Catch update (a)synchronous errors thrown in function or through `next(err)`
+    await expect(user.update({ query: userDoc._id, data: { first: '' } })).rejects.toThrow(`beforeValidate error 1..`)
+    await expect(user.update({ query: userDoc._id, data: { first: 'Martin' } })).rejects.toThrow(`beforeValidate error 2..`)
+    await expect(user.update({ query: userDoc._id, data: { first: 'Martin', last: 'Luther' } })).resolves.toEqual({
+      first: 'Martin',
+      last: 'Luther'
+    })
+
+    db.close()
+    done()
+  })
+
 }

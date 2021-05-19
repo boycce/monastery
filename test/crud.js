@@ -323,47 +323,65 @@ module.exports = function(monastery, db) {
     let db = monastery('localhost/monastery', { defaultFields: false, serverSelectionTimeoutMS: 2000 })
     let user = db.model('user', {
       fields: {
-        name: { type: 'string'}
+        first: { type: 'string'},
+        last: { type: 'string'}
       },
       beforeInsert: [(data, next) => {
-        if (!data.name) next(new Error('beforeInsert error..'))
-        else next()
+        if (!data.first) {
+          next(new Error('beforeInsert error 1..'))
+        } else if (!data.last) {
+          setTimeout(function() {
+            next(new Error('beforeInsert error 2..'))
+          }, 100)
+        } else {
+          next()
+        }
       }],
       beforeUpdate: [(data, next) => {
-        setTimeout(function() {
-          if (!data.name) next(new Error('beforeUpdate error..'))
-          else next()
-        }, 100)
+        if (!data.first) {
+          next(new Error('beforeUpdate error 1..'))
+        } else if (!data.last) {
+          setTimeout(function() {
+            next(new Error('beforeUpdate error 2..'))
+          }, 100)
+        } else {
+          next()
+        }
       }],
       beforeRemove: [(next) => {
-        throw new Error('beforeRemove error..')
+        next(new Error('beforeRemove error..'))
       }],
       afterFind: [(data, next) => {
         next()
       }],
     })
-    let userDoc = await user.insert({ data: { name: 'Martin' }})
+    let userDoc = await user.insert({ data: { first: 'Martin', last: 'Luther' }})
 
-    // Catch synchronous errors through `next(err)`
-    await expect(user.insert({ data: {} })).rejects.toThrow(`beforeInsert error..`)
-    await expect(user.insert({ data: { name: 'Martin' } })).resolves.toEqual({
+    // Catch insert (a)synchronous errors thrown in function or through `next(err)`
+    await expect(user.insert({ data: { first: '' } })).rejects.toThrow(`beforeInsert error 1..`)
+    await expect(user.insert({ data: { first: 'Martin' } })).rejects.toThrow(`beforeInsert error 2..`)
+    await expect(user.insert({ data: { first: 'Martin', last: 'Luther' } })).resolves.toEqual({
       _id: expect.any(Object),
-      name: 'Martin'
+      first: 'Martin',
+      last: 'Luther'
     })
 
-    // Catch asynchronously errors through `next(err)`
-    await expect(user.update({ query: userDoc._id, data: { name: '' } })).rejects.toThrow(`beforeUpdate error..`)
-    await expect(user.update({ query: userDoc._id, data: { name: 'Martin' } })).resolves.toEqual({
-      name: 'Martin'
+    // Catch update (a)synchronous errors thrown in function or through `next(err)`
+    await expect(user.update({ query: userDoc._id, data: { first: '' } })).rejects.toThrow(`beforeUpdate error 1..`)
+    await expect(user.update({ query: userDoc._id, data: { first: 'Martin' } })).rejects.toThrow(`beforeUpdate error 2..`)
+    await expect(user.update({ query: userDoc._id, data: { first: 'Martin', last: 'Luther' } })).resolves.toEqual({
+      first: 'Martin',
+      last: 'Luther'
     })
 
-    // Catch synchronous errors thrown in the function
+    // Catch remove synchronous errors through `next(err)`
     await expect(user.remove({ query: userDoc._id })).rejects.toThrow(`beforeRemove error..`)
 
-    // After find
+    // After find continues series
     await expect(user.find({ query: userDoc._id })).resolves.toEqual({
       _id: expect.any(Object),
-      name: 'Martin'
+      first: 'Martin',
+      last: 'Luther'
     })
 
     db.close()
