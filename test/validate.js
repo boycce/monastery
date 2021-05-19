@@ -85,7 +85,7 @@ module.exports = function(monastery, db) {
       meta: { rule: 'isObject', model: 'user', field: 'dog' }
     })
 
-    // Required subdocument property (implicit insert)
+    // Required subdocument property (required on  insert)
     await expect(user.validate({})).rejects.toContainEqual({
       status: '400',
       title: 'animals.dog.color',
@@ -93,7 +93,23 @@ module.exports = function(monastery, db) {
       meta: { rule: 'required', model: 'user', field: 'color' }
     })
 
-    // Ignore required subdocument property (explicit update option)
+    // Required subdocument property (required on update when a parent is specified)
+    await expect(user.validate({ animals: { dog: {}} }, { update: true })).rejects.toContainEqual({
+      status: '400',
+      title: 'animals.dog.color',
+      detail: 'This field is required.',
+      meta: { rule: 'required', model: 'user', field: 'color' }
+    })
+
+    // Required subdocument property (required on update when a grand-parent is specified)
+    await expect(user.validate({ animals: {} }, { update: true })).rejects.toContainEqual({
+      status: '400',
+      title: 'animals.dog.color',
+      detail: 'This field is required.',
+      meta: { rule: 'required', model: 'user', field: 'color' }
+    })
+
+    // Ignore required subdocument property (not required on update)
     await expect(user.validate({}, { update: true })).resolves.toEqual({})
   })
 
