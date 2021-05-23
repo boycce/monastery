@@ -45,6 +45,7 @@ let plugin = module.exports = {
   setupModel: function(model) {
     /**
      * Cache all model image paths for a model and add monastery operation hooks
+     * Todo: need to test the model hook arguement signatures here
      * @param {object} model
      * @this plugin
      */
@@ -56,8 +57,8 @@ let plugin = module.exports = {
       model.beforeUpdate.push(function(data, n) {
         plugin.removeImages(this, data).then(() => n(null, data)).catch(e => n(e))
       })
-      model.beforeRemove.push(function(data, n) {
-        plugin.removeImages(this, data).then(() => n(null, data)).catch(e => n(e))
+      model.beforeRemove.push(function(n) {
+        plugin.removeImages(this, {}).then(() => n(null, {})).catch(e => n(e))
       })
       model.afterUpdate.push(function(data, n) {
         plugin.addImages(this, data).then(() => n(null, data)).catch(e => n(e))
