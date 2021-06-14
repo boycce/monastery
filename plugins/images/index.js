@@ -183,7 +183,7 @@ let plugin = module.exports = {
     let pre
     let preExistingImages = []
     let useCount = {}
-    if (typeof options.files == 'undefined') return Promise.resolve()
+    if (typeof options.files == 'undefined') return new Promise(res => res())
 
     // Find all documents from the same query
     return options.model._find(options.query, options)
