@@ -110,6 +110,9 @@ let fieldName = {
   // Monastery will automatically create a mongodb index for this field, see "MongoDB indexes"
   // below for more information
   index: true|1|-1|'text'|'unique'|Object
+
+  // The field  won't stored, handy for fields that get populated with documents, see ./find for more details
+  virtual: true
 }
 ```
 
