@@ -7,6 +7,8 @@ nav_order: 7
 
 To use the default image plugin shipped with monastery, you need to use the options below when initialising a manager
 
+
+
 ```js
   let db = monastery('localhost/mydb', {
     imagePlugin: {
@@ -14,7 +16,7 @@ To use the default image plugin shipped with monastery, you need to use the opti
       awsAccessKeyId: 'your-key-here',
       awsSecretAccessKey: 'your-key-here',
       bucketDir: 'full', // default
-      formats: ['jpg', 'jpeg', 'png', 'ico'] // optional, doesnt support txt based files e.g. svg, txt, ..
+      formats: ['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff'] // or 'any' to include everything
     }
   })
 ```
@@ -25,7 +27,7 @@ Then in your model schema, e.g.
 let user = db.model('user', { fields: {
   logo:  {
     type: 'image',
-    formats: ['jpg', 'jpeg', 'webp', 'ico'], // optional plugin rule
+    formats: ['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff'], // optional plugin rule
     fileSize: 1000 * 1000 * 5 // optional plugin rule, size in bytes
   },
   logos: [{
@@ -53,6 +55,10 @@ user.update({
   files: req.query.files? req.files : undefined
 })
 ```
+
+### File types
+
+Due to known limitations, we are inaccurately able to validate non-binary file types (e.g. txt, svg) before uploading to S3, and rely on their file processing to remove any malicious files.
 
 ...to be continued
 

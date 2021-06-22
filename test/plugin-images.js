@@ -406,11 +406,13 @@ module.exports = function(monastery, db) {
       }
     })
     let user = db.model('user', { fields: {
-      imageIco:  { type: 'image' },
-      imageWebp: { type: 'image', formats: ['webp'] },
-      imageSvg:  { type: 'image' },
-      imageSize1: { type: 'image', fileSize: 1000 * 100 },
-      imageSize2: { type: 'image' },
+      imageIco:     { type: 'image' },
+      imageWebp:    { type: 'image', formats: ['webp'] },
+      imageSvgBad:  { type: 'image' },
+      imageSvgGood: { type: 'image', formats: ['svg'] },
+      imageSvgAny:  { type: 'image', formats: ['any'] },
+      imageSize1:   { type: 'image', fileSize: 1000 * 100 },
+      imageSize2:   { type: 'image' },
     }})
 
     let plugin = db.imagePluginFile
@@ -421,13 +423,16 @@ module.exports = function(monastery, db) {
     app.use(upload({ limits: { fileSize: 1000 * 200, files: 10 }}))
 
     app.post('/', async (req, res) => {
+      let imageSvgBad = { imageSvgBad: req.files.imageSvgBad }
       let imageSize1 = { imageSize1: req.files.imageSize1 }
       let imageSize2 = { imageSize2: req.files.imageSize2 }
+      delete req.files.imageSvgBad
       delete req.files.imageSize1
       delete req.files.imageSize2
-      // ico/Webp will throw an error first if it's not a valid type
-      await expect(plugin._findValidImages(req.files, user)).rejects.toEqual({
-        title: 'imageSvg',
+      // Ico, Webp, and imageSvgGood will throw an error first if it's not a valid type
+      await expect(plugin._findValidImages(req.files, user)).resolves.toEqual(expect.any(Array))
+      await expect(plugin._findValidImages(imageSvgBad, user)).rejects.toEqual({
+        title: 'imageSvgBad',
         detail: 'The file format \'svg\' for \'bad.svg\' is not supported'
       })
       await expect(plugin._findValidImages(imageSize1, user)).rejects.toEqual({
@@ -446,7 +451,9 @@ module.exports = function(monastery, db) {
       .post('/')
       .attach('imageIco', `${__dirname}/assets/image.ico`)
       .attach('imageWebp', `${__dirname}/assets/image.webp`)
-      .attach('imageSvg', `${__dirname}/assets/bad.svg`)
+      .attach('imageSvgBad', `${__dirname}/assets/bad.svg`)
+      .attach('imageSvgGood', `${__dirname}/assets/bad.svg`)
+      .attach('imageSvgAny', `${__dirname}/assets/bad.svg`)
       .attach('imageSize1', `${__dirname}/assets/lion1.png`)
       .attach('imageSize2', `${__dirname}/assets/lion2.jpg`)
       .expect(200)

@@ -11,6 +11,8 @@ let plugin = module.exports = {
      * e.g. fields.avatar: { image: true }
      * e.g. fields.photos: [{ image: true, //sizes: { large: [800,  600], .. } (not implemented) }]
      *
+     * Note we cannot accurately test for non binary file-types, e.g. 'txt', 'csv'
+     *
      * @param {object} monastery manager instance
      * @param {options} options - plugin options
      * @this plugin
@@ -21,7 +23,7 @@ let plugin = module.exports = {
     this.awsAccessKeyId = options.awsAccessKeyId
     this.awsSecretAccessKey = options.awsSecretAccessKey
     this.bucketDir = options.bucketDir || 'full'
-    this.formats = options.formats || ['png', 'jpg', 'jpeg',  'bmp', 'tiff', 'gif']
+    this.formats = options.formats || ['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff']
     this.manager = manager
 
     if (!options.awsBucket || !options.awsAccessKeyId || !options.awsSecretAccessKey) {
@@ -119,7 +121,7 @@ let plugin = module.exports = {
               date: this.manager.useMilliseconds? Date.now() : Math.floor(Date.now() / 1000),
               filename: file.name,
               filesize: file.size,
-              path: `${plugin.bucketDir}/${uid}.${file.format}`,
+              path: `${plugin.bucketDir}/${uid}.${file.ext}`,
               // sizes: ['large', 'medium', 'small'],
               uid: uid
             }
@@ -339,6 +341,8 @@ let plugin = module.exports = {
         return new Promise((resolve, reject) => {
           fileType.fromBuffer(file.data).then(res => {
             let maxSize = filesArr.imageField.fileSize
+            let formats = filesArr.imageField.formats || plugin.formats
+            let allowAny = util.inArray(formats, 'any')
             file.format = res? res.ext : ''
             file.ext = file.format || (file.name.match(/\.(.*)$/) || [])[1] || 'unknown'
             file.nameClipped = file.name.length > 14? file.name.substring(0, 14) + '..' : file.name
@@ -351,7 +355,11 @@ let plugin = module.exports = {
               title: filesArr.inputPath + (i? `.${i}` : ''),
               detail: `The file size for '${file.nameClipped}' is bigger than ${(maxSize/1000/1000).toFixed(1)}MB.`
             })
-            else if (!util.inArray(filesArr.imageField.formats || plugin.formats, file.format)) reject({
+            else if (file.ext == 'unknown') reject({
+              title: filesArr.inputPath + (i? `.${i}` : ''),
+              detail: `Please add a file extension to your file '${file.nameClipped}'`
+            })
+            else if (!allowAny && !util.inArray(formats, file.ext)) reject({
               title: filesArr.inputPath + (i? `.${i}` : ''),
               detail: `The file format '${file.ext}' for '${file.nameClipped}' is not supported`
             })
