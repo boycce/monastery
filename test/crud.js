@@ -203,6 +203,66 @@ module.exports = function(monastery, db) {
     done()
   })
 
+  test('update defaults', async (done) => {
+    let db = monastery('localhost/monastery', {
+      // default: defaultFields: true,
+      useMilliseconds: true,
+      serverSelectionTimeoutMS: 2000
+    })
+    let user = db.model('user', {
+      fields: {
+        name: { type: 'string' }
+      }
+    })
+    let inserted = await user.insert({
+      data: {}
+    })
+    expect(inserted).toEqual({
+      _id: inserted._id,
+      createdAt: expect.any(Number),
+      updatedAt: expect.any(Number)
+    })
+
+    // Default field
+    let updated = await user.update({
+      query: inserted._id,
+      data: { name: 'Bruce' }
+    })
+    expect(updated).toEqual({
+      name: 'Bruce',
+      updatedAt: expect.any(Number)
+    })
+    expect(updated.updatedAt && updated.updatedAt != inserted.updatedAt).toEqual(true)
+
+    // Empty data (still contains updatedAt)
+    let updated2 = await user.update({
+      query: inserted._id,
+      data: {}
+    })
+    expect(updated2).toEqual({
+      updatedAt: expect.any(Number)
+    })
+
+    // Empty data (with no timestamps)
+    await expect(user.update({
+      query: inserted._id,
+      data: {},
+      timestamps: false
+    })).rejects.toThrow(`No valid data passed to user.update()`)
+
+    // UpdatedAt override
+    let updated4 = await user.update({
+      query: inserted._id,
+      data: { updatedAt: 1 }
+    })
+    expect(updated4).toEqual({
+      updatedAt: 1
+    })
+
+    db.close()
+    done()
+  })
+
   test('Insert with id casting', async (done) => {
     let db = monastery('localhost/monastery', { defaultFields: false })
     let company = db.model('company', { fields: {
