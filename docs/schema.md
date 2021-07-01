@@ -105,12 +105,13 @@ let fieldName = {
   // Default value
   default: 12,
 
-  // Default value return from a function
-  default: () => "I'm a default value",
+  // Default value can be returned from a function. `this` refers to the data object, but be
+  // sure to pass any referenced default fields along with insert/update/validate, e.g. `this.age`
+  default: function(fieldName, model) { return `I'm ${this.age} years old` },
 
   // Monastery will automatically create a mongodb index for this field, see "MongoDB indexes"
   // below for more information
-  index: true|1|-1|'text'|'unique'|Object
+  index: true|1|-1|'text'|'unique'|Object,
 
   // The field  won't stored, handy for fields that get populated with documents, see ./find for more details
   virtual: true
@@ -167,19 +168,19 @@ await db.user.insert({
 
 ### Custom validation rules
 
-You are able to define custom validation rules to use.
+You are able to define custom validation rules to use. (`this` will refer to the data object passed in)
 
 ```js
 schema.rules = {
   // Basic definition
-  isGrandMaster: function(value, ruleArgument) {
+  isGrandMaster: function(value, ruleArgument, fieldName, model) {
     return (value == 'Martin Luther')? true : false
   },
   // Full definition
   isGrandMaster: {
-    message: (value, ruleArgument) => 'Only grand masters are permitted'
-    fn: function(value, ruleArgument) {
-      return (value == 'Martin Luther')? true : false
+    message: (value, ruleArgument, fieldName, model) => 'Only grand masters are permitted'
+    fn: function(value, ruleArgument, fieldName, model) {
+      return (value == 'Martin Luther' || this.age > 100)? true : false
     }
   }
 }
@@ -213,7 +214,7 @@ schema.messages = {
     type: 'Sorry, your name needs to be a string, like it is so'
   },
   "address.city": {
-    minLength: (value, ruleArgument) => {
+    minLength: (value, ruleArgument, fieldName, model) => {
       return `Is your city of residence really only ${ruleArgument} characters long?`
     }
   },
