@@ -13,10 +13,9 @@ Monastery constructor, same as the [monk constructor](https://automattic.github.
 1. `uri` *(string\|array)*: A [mongo connection string URI](https://docs.mongodb.com/manual/reference/connection-string/). Replica sets can be an array or comma separated.
 
 2. [`options`] *(object)*:
-    - [`defaultFields = true`] *(boolean)*: whether to use [schema field defaults](../schema.html#fields)
     - [`defaultObjects = false`] *(boolean)*: when [inserting](../model/insert.html#defaults-example), undefined subdocuments and arrays are defined
     - [`nullObjects = false`] *(boolean)*: subdocuments and arrays can be set to null or an empty string (which gets converted to null). You can override this per field via `field.schema = { nullObject: true }`.
-    - [`timestamps = true`] *(boolean)*: whether `createdAt` and `updatedAt` are accounted for automatically, this can be overridden per operation
+    - [`timestamps = true`] *(boolean)*: whether to use [`createdAt` and `updatedAt`](../schema.html#fields), this can be overridden per operation
     - [`useMilliseconds = false`] *(boolean)*: by default the `createdAt` and `updatedAt` fields that get created automatically use unix timestamps in seconds, set this to true to use milliseconds instead.
     - [`mongo options`](http://mongodb.github.io/node-mongodb-native/3.2/reference/connecting/connection-settings/)...
 

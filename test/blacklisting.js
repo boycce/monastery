@@ -3,7 +3,7 @@ module.exports = function(monastery, db) {
   test('Find blacklisting', async (done) => {
     // Setup
     let db = monastery('localhost/monastery', {
-      defaultFields: false,
+      timestamps: false,
       serverSelectionTimeoutMS: 2000
     })
     let bird = db.model('bird', {
@@ -159,7 +159,7 @@ module.exports = function(monastery, db) {
   test('Find blacklisting (default fields)', async (done) => {
     // Setup
     let db = monastery('localhost/monastery', {
-      defaultFields: false,
+      timestamps: false,
       serverSelectionTimeoutMS: 2000
     })
     let user = db.model('user', {
@@ -234,7 +234,7 @@ module.exports = function(monastery, db) {
   test('Find blacklisting (populate)', async (done) => {
     // Setup
     let db = monastery('localhost/monastery', {
-      defaultFields: false,
+      timestamps: false,
       serverSelectionTimeoutMS: 2000
     })
     let bird = db.model('bird', {
@@ -320,7 +320,7 @@ module.exports = function(monastery, db) {
   test('Insert/update blacklisting (validate)', async (done) => {
     // Setup
     let db = monastery('localhost/monastery', {
-      defaultFields: false,
+      timestamps: false,
       serverSelectionTimeoutMS: 2000
     })
     let user = db.model('user', {

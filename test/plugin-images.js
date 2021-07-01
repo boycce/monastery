@@ -4,7 +4,7 @@ module.exports = function(monastery, db) {
 
   test('images: no initialisation', async (done) => {
     let db = monastery('localhost/monastery', {
-      defaultFields: false,
+      timestamps: false,
       serverSelectionTimeoutMS: 2000
     })
     db.model('company', {
@@ -58,7 +58,7 @@ module.exports = function(monastery, db) {
 
   test('images: initialisation', async (done) => {
     let db = monastery('localhost/monastery', {
-      defaultFields: false,
+      timestamps: false,
       serverSelectionTimeoutMS: 2000,
       imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
     })
@@ -93,7 +93,7 @@ module.exports = function(monastery, db) {
 
   test('images: addImages helper functions', async (done) => {
     let db = monastery('localhost/monastery', {
-      defaultFields: false,
+      timestamps: false,
       serverSelectionTimeoutMS: 2000,
       imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
     })
@@ -146,7 +146,7 @@ module.exports = function(monastery, db) {
 
   test('images: addImages', async (done) => {
     let db = monastery('localhost/monastery', {
-      defaultFields: false,
+      timestamps: false,
       serverSelectionTimeoutMS: 2000,
       imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
     })
@@ -251,7 +251,7 @@ module.exports = function(monastery, db) {
 
   test('images: removeImages', async (done) => {
     let db = monastery('localhost/monastery', {
-      defaultFields: false,
+      timestamps: false,
       serverSelectionTimeoutMS: 2000,
       imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
     })
@@ -342,7 +342,7 @@ module.exports = function(monastery, db) {
   test('images: removeImages with no data', async (done) => {
     // NOTE: Redundent, leaving for now (test was needed to fix a project issue)
     let db = monastery('localhost/monastery', {
-      defaultFields: false,
+      timestamps: false,
       serverSelectionTimeoutMS: 2000,
       imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
     })
@@ -396,7 +396,7 @@ module.exports = function(monastery, db) {
 
   test('images: addImages formats & filesizes', async (done) => {
     let db = monastery('localhost/monastery', {
-      defaultFields: false,
+      timestamps: false,
       serverSelectionTimeoutMS: 2000,
       imagePlugin: {
         awsBucket: 'fake',

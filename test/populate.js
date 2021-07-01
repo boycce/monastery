@@ -3,7 +3,7 @@ module.exports = function(monastery, db) {
   test('Model populate', async (done) => {
     // Setup
     let db = monastery('localhost/monastery', {
-      defaultFields: false,
+      timestamps: false,
       serverSelectionTimeoutMS: 2000
     })
     let bird = db.model('bird', { fields: {
@@ -88,7 +88,7 @@ module.exports = function(monastery, db) {
 
   test('Model populate type=any', async (done) => {
     let db = monastery('localhost/monastery', {
-      defaultFields: false,
+      timestamps: false,
       serverSelectionTimeoutMS: 2000
     })
     db.model('company', { fields: {
@@ -143,7 +143,7 @@ module.exports = function(monastery, db) {
   test('Model populate/blacklisting via $lookup', async (done) => {
     // Setup
     let db = monastery('localhost/monastery', {
-      defaultFields: false,
+      timestamps: false,
       serverSelectionTimeoutMS: 2000
     })
     let user = db.model('user', {

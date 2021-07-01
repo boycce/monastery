@@ -5,7 +5,7 @@ nav_order: 5
 
 # Validation Rules
 
-  All rules except for `type` and `required` are ignored if the data value is a null or an empty string
+  All rules except for `type` and `required` are ignored if the data value is a **null** or an **empty string**
 
   Rule | Rule argument
   - | -

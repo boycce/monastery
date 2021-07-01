@@ -3,7 +3,7 @@ let util = require('../lib/util')
 module.exports = function(monastery, db) {
 
   test('Basic operator calls', async (done) => {
-    let db = monastery('localhost/monastery', { defaultFields: false, serverSelectionTimeoutMS: 2000 })
+    let db = monastery('localhost/monastery', { timestamps: false, serverSelectionTimeoutMS: 2000 })
     let user = db.model('user', {
       fields: { name: { type: 'string' }},
       beforeValidate: [(data, next) => { beforeValidateHookCalled = true; next() }]
@@ -142,12 +142,12 @@ module.exports = function(monastery, db) {
 
   test('Insert defaults', async (done) => {
     let db = monastery('localhost/monastery', {
-      // default: defaultFields: true
+      // default: timestamps: true
       defaultObjects: true,
       serverSelectionTimeoutMS: 2000
     })
     let db2 = monastery('localhost/monastery', {
-      // default: defaultFields: true,
+      // default: timestamps: true,
       useMilliseconds: true,
       serverSelectionTimeoutMS: 2000
     })
@@ -205,7 +205,7 @@ module.exports = function(monastery, db) {
 
   test('update defaults', async (done) => {
     let db = monastery('localhost/monastery', {
-      // default: defaultFields: true,
+      // default: timestamps: true,
       useMilliseconds: true,
       serverSelectionTimeoutMS: 2000
     })
@@ -264,7 +264,7 @@ module.exports = function(monastery, db) {
   })
 
   test('Insert with id casting', async (done) => {
-    let db = monastery('localhost/monastery', { defaultFields: false })
+    let db = monastery('localhost/monastery', { timestamps: false })
     let company = db.model('company', { fields: {
       name: { type: 'string' }
     }})
@@ -289,7 +289,7 @@ module.exports = function(monastery, db) {
   })
 
   test('Find default field population', async (done) => {
-    let db = monastery('localhost/monastery', { defaultFields: false, serverSelectionTimeoutMS: 2000 })
+    let db = monastery('localhost/monastery', { timestamps: false, serverSelectionTimeoutMS: 2000 })
     let user = db.model('user', {
       fields: {
         name: { type: 'string'},
@@ -380,7 +380,7 @@ module.exports = function(monastery, db) {
   })
 
   test('Hooks', async (done) => {
-    let db = monastery('localhost/monastery', { defaultFields: false, serverSelectionTimeoutMS: 2000 })
+    let db = monastery('localhost/monastery', { timestamps: false, serverSelectionTimeoutMS: 2000 })
     let user = db.model('user', {
       fields: {
         first: { type: 'string'},

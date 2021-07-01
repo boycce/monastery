@@ -3,7 +3,7 @@ module.exports = function(monastery, db) {
   test('Virtuals', async (done) => {
     // Setup
     let db = monastery('localhost/monastery', {
-      defaultFields: false,
+      timestamps: false,
       serverSelectionTimeoutMS: 2000
     })
 
@@ -155,7 +155,7 @@ module.exports = function(monastery, db) {
   test('Insert/update virtuals (validate)', async (done) => {
     // Setup
     let db = monastery('localhost/monastery', {
-      defaultFields: false,
+      timestamps: false,
       serverSelectionTimeoutMS: 2000
     })
     let user = db.model('user', {

@@ -15,7 +15,7 @@ Update document(s) in a collection and call related hooks: `schema.beforeUpdate`
 - `options.data` *(object)* - data that's validated against the model schema and then wrapped in `{ $set: .. }`, [`more below`](#data)
 - [`options.skipValidation`] (string\|array): skip validation for this field name(s)
 - [`options.sort`] *(string\|object\|array)*: same as the mongodb option, but  allows for string parsing e.g. 'name', 'name:1'
-- [`timestamps`] *(boolean)*: whether `updatedAt` is automatically updated, defaults to `manager.timestamps`
+- [`options.timestamps`] *(boolean)*: whether `updatedAt` is automatically updated, defaults to the `manager.timestamps` value
 - [`options.blacklist`] *(array\|string\|false)*: augment `schema.updateBL`. `false` will remove all blacklisting
 - [[`any mongodb option`](http://mongodb.github.io/node-mongodb-native/3.2/api/Collection.html#update)] *(any)*
 

@@ -12,7 +12,19 @@ module.exports = function(monastery, db) {
     }})
 
     // no fields defined
-    expect(db.model('user2').fields).toEqual({})
+    expect(db.model('user2').fields).toEqual({
+      createdAt: {
+         default: expect.any(Function),
+         insertOnly: true,
+         isInteger: true,
+         type: "integer",
+       },
+       updatedAt: {
+         default: expect.any(Function),
+         isInteger: true,
+         type: "integer",
+       },
+    })
 
     // Has model name
     expect(user.name).toEqual('user')
@@ -190,7 +202,7 @@ module.exports = function(monastery, db) {
 
   test('Model findBL, findBLProject', async (done) => {
     let db = monastery('localhost/monastery', {
-      defaultFields: false,
+      timestamps: false,
       serverSelectionTimeoutMS: 2000
     })
     let bird = db.model('bird', { fields: {

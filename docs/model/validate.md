@@ -16,6 +16,7 @@ Validate a model and call related hook: `schema.beforeValidate`
 
 - [`options.skipValidation`] (string\|array): skip validation for this field name(s)
 - [`options.blacklist`] *(array\|string\|false)*: augment the model's blacklist. `false` will remove all blacklisting
+- [`options.timestamps`] *(boolean)*: whether `createdAt` and `updatedAt` are inserted, or `updatedAt` is updated, depending on the `options.update` value. Defaults to the `manager.timestamps` value
 - [`options.update`] *(boolean)*: If true, required rules will be skipped, defaults to false
 
 ### Returns

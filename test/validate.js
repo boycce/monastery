@@ -379,7 +379,7 @@ module.exports = function(monastery, db) {
 
   test('Schema default objects', async (done) => {
     let db = monastery('localhost/monastery', {
-      defaultFields: false,
+      timestamps: false,
       defaultObjects: true,
       serverSelectionTimeoutMS: 2000
     })
@@ -409,7 +409,7 @@ module.exports = function(monastery, db) {
 
   test('Schema nullObjects', async (done) => {
     let db = monastery('localhost/monastery', {
-      defaultFields: false,
+      timestamps: false,
       nullObjects: true,
       serverSelectionTimeoutMS: 2000
     })
@@ -512,7 +512,7 @@ module.exports = function(monastery, db) {
   })
 
   test('Validation hooks', async (done) => {
-    let db = monastery('localhost/monastery', { defaultFields: false, serverSelectionTimeoutMS: 2000 })
+    let db = monastery('localhost/monastery', { timestamps: false, serverSelectionTimeoutMS: 2000 })
     let user = db.model('user', {
       fields: {
         first: { type: 'string'},

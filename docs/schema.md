@@ -45,17 +45,18 @@ schema.fields = {
 }
 ```
 
-These fields automatically get created when [defaultFields](./manager) is true (default). These fields use unix timestamps in seconds (by default), but can be configured to use use milliseconds via the manager [`useMilliseconds` ](./manager) option.
+These fields automatically get assigned when [`manager.timestamps`](./manager) is true (default), or can be overriden per operation. These fields use unix timestamps in seconds (by default), but can be configured to use use milliseconds via the manager [`useMilliseconds` ](./manager) option.
 
 ```js
 schema.fields = {
   createdAt: {
     type: 'date',
-    default: () => Math.floor(Date.now() / 1000)
+    insertOnly: true,
+    default: function() { return Math.floor(Date.now() / 1000) }
   },
   updatedAt: {
     type: 'date',
-    default: () => Math.floor(Date.now() / 1000)
+    default: function() { return Math.floor(Date.now() / 1000) }
   }
 }
 ```
