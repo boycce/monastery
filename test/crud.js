@@ -250,14 +250,20 @@ module.exports = function(monastery, db) {
       timestamps: false
     })).rejects.toThrow(`No valid data passed to user.update()`)
 
-    // UpdatedAt override
+    // UpdatedAt override (wont work)
     let updated4 = await user.update({
       query: inserted._id,
       data: { updatedAt: 1 }
     })
-    expect(updated4).toEqual({
-      updatedAt: 1
+    expect(updated4.updatedAt > 1).toEqual(true)
+
+    // UpdatedAt override
+    let updated5 = await user.update({
+      query: inserted._id,
+      data: { updatedAt: 1 },
+      timestamps: false
     })
+    expect(updated5.updatedAt).toEqual(1)
 
     db.close()
     done()

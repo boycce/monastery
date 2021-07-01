@@ -17,11 +17,13 @@ module.exports = function(monastery, db) {
          default: expect.any(Function),
          insertOnly: true,
          isInteger: true,
+         timestampField: true,
          type: "integer",
        },
        updatedAt: {
          default: expect.any(Function),
          isInteger: true,
+         timestampField: true,
          type: "integer",
        },
     })
@@ -75,11 +77,13 @@ module.exports = function(monastery, db) {
         default: expect.any(Function),
         insertOnly: true,
         isInteger: true,
+        timestampField: true,
         type: "integer"
       },
       updatedAt: {
         default: expect.any(Function),
         isInteger: true,
+        timestampField: true,
         type: "integer"
       }
     })
