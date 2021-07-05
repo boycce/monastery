@@ -34,4 +34,4 @@ nav_order: 5
 
 ### Image type
 
-  `type: 'image'` will be converted to `type: 'any'` upon initialisation without any image plugins. This type allows plugins to hook into field type. See the corresponding plugins for more details or [monastery's default image plugin](./image-plugin).
+  `type: 'image'` will be converted to `type: 'any'` upon initialisation without any image plugins. This type allows plugins to hook into field type. See the corresponding plugins for more details or [monastery's default image plugin](./image-plugin)..
