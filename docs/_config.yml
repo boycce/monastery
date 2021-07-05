@@ -1,6 +1,7 @@
 remote_theme: boycce/github-docs
 title: Monastery
 description: A straight forward MongoDB ODM built upon MonkJS
+githuburl: "https://github.com/boycce/monastery"
 
 # Aux links for the naviation
 aux_links:
