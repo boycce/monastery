@@ -13,6 +13,7 @@ Thumbs.db
 _site
 .jekyll-cache
 docs/Gemfile.lock
+docs/.sass-cache
 
 # External disk files
 .Spotlight-V100
