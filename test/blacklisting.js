@@ -8,20 +8,10 @@ module.exports = function(monastery, db) {
     })
     let bird = db.model('bird', {
       fields: {
-        name: { type: 'string' }
+        name: { type: 'string' },
       }
     })
     let user = db.model('user', {
-      findBL: [
-        'dog',
-        'animals.cat',
-        'pets.age',
-        'hiddenPets',
-        'hiddenList',
-        'deep.deep2.deep3',
-        'deeper',
-        'hiddenDeepModel'
-      ],
       fields: {
         list: [{ type: 'number' }],
         dog: { type: 'string' },
@@ -58,7 +48,17 @@ module.exports = function(monastery, db) {
         hiddenDeepModel: {
           myBird: { model: 'bird' }
         }
-      }
+      },
+      findBL: [
+        'dog',
+        'animals.cat',
+        'pets.age',
+        'hiddenPets',
+        'hiddenList',
+        'deep.deep2.deep3',
+        'deeper',
+        'hiddenDeepModel'
+      ],
     })
     let bird1 = await bird.insert({ data: { name: 'ponyo' }})
     let user1 = await user.insert({ data: {
@@ -96,7 +96,7 @@ module.exports = function(monastery, db) {
       }
     }})
 
-    // NOte: testing mongodb projections
+    // Note: testing mongodb projections
 
     // Test initial blacklist
     let find1 = await user.findOne({
@@ -252,7 +252,7 @@ module.exports = function(monastery, db) {
         dog: { type: 'string' },
         myBird: { model: 'bird' },
         myBird2: { model: 'bird' }
-      }
+      },
     })
     let bird1 = await bird.insert({ data: {
       name: 'ponyo',
