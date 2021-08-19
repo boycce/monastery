@@ -458,6 +458,7 @@ module.exports = function(monastery, db) {
     }})
 
     // Skip validation on the required fields
+    await expect(user.validate({}, { skipValidation: true })).resolves.toEqual({})
     await expect(user.validate({}, { skipValidation: ['name'] })).resolves.toEqual({})
     await expect(user2.validate({}, { skipValidation: ['my.name'] })).resolves.toEqual({})
     await expect(user3.validate({ people: [{}] }, { skipValidation: ['people.name'] }))
