@@ -403,7 +403,7 @@ let plugin = module.exports = {
           filename: { type: 'string' },
           filesize: { type: 'number' },
           path: { type: 'string' },
-          schema: { image: true, nullObject: true },
+          schema: { image: true, nullObject: true, isImageObject: true },
           uid: { type: 'string' }
         }
         list.push({

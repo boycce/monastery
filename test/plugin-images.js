@@ -75,7 +75,7 @@ module.exports = function(monastery, opendb) {
       filename: { type: 'string', isString: true },
       filesize: { type: 'number', isNumber: true },
       path: { type: 'string', isString: true },
-      schema: { type: 'object', isObject: true, image: true, nullObject: true },
+      schema: { type: 'object', isObject: true, image: true, nullObject: true, default: undefined, isImageObject: true },
       uid: { type: 'string', isString: true }
     }
 
@@ -463,6 +463,90 @@ module.exports = function(monastery, opendb) {
         if (err) console.log(err)
         db.close()
         done()
+      })
+  })
+
+  test('images addImages bad file objects', async (done) => {
+    //// latest supertrace setup
+    let db = (await opendb(null, {
+      timestamps: false,
+      serverSelectionTimeoutMS: 2000,
+      imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
+    })).db
+
+    let user = db.model('user', { fields: {
+      logo: { type: 'image' },
+      logos: [{ type: 'image' }],
+      users: [{ logo: { type: 'image' } }]
+    }})
+
+    let imageObjectMock = {
+      bucket: 'temp',
+      date: 1234,
+      filename: 'temp.png',
+      filesize: 1234,
+      path: 'temp',
+      uid: 'temp'
+    }
+    let detailLongMock = 'Image fields need to either be null, undefined, or an object containing the '
+      + 'following fields \'{ bucket, date, filename, filesize, path, uid }\''
+
+    let supertest = require('supertest')
+    let express = require('express')
+    let app = express()
+    let bodyParser = require('body-parser')
+
+    app.use(bodyParser.json())
+    app.use(bodyParser.urlencoded({ extended: true }))
+    app.post('/', async function(req, res) {
+      try {
+        let result = await db.user.validate(req.body)
+        res.send()
+      } catch (err) {
+        res.status(500).send(err)
+      }
+    })
+
+    // Start tests
+    supertest(app)
+      .post('/')
+      .send({
+        logo: null,//ok
+        logos: [undefined, imageObjectMock, {}],//0,1=ok
+        users: [
+          { logo: {} },
+          { logo: { bucket: "" }},
+          { logo: imageObjectMock },//ok
+          { logo: null },//ok
+        ]
+      })
+      .expect(500)
+      .then(res => {
+        // console.log(res.body)
+        expect(res.body).toEqual([
+          {
+            detail: 'Invalid image value',
+            meta: { rule: 'isImageObject', model: 'user', field: '2', detailLong: detailLongMock },
+            status: '400',
+            title: 'logos.2'
+          }, {
+            detail: 'Invalid image value',
+            meta: { rule: 'isImageObject', model: 'user', field: 'logo', detailLong: detailLongMock },
+            status: '400',
+            title: 'users.0.logo'
+          }, {
+            detail: 'Invalid image value',
+            meta: { rule: 'isImageObject', model: 'user', field: 'logo', detailLong: detailLongMock },
+            status: '400',
+            title: 'users.1.logo'
+          }
+        ])
+        db.close()
+        done()
+      })
+      .catch(err => {
+        db.close()
+        done(err)
       })
   })
 
