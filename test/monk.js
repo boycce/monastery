@@ -1,7 +1,8 @@
-module.exports = function(monastery, db) {
+module.exports = function(monastery, opendb) {
 
   test('Monk confilicts', async (done) => {
     // Setup
+    let db = (await opendb(false)).db
     let monkdb = require('monk')(':badconnection', () => {})
     let user = db.model('user', {})
     let modelNamedConnected = db.model('connected', {})

@@ -1,12 +1,8 @@
-module.exports = function(monastery, db) {
+module.exports = function(monastery, opendb) {
 
   test('Virtuals', async (done) => {
     // Setup
-    let db = monastery('localhost/monastery', {
-      timestamps: false,
-      serverSelectionTimeoutMS: 2000
-    })
-
+    let db = (await opendb(null)).db
     // Test model setup
     let bird = db.model('bird', {
       fields: {
@@ -154,10 +150,7 @@ module.exports = function(monastery, db) {
 
   test('Insert/update virtuals (validate)', async (done) => {
     // Setup
-    let db = monastery('localhost/monastery', {
-      timestamps: false,
-      serverSelectionTimeoutMS: 2000
-    })
+    let db = (await opendb(null)).db
     let user = db.model('user', {
       fields: {
         list: [{ type: 'number' }],
@@ -252,8 +245,6 @@ module.exports = function(monastery, db) {
         }
       }
     })
-
-    await db.user.find({ query: {}}) // wait for db to open before closing
     db.close()
     done()
   })

@@ -1,6 +1,6 @@
 let util = require('../lib/util')
 
-module.exports = function(monastery, db) {
+module.exports = function(monastery, opendb) {
 
   test('Utilities: formdata', async () => {
     expect(await util.parseFormData({
@@ -32,6 +32,7 @@ module.exports = function(monastery, db) {
   })
 
   test('Utilities: isId', async () => {
+    let db = (await opendb(false)).db
     expect(db.isId('')).toEqual(false)
     expect(db.isId(1234)).toEqual(false)
     expect(db.isId('1234')).toEqual(false)

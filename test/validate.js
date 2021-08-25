@@ -1,7 +1,8 @@
-module.exports = function(monastery, db) {
+module.exports = function(monastery, opendb) {
 
   test('Validation basic errors', async () => {
     // Setup
+    let db = (await opendb(false)).db
     let user = db.model('user', { fields: {
       date: { type: 'date' },
       name: { type: 'string', required: true },
@@ -81,6 +82,7 @@ module.exports = function(monastery, db) {
 
   test('Validation subdocument errors', async () => {
     // Setup
+    let db = (await opendb(false)).db
     let user = db.model('user', { fields: {
       animals: {
         cat: { type: 'string', required: true },
@@ -163,6 +165,7 @@ module.exports = function(monastery, db) {
 
   test('Validation array errors', async () => {
     // Setup
+    let db = (await opendb(false)).db
     let user = db.model('user', { fields: {
       animals: {
         cats: [{ type: 'string' }],
@@ -226,6 +229,7 @@ module.exports = function(monastery, db) {
 
   test('Validation messages', async () => {
     // Setup
+    let db = (await opendb(false)).db
     let user = db.model('user', {
       fields: {
         name: { type: 'string', minLength: 4 },
@@ -296,6 +300,7 @@ module.exports = function(monastery, db) {
 
   test('Validated data', async () => {
     // Setup
+    let db = (await opendb(false)).db
     let fields = {
       name: { type: 'string' },
       names: [{ type: 'string' }],
@@ -355,6 +360,7 @@ module.exports = function(monastery, db) {
 
   test('Schema options', async () => {
     // Setup
+    let db = (await opendb(false)).db
     let user = db.model('user', { fields: {
       name: { type: 'string', 'insertOnly': true }
     }})
@@ -395,6 +401,7 @@ module.exports = function(monastery, db) {
 
   test('Schema rules', async () => {
     // Setup
+    let db = (await opendb(false)).db
     let user = db.model('user', { fields: {
       name: { type: 'string', minLength: 7 },
       email: { type: 'string', isEmail: true },
@@ -442,11 +449,11 @@ module.exports = function(monastery, db) {
   })
 
   test('Schema default objects', async (done) => {
-    let db = monastery('localhost/monastery', {
+    let db = (await opendb(null, {
       timestamps: false,
       defaultObjects: true,
       serverSelectionTimeoutMS: 2000
-    })
+    })).db
 
     let base = { names: [], animals: { dogs: [] }}
     let user = db.model('user', { fields: {
@@ -457,9 +464,6 @@ module.exports = function(monastery, db) {
         dogs: [{ name: { type: 'string' } }]
       }
     }})
-
-    // Mongodb throws an error if this is the only test otherwise, connection error ...
-    await db.user.find({ query: {} })
 
     // Array/subdocument defaults
     await expect(user.validate({})).resolves.toEqual({
@@ -472,11 +476,11 @@ module.exports = function(monastery, db) {
   })
 
   test('Schema nullObjects', async (done) => {
-    let db = monastery('localhost/monastery', {
+    let db = (await opendb(null, {
       timestamps: false,
       nullObjects: true,
       serverSelectionTimeoutMS: 2000
-    })
+    })).db
     let user = db.model('user', { fields: {
       names: [{ type: 'string' }],
       animals: {
@@ -493,6 +497,7 @@ module.exports = function(monastery, db) {
   })
 
   test('Validation options', async () => {
+    let db = (await opendb(false)).db
     let user = db.model('user', { fields: {
       name: { type: 'string', required: true }
     }})
@@ -577,7 +582,7 @@ module.exports = function(monastery, db) {
   })
 
   test('Validation hooks', async (done) => {
-    let db = monastery('localhost/monastery', { timestamps: false, serverSelectionTimeoutMS: 2000 })
+    let db = (await opendb(null)).db
     let user = db.model('user', {
       fields: {
         first: { type: 'string'},

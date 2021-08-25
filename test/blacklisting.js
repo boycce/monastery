@@ -1,11 +1,8 @@
-module.exports = function(monastery, db) {
+module.exports = function(monastery, opendb) {
 
   test('Find blacklisting', async (done) => {
     // Setup
-    let db = monastery('localhost/monastery', {
-      timestamps: false,
-      serverSelectionTimeoutMS: 2000
-    })
+    let db = (await opendb(null)).db
     let bird = db.model('bird', {
       fields: {
         name: { type: 'string' },
@@ -158,10 +155,7 @@ module.exports = function(monastery, db) {
 
   test('Find blacklisting (default fields)', async (done) => {
     // Setup
-    let db = monastery('localhost/monastery', {
-      timestamps: false,
-      serverSelectionTimeoutMS: 2000
-    })
+    let db = (await opendb(null)).db
     let user = db.model('user', {
       fields: {
         name: { type: 'string' },
@@ -233,10 +227,7 @@ module.exports = function(monastery, db) {
 
   test('Find blacklisting (populate)', async (done) => {
     // Setup
-    let db = monastery('localhost/monastery', {
-      timestamps: false,
-      serverSelectionTimeoutMS: 2000
-    })
+    let db = (await opendb(null)).db
     let bird = db.model('bird', {
       fields: {
         name: { type: 'string' },
@@ -319,10 +310,7 @@ module.exports = function(monastery, db) {
 
   test('Insert/update blacklisting (validate)', async (done) => {
     // Setup
-    let db = monastery('localhost/monastery', {
-      timestamps: false,
-      serverSelectionTimeoutMS: 2000
-    })
+    let db = (await opendb(null)).db
     let user = db.model('user', {
       fields: {
         list: [{ type: 'number' }],
@@ -417,8 +405,6 @@ module.exports = function(monastery, db) {
         }
       }
     })
-
-    await db.user.find({ query: {}}) // wait for db to open before closing
     db.close()
     done()
   })

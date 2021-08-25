@@ -1,7 +1,8 @@
-module.exports = function(monastery, db) {
+module.exports = function(monastery, opendb) {
 
   test('Model setup', async () => {
     // Setup
+    let db = (await opendb(false)).db
     let user = db.model('user', { fields: {
       name: { type: 'string' },
       pets: [{ type: 'string' }],
@@ -69,7 +70,7 @@ module.exports = function(monastery, db) {
 
   test('Model setup with default fields', async () => {
     // Setup
-    let db = monastery(false, { defaultObjects: true })
+    let db = (await opendb(false, { defaultObjects: true })).db
 
     // Default fields
     expect(db.model('user2').fields).toEqual({
@@ -91,7 +92,7 @@ module.exports = function(monastery, db) {
 
   test('Model setup with default objects', async () => {
     // Setup
-    let db = monastery(false, { defaultObjects: true })
+    let db = (await opendb(false, { defaultObjects: true })).db
     let user = db.model('user', { fields: {
       name: { type: 'string' },
       pets: [{ type: 'string' }],
@@ -117,7 +118,7 @@ module.exports = function(monastery, db) {
   test('Model indexes', async (done) => {
     // Setup
     // Need to test different types of indexes
-    let db = monastery('localhost/monastery', { serverSelectionTimeoutMS: 2000 })
+    let db = (await opendb(null)).db
     let user = db.model('user', {})
     let user2 = db.model('user2', {})
 
@@ -144,7 +145,7 @@ module.exports = function(monastery, db) {
   test('Model 2dsphere indexes', async (done) => {
     // Setup. The tested model needs to be unique as race condition issue arises when the same model
     // with text indexes are setup at the same time
-    let db = monastery('localhost/monastery', { serverSelectionTimeoutMS: 2000 })
+    let db = (await opendb(null)).db
     await db.model('user3', {
       promise: true,
       fields: {
@@ -192,12 +193,10 @@ module.exports = function(monastery, db) {
       }
     })).resolves.toEqual({
        _id: expect.any(Object),
-       createdAt: expect.any(Number),
        location: {
          coordinates: [172.5880385, -43.3311608],
          type: "Point"
        },
-       updatedAt: expect.any(Number),
     })
 
     db.close()
@@ -205,10 +204,7 @@ module.exports = function(monastery, db) {
   })
 
   test('Model findBL, findBLProject', async (done) => {
-    let db = monastery('localhost/monastery', {
-      timestamps: false,
-      serverSelectionTimeoutMS: 2000
-    })
+    let db = (await opendb(null)).db
     let bird = db.model('bird', { fields: {
       name: { type: 'string' }
     }})

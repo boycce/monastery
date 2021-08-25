@@ -1,12 +1,9 @@
-module.exports = function(monastery, db) {
+module.exports = function(monastery, opendb) {
 
   // Data no images doesn't throw error
 
-  test('images: no initialisation', async (done) => {
-    let db = monastery('localhost/monastery', {
-      timestamps: false,
-      serverSelectionTimeoutMS: 2000
-    })
+  test('images no initialisation', async (done) => {
+    let db = (await opendb(null)).db
     db.model('company', {
       fields: {
         logo: { type: 'image' }
@@ -55,13 +52,14 @@ module.exports = function(monastery, db) {
     db.close()
     done()
   })
-
-  test('images: initialisation', async (done) => {
-    let db = monastery('localhost/monastery', {
+  /*
+  test('images initialisation', async (done) => {
+    let db = (await opendb(null, {
       timestamps: false,
       serverSelectionTimeoutMS: 2000,
       imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
-    })
+    })).db
+
     let user = db.model('user', { fields: {
       logo: { type: 'image' },
       logos: [{ type: 'image' }],
@@ -86,17 +84,17 @@ module.exports = function(monastery, db) {
     expect(user.fields.logos[0]).toEqual(expected)
     expect(user.fields.users[0].logo).toEqual(expected)
 
-    await user.find({ query: {} }) // wait for db to open before closing
     db.close()
     done()
   })
+  */
 
-  test('images: addImages helper functions', async (done) => {
-    let db = monastery('localhost/monastery', {
+  test('images addImages helper functions', async (done) => {
+    let db = (await opendb(null, {
       timestamps: false,
       serverSelectionTimeoutMS: 2000,
       imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
-    })
+    })).db
     let plugin = db.imagePluginFile
     let user = db.model('user', { fields: {
       logo: { type: 'image' },
@@ -139,17 +137,17 @@ module.exports = function(monastery, db) {
     expect(plugin._addImageObjectsToData('user.a.b.c.logo', {}, image))
       .toEqual({ user: { a: { b: { c: { logo: image }}}}})
 
-
     db.close()
     done()
   })
 
-  test('images: addImages', async (done) => {
-    let db = monastery('localhost/monastery', {
+  test('images addImages', async (done) => {
+    let db = (await opendb(null, {
       timestamps: false,
       serverSelectionTimeoutMS: 2000,
       imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
-    })
+    })).db
+
     let user = db.model('user', { fields: {
       logo: { type: 'image' },
       logos: [{ type: 'image' }],
@@ -249,18 +247,20 @@ module.exports = function(monastery, db) {
       .end((err, res) => { if (err) console.log(err) })
   })
 
-  test('images: removeImages', async (done) => {
-    let db = monastery('localhost/monastery', {
+  test('images removeImages', async (done) => {
+    let db = (await opendb(null, {
       timestamps: false,
       serverSelectionTimeoutMS: 2000,
       imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
-    })
+    })).db
+
     let user = db.model('user', { fields: {
       logo: { type: 'image' },
       logos: [{ type: 'image' }],
       users: [{ userlogo: { type: 'image' } }],
       deep: { logo: { type: 'image' }}
     }})
+
     let image = {
       bucket: 'test',
       date: 1234,
@@ -339,16 +339,18 @@ module.exports = function(monastery, db) {
       .end((err, res) => { if (err) console.log(err) })
   })
 
-  test('images: removeImages with no data', async (done) => {
+  test('images removeImages with no data', async (done) => {
     // NOTE: Redundent, leaving for now (test was needed to fix a project issue)
-    let db = monastery('localhost/monastery', {
+    let db = (await opendb(null, {
       timestamps: false,
       serverSelectionTimeoutMS: 2000,
       imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
-    })
+    })).db
+
     let user = db.model('user', { fields: {
       logo: { type: 'image' }
     }})
+
     let image = {
       bucket: 'test',
       date: 1234,
@@ -394,8 +396,8 @@ module.exports = function(monastery, db) {
       .end((err, res) => { if (err) console.log(err, res.text) })
   })
 
-  test('images: addImages formats & filesizes', async (done) => {
-    let db = monastery('localhost/monastery', {
+  test('images addImages formats & filesizes', async (done) => {
+    let db = (await opendb(null, {
       timestamps: false,
       serverSelectionTimeoutMS: 2000,
       imagePlugin: {
@@ -404,7 +406,8 @@ module.exports = function(monastery, db) {
         awsSecretAccessKey: 'fake',
         formats: ['jpg', 'jpeg', 'png', 'ico']
       }
-    })
+    })).db
+
     let user = db.model('user', { fields: {
       imageIco:     { type: 'image' },
       imageWebp:    { type: 'image', formats: ['webp'] },

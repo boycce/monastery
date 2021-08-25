@@ -1,11 +1,8 @@
-module.exports = function(monastery, db) {
+module.exports = function(monastery, opendb) {
 
   test('Model populate', async (done) => {
     // Setup
-    let db = monastery('localhost/monastery', {
-      timestamps: false,
-      serverSelectionTimeoutMS: 2000
-    })
+    let db = (await opendb(null)).db
     let bird = db.model('bird', { fields: {
       name: { type: 'string' }
     }})
@@ -87,10 +84,7 @@ module.exports = function(monastery, db) {
   })
 
   test('Model populate type=any', async (done) => {
-    let db = monastery('localhost/monastery', {
-      timestamps: false,
-      serverSelectionTimeoutMS: 2000
-    })
+    let db = (await opendb(null)).db
     db.model('company', { fields: {
       address: { type: 'any' }
     }})
@@ -142,10 +136,7 @@ module.exports = function(monastery, db) {
 
   test('Model populate/blacklisting via $lookup', async (done) => {
     // Setup
-    let db = monastery('localhost/monastery', {
-      timestamps: false,
-      serverSelectionTimeoutMS: 2000
-    })
+    let db = (await opendb(null)).db
     let user = db.model('user', {
       fields: {
         birds: [{ model: 'bird' }],

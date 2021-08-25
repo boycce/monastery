@@ -20,6 +20,7 @@
     "minor": "standard-version --release-as minor && npm publish",
     "patch": "standard-version && npm publish",
     "test": "jest",
+    "test-one-example": "jest -t images",
     "watch": "DEBUG=-monastery:info jest --watchAll --runInBand --verbose=false",
     "docs": "cd docs && bundle exec jekyll serve --livereload --livereload-port 4001"
   },

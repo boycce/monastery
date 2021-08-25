@@ -13,15 +13,24 @@
  */
 
 let monastery = require('../lib')
-let db = monastery(false, { timestamps: false })
+let opendb = async function(uri, opts) {
+  let db = monastery(
+    uri === false? false : (uri || 'localhost/monastery'),
+    opts || { timestamps: false, serverSelectionTimeoutMS: 2000 }
+  )
+  // Wait until mongo is open
+  if (db.then) await db.then(() => {})
+  // Returning an object instead of promise
+  return { db: db }
+}
 
 /* Run tests sequentially */
-require('./util')(monastery, db)
-require('./monk')(monastery, db)
-require('./model')(monastery, db)
-require('./crud')(monastery, db)
-require('./blacklisting')(monastery, db)
-require('./populate')(monastery, db)
-require('./validate')(monastery, db)
-require('./plugin-images')(monastery, db)
-require('./virtuals')(monastery, db)
+require('./util')(monastery, opendb)
+require('./monk')(monastery, opendb)
+require('./model')(monastery, opendb)
+require('./crud')(monastery, opendb)
+require('./blacklisting')(monastery, opendb)
+require('./populate')(monastery, opendb)
+require('./validate')(monastery, opendb)
+require('./plugin-images')(monastery, opendb)
+require('./virtuals')(monastery, opendb)
