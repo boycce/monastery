@@ -52,7 +52,7 @@ module.exports = function(monastery, opendb) {
     db.close()
     done()
   })
-  /*
+
   test('images initialisation', async (done) => {
     let db = (await opendb(null, {
       timestamps: false,
@@ -87,7 +87,6 @@ module.exports = function(monastery, opendb) {
     db.close()
     done()
   })
-  */
 
   test('images addImages helper functions', async (done) => {
     let db = (await opendb(null, {
