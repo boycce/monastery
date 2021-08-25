@@ -488,7 +488,7 @@ module.exports = function(monastery, opendb) {
       path: 'temp',
       uid: 'temp'
     }
-    let detailLongMock = 'Image fields need to either be null, undefined, or an object containing the '
+    let detailLongMock = 'Image fields need to either be null, undefined, file, or an object containing the '
       + 'following fields \'{ bucket, date, filename, filesize, path, uid }\''
 
     let supertest = require('supertest')
