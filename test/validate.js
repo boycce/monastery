@@ -405,11 +405,13 @@ module.exports = function(monastery, opendb) {
     let user = db.model('user', { fields: {
       name: { type: 'string', minLength: 7 },
       email: { type: 'string', isEmail: true },
-      names: { type: 'string', enum: ['Martin', 'Luther'] }
+      names: { type: 'string', enum: ['Martin', 'Luther'] },
+      amount: { type: 'number' },
     }})
     let user2 = db.model('user', { fields: {
       amount: { type: 'number', required: true },
     }})
+
 
     // MinLength
     await expect(user.validate({ name: 'Martin Luther' })).resolves.toEqual({name: 'Martin Luther'})
@@ -450,18 +452,33 @@ module.exports = function(monastery, opendb) {
       }
     })
 
+    // Number valid
+    await expect(user2.validate({ amount: 0 })).resolves.toEqual({ amount: 0 }) // required
+    await expect(user.validate({ amount: '0' })).resolves.toEqual({ amount: 0 }) // required
+    await expect(user.validate({ amount: undefined })).resolves.toEqual({})  // not required
+    await expect(user.validate({ amount: null })).resolves.toEqual({ amount: null }) // not required
+
     // Number required
-    await expect(user2.validate({ amount: 0 })).resolves.toEqual({ amount: 0 })
-    await expect(user2.validate({ amount: '' })).rejects.toContainEqual({
+    let mock1 = {
       detail: 'This field is required.',
       status: '400',
       title: 'amount',
-      meta: {
-        model: 'user',
-        field: 'amount',
-        rule: 'required'
-      }
-    })
+      meta: { model: 'user', field: 'amount', rule: 'required' }
+    }
+    await expect(user2.validate({})).rejects.toContainEqual(mock1)
+    await expect(user2.validate({ amount: '' })).rejects.toContainEqual(mock1)
+    await expect(user2.validate({ amount: undefined })).rejects.toContainEqual(mock1)
+    await expect(user2.validate({ amount: null })).rejects.toContainEqual(mock1)
+
+    // Number invalid
+    let mock2 = {
+      detail: 'Value was not a number.',
+      status: '400',
+      title: 'amount',
+      meta: { model: 'user', field: 'amount', rule: 'isNumber' }
+    }
+    await expect(user.validate({ amount: false })).rejects.toContainEqual(mock2)
+    await expect(user.validate({ amount: 'bad' })).rejects.toContainEqual(mock2)
   })
 
   test('Schema default objects', async (done) => {
