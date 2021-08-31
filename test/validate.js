@@ -407,43 +407,59 @@ module.exports = function(monastery, opendb) {
       email: { type: 'string', isEmail: true },
       names: { type: 'string', enum: ['Martin', 'Luther'] }
     }})
+    let user2 = db.model('user', { fields: {
+      amount: { type: 'number', required: true },
+    }})
 
     // MinLength
-    await expect(user.validate({ name: 'Martin Luther' })).resolves.toEqual({"name": "Martin Luther"})
+    await expect(user.validate({ name: 'Martin Luther' })).resolves.toEqual({name: 'Martin Luther'})
     await expect(user.validate({ name: 'Carl' })).rejects.toContainEqual({
-      detail: "Value needs to be at least 7 characters long.",
-      status: "400",
-      title: "name",
+      detail: 'Value needs to be at least 7 characters long.',
+      status: '400',
+      title: 'name',
       meta: {
-        model: "user",
-        field: "name",
-        rule: "minLength"
+        model: 'user',
+        field: 'name',
+        rule: 'minLength'
       }
     })
 
     // isEmail
-    await expect(user.validate({ email: 'good@g.com' })).resolves.toEqual({"email": "good@g.com"})
+    await expect(user.validate({ email: 'good@g.com' })).resolves.toEqual({email: 'good@g.com'})
     await expect(user.validate({ email: 'bad email' })).rejects.toContainEqual({
-      detail: "Please enter a valid email address.",
-      status: "400",
-      title: "email",
+      detail: 'Please enter a valid email address.',
+      status: '400',
+      title: 'email',
       meta: {
-        model: "user",
-        field: "email",
-        rule: "isEmail"
+        model: 'user',
+        field: 'email',
+        rule: 'isEmail'
       }
     })
 
     // Enum
-    await expect(user.validate({ names: 'Martin' })).resolves.toEqual({ "names": "Martin" })
+    await expect(user.validate({ names: 'Martin' })).resolves.toEqual({ names: 'Martin' })
     await expect(user.validate({ names: 'bad name' })).rejects.toContainEqual({
-      detail: "Invalid enum value",
-      status: "400",
-      title: "names",
+      detail: 'Invalid enum value',
+      status: '400',
+      title: 'names',
       meta: {
-        model: "user",
-        field: "names",
-        rule: "enum"
+        model: 'user',
+        field: 'names',
+        rule: 'enum'
+      }
+    })
+
+    // Number required
+    await expect(user2.validate({ amount: 0 })).resolves.toEqual({ amount: 0 })
+    await expect(user2.validate({ amount: '' })).rejects.toContainEqual({
+      detail: 'This field is required.',
+      status: '400',
+      title: 'amount',
+      meta: {
+        model: 'user',
+        field: 'amount',
+        rule: 'required'
       }
     })
   })
