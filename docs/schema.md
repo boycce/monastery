@@ -209,17 +209,39 @@ You are able to define custom error messages for each validation rule.
 
 ```js
 schema.messages = {
-  "name": {
+  'name': {
     required: 'Sorry, even a monk cannot be nameless'
-    type: 'Sorry, your name needs to be a string, like it is so'
+    type: 'Sorry, your name needs to be a string'
   },
-  "address.city": {
+  'address.city': {
     minLength: (value, ruleArgument, fieldName, model) => {
       return `Is your city of residence really only ${ruleArgument} characters long?`
     }
   },
-  "pets.[].name": {
-    required: `Your pet's name needs to be a string, like it is so.`
+  // You can assign custom error messages for all subdocument fields in an array
+  // e.g. pets = [{ name: { type: 'string' }}]
+  'pets.name': {
+    required: `Your pet's name needs to be a string.`
+  }
+  // To target a specific array item
+  'pets.0.name': {
+    required: `You first pet needs a name`
+  }
+  // You can also target any rules set on the array or sub arrays
+  // e.g.
+  // let arrayWithSchema = (array, schema) => { array.schema = schema; return array }
+  // petGroups = arrayWithSchema(
+  //   [arrayWithSchema(
+  //     [{ name: { type: 'string' }}],
+  //     { minLength: 1 }
+  //   )],
+  //   { minLength: 1 }
+  // )
+  'petGroups': {
+    minLength: `Please add at least one pet pet group.`
+  }
+  'petGroups.$': {
+    minLength: `Please add at least one pet into your pet group.`
   }
 }
 ```
@@ -265,7 +287,7 @@ let schema = {
 
   afterFind: [function(data) {// Synchronous
     data = data || {}
-    data.name = data.firstName + " " + data.lastName
+    data.name = data.firstName + ' ' + data.lastName
   }]
 }
 

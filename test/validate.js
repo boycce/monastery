@@ -1,3 +1,5 @@
+let validate = require('../lib/model-validate')
+
 module.exports = function(monastery, opendb) {
 
   test('Validation basic errors', async () => {
@@ -227,7 +229,40 @@ module.exports = function(monastery, opendb) {
       .rejects.toContainEqual(error)
   })
 
-  test('Validation messages', async () => {
+  test('Validation getMostSpecificKeyMatchingPath', async () => {
+    let fn = validate._getMostSpecificKeyMatchingPath
+    let mock = {
+      'cats.name': true,
+      'cats.name': true,
+
+      'dogs.name': true,
+      'dogs.$.name': true,
+
+      'pigs.name': true,
+      'pigs.$.name': true,
+      'pigs.1.name': true,
+      'pigs.2.name': true,
+
+      'gulls.$': true,
+      'gulls.$.$': true,
+      'gulls.name': true,
+      'gulls.$.name': true,
+    }
+    // subdocument
+    expect(fn(mock, 'cats.name')).toEqual('cats.name')
+    // array subdocuments
+    expect(fn(mock, 'cats.1.name')).toEqual('cats.name')
+    expect(fn(mock, 'dogs.1.name')).toEqual('dogs.$.name')
+    expect(fn(mock, 'dogs.2.name')).toEqual('dogs.$.name')
+    expect(fn(mock, 'pigs.1.name')).toEqual('pigs.1.name')
+    expect(fn(mock, 'pigs.2.name')).toEqual('pigs.2.name')
+    expect(fn(mock, 'pigs.3.name')).toEqual('pigs.$.name')
+    // array
+    expect(fn(mock, 'gulls.1.2')).toEqual('gulls.$.$')
+    expect(fn(mock, 'gulls.1')).toEqual('gulls.$')
+  })
+
+  test('Validation default messages', async () => {
     // Setup
     let db = (await opendb(false)).db
     let user = db.model('user', {
@@ -238,63 +273,233 @@ module.exports = function(monastery, opendb) {
         animals: [{
           name: { type: 'string', minLength: 4 }
         }]
+      }
+    })
+
+    let mock = {
+      status: '400',
+      title: 'name',
+      detail: 'Value needs to be at least 4 characters long.',
+      meta: { rule: 'minLength', model: 'user', field: 'name' }
+    }
+
+    // basic error
+    await expect(user.validate({ name: 'ben' })).rejects.toContainEqual(
+      mock
+    )
+
+    // subdocument error
+    await expect(user.validate({ dog: { name: 'ben' } })).rejects.toContainEqual({
+      ...mock,
+      title: 'dog.name'
+    })
+
+    // array error
+    await expect(user.validate({ dogNames: ['ben'] })).rejects.toContainEqual({
+      ...mock,
+      title: 'dogNames.0',
+      meta: { ...mock.meta, field: '0' }
+    })
+
+    // subdocument in an array error
+    await expect(user.validate({ animals: [{ name: 'ben' }] })).rejects.toContainEqual({
+      ...mock,
+      title: 'animals.0.name'
+    })
+
+    // subdocument in an array error (different index)
+    await expect(user.validate({ animals: [{ name: 'carla' }, { name: 'ben' }] })).rejects.toContainEqual({
+      ...mock,
+      title: 'animals.1.name'
+    })
+  })
+
+  test('Validation custom messages', async () => {
+    // Setup
+    // Todo: Setup testing for array array subdocument field messages
+    let db = (await opendb(false)).db
+    let arrayWithSchema = (array, schema) => { array.schema = schema; return array }
+    let user = db.model('user', {
+      fields: {
+        name: { type: 'string', minLength: 4 },
+        dog: { name: { type: 'string', minLength: 4 }},
+        dogNames: [{ type: 'string', minLength: 4 }],
       },
       messages: {
         'name': { minLength: 'Oops min length is 4' },
         'dog.name': { minLength: 'Oops min length is 4' },
-        'dogNames.[]': { minLength: 'Oops min length is 4' },
-        'animals.[].name': { minLength: 'Oops min length is 4' }
+        'dogNames': { minLength: 'Oops min length is 4' },
       }
     })
 
-    // Basic error
-    await expect(user.validate({
-      name: 'ben'
-    })).rejects.toContainEqual({
+    let mock = {
       status: '400',
       title: 'name',
       detail: 'Oops min length is 4',
       meta: { rule: 'minLength', model: 'user', field: 'name' }
-    })
+    }
 
+    // basic error
+    await expect(user.validate({ name: 'ben' })).rejects.toContainEqual(
+      mock
+    )
     // subdocument error
-    await expect(user.validate({
-      dog: { name: 'ben' }
-    })).rejects.toContainEqual({
-      status: '400',
-      title: 'dog.name',
-      detail: 'Oops min length is 4',
-      meta: { rule: 'minLength', model: 'user', field: 'name' }
+    await expect(user.validate({ dog: { name: 'ben' } })).rejects.toContainEqual({
+      ...mock,
+      title: 'dog.name'
+    })
+    // array error
+    await expect(user.validate({ dogNames: ['ben'] })).rejects.toContainEqual({
+      ...mock,
+      title: 'dogNames.0',
+      meta: { ...mock.meta, field: '0' }
+    })
+  })
+
+  test('Validation custom messages for arrays', async () => {
+    // Setup
+    // Todo: Setup testing for array array subdocument field messages
+    let db = (await opendb(false)).db
+    let arrayWithSchema = (array, schema) => { array.schema = schema; return array }
+    let user = db.model('user', {
+      fields: {
+        dogNames: arrayWithSchema([
+          arrayWithSchema([{ type: 'string' }], { minLength: 1 })
+        ], { minLength: 1 }),
+        catNames: [{
+          name: { type: 'string', minLength: 4 }
+        }],
+        pigNames: [[{
+          name: { type: 'string', minLength: 4 },
+        }]],
+      },
+      messages: {
+        'dogNames': { minLength: 'add one dog name' },
+        'dogNames.$': { minLength: 'add one sub dog name' },
+
+        'catNames.name': { minLength: 'min length error (name)' },
+        'catNames.1.name': { minLength: 'min length error (1)' },
+        'catNames.2.name': { minLength: 'min length error (2)' },
+
+        'pigNames.name': { minLength: 'min length error (name)' },
+        'pigNames.$.name': { minLength: 'min length error ($)' },
+        'pigNames.1.name': { minLength: 'min length error (1)' },
+        'pigNames.2.name': { minLength: 'min length error (2)' },
+        'pigNames.0.2.name': { minLength: 'min length error (deep 0 2)' },
+        'pigNames.$.2.name': { minLength: 'min length error (deep $ 2)' },
+      }
     })
 
-    // array error
-    await expect(user.validate({
-      dogNames: ['ben']
-    })).rejects.toContainEqual({
+    // Empty array
+    await expect(user.validate({ dogNames: [] })).rejects.toContainEqual({
+      status: '400',
+      title: 'dogNames',
+      detail: 'add one dog name',
+      meta: { rule: 'minLength', model: 'user', field: 'dogNames' }
+    })
+    // Empty sub array
+    await expect(user.validate({ dogNames: [['carla']] })).resolves.toEqual({ dogNames: [['carla']] })
+    await expect(user.validate({ dogNames: [[]] })).rejects.toContainEqual({
       status: '400',
       title: 'dogNames.0',
-      detail: 'Oops min length is 4',
+      detail: 'add one sub dog name',
       meta: { rule: 'minLength', model: 'user', field: '0' }
     })
 
-    // subdocument in an array error
-    await expect(user.validate({
-      animals: [{ name: 'ben' }]
-    })).rejects.toContainEqual({
+
+    // array-subdocument-field error (loose match)
+    await expect(user.validate({ catNames: [{ name: 'ben' }] })).rejects.toContainEqual({
       status: '400',
-      title: 'animals.0.name',
-      detail: 'Oops min length is 4',
+      title: 'catNames.0.name',
+      detail: 'min length error (name)',
+      meta: { rule: 'minLength', model: 'user', field: 'name' }
+    })
+    // array-subdocument-1-field error
+    await expect(user.validate({ catNames: [{ name: 'carla' }, { name: 'ben' }] })).rejects.toContainEqual({
+      status: '400',
+      title: 'catNames.1.name',
+      detail: 'min length error (1)',
+      meta: { rule: 'minLength', model: 'user', field: 'name' }
+    })
+    // array-subdocument-2-field error
+    await expect(user.validate({ catNames: [{ name: 'carla' }, { name: 'carla' }, { name: 'ben' }] })).rejects.toContainEqual({
+      status: '400',
+      title: 'catNames.2.name',
+      detail: 'min length error (2)',
       meta: { rule: 'minLength', model: 'user', field: 'name' }
     })
 
-    // subdocument in an array error (different index)
-    await expect(user.validate({
-      animals: [{ name: 'carla' }, { name: 'ben' }]
-    })).rejects.toContainEqual({
+
+    // array-subdocument-field error (loose $ match)
+    await expect(user.validate({ pigNames: [[{ name: 'ben' }]] })).rejects.toContainEqual({
       status: '400',
-      title: 'animals.1.name',
-      detail: 'Oops min length is 4',
+      title: 'pigNames.0.0.name',
+      detail: 'min length error ($)',
       meta: { rule: 'minLength', model: 'user', field: 'name' }
+    })
+    // array-subdocument-1-field error
+    await expect(user.validate({ pigNames: [[{ name: 'carla' }, { name: 'ben' }]] })).rejects.toContainEqual({
+      status: '400',
+      title: 'pigNames.0.1.name',
+      detail: 'min length error (1)',
+      meta: { rule: 'minLength', model: 'user', field: 'name' }
+    })
+    // array-subdocument-0-2-field error
+    await expect(user.validate({ pigNames: [[{ name: 'carla' }, { name: 'carla' }, { name: 'ben' }]] })).rejects.toContainEqual({
+      status: '400',
+      title: 'pigNames.0.2.name',
+      detail: 'min length error (deep 0 2)',
+      meta: { rule: 'minLength', model: 'user', field: 'name' }
+    })
+    // array-subdocument-2-0-field error (fallback)
+    await expect(user.validate({ pigNames: [[],[],[{ name: 'carla' },{ name: 'carla' },{ name: 'ben' }]] })).rejects.toContainEqual({
+      status: '400',
+      title: 'pigNames.2.2.name',
+      detail: 'min length error (deep $ 2)',
+      meta: { rule: 'minLength', model: 'user', field: 'name' }
+    })
+    // array-subdocument-2-0-field error (lower fallback)
+    await expect(user.validate({ pigNames: [[],[],[{ name: 'ben' }]] })).rejects.toContainEqual({
+      status: '400',
+      title: 'pigNames.2.0.name',
+      detail: 'min length error (2)',
+      meta: { rule: 'minLength', model: 'user', field: 'name' }
+    })
+  })
+
+  test('Validation custom rules', async () => {
+    // Setup
+    let db = (await opendb(false)).db
+    let user = db.model('user', {
+      fields: {
+        name: { type: 'string', bigName: 8 },
+        animals: [{
+          name: { type: 'string', bigName: 8 }
+        }]
+      },
+      rules: {
+        bigName: function(value, ruleArg) {
+          return value.length >= ruleArg
+        }
+      }
+    })
+
+    // Basic field
+    await expect(user.validate({ name: 'benjamin' })).resolves.toEqual({ name: 'benjamin' })
+    await expect(user.validate({ name: 'ben' })).rejects.toContainEqual({
+      status: '400',
+      title: 'name',
+      detail: 'Invalid data property for rule "bigName".',
+      meta: { rule: 'bigName', model: 'user', field: 'name' }
+    })
+
+    // subdocument in an array
+    await expect(user.validate({ animals: [{ name: 'benjamin' }] })).resolves.toEqual({ animals: [{ name: 'benjamin' }] })
+    await expect(user.validate({ animals: [{ name: 'ben' }] })).rejects.toContainEqual({
+      status: '400',
+      title: 'animals.0.name',
+      detail: 'Invalid data property for rule "bigName".',
+      meta: { rule: 'bigName', model: 'user', field: 'name' }
     })
   })
 
@@ -399,7 +604,7 @@ module.exports = function(monastery, opendb) {
     })
   })
 
-  test('Schema rules', async () => {
+  test('Schema default rules', async () => {
     // Setup
     let db = (await opendb(false)).db
     let user = db.model('user', { fields: {
