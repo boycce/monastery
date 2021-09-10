@@ -173,13 +173,13 @@ You are able to define custom validation rules to use. (`this` will refer to the
 ```js
 schema.rules = {
   // Basic definition
-  isGrandMaster: function(value, ruleArgument, fieldName, model) {
+  isGrandMaster: function(value, ruleArgument, path, model) {
     return (value == 'Martin Luther')? true : false
   },
   // Full definition
   isGrandMaster: {
-    message: (value, ruleArgument, fieldName, model) => 'Only grand masters are permitted'
-    fn: function(value, ruleArgument, fieldName, model) {
+    message: (value, ruleArgument, path, model) => 'Only grand masters are permitted'
+    fn: function(value, ruleArgument, path, model) {
       return (value == 'Martin Luther' || this.age > 100)? true : false
     }
   }
@@ -214,7 +214,7 @@ schema.messages = {
     type: 'Sorry, your name needs to be a string'
   },
   'address.city': {
-    minLength: (value, ruleArgument, fieldName, model) => {
+    minLength: (value, ruleArgument, path, model) => {
       return `Is your city of residence really only ${ruleArgument} characters long?`
     }
   },
