@@ -135,19 +135,18 @@ module.exports = function(monastery, opendb) {
     let setupIndex2 = await userIndexRawModel._setupIndexes({
       name: { type: 'string', index: 'text' },
     })
-    await expect(db._db.collection('userIndexRaw').indexes()).resolves.toEqual([
-      { v: 2, key: { _id: 1 }, name: '_id_' },
-      { v: 2, unique: true, key: { email: 1 }, name: 'email_1' },
-      {
-        v: 2,
-        key: { _fts: 'text', _ftsx: 1 },
-        name: 'text',
-        weights: { name: 1 },
-        default_language: 'english',
-        language_override: 'language',
-        textIndexVersion: 3
-      }
-    ])
+    let indexes = await db._db.collection('userIndexRaw').indexes()
+    expect(indexes[0]).toMatchObject({ v: 2, key: { _id: 1 }, name: '_id_' })
+    expect(indexes[1]).toMatchObject({ v: 2, unique: true, key: { email: 1 }, name: 'email_1' })
+    expect(indexes[2]).toMatchObject({
+      v: 2,
+      key: { _fts: 'text', _ftsx: 1 },
+      name: 'text',
+      weights: { name: 1 },
+      default_language: 'english',
+      language_override: 'language',
+      textIndexVersion: 3
+    })
 
     // Unique & text index
     let userIndexModel = await db.model('userIndex', {
@@ -157,19 +156,19 @@ module.exports = function(monastery, opendb) {
         name: { type: 'string', index: 'text' },
       }
     })
-    await expect(db._db.collection('userIndex').indexes()).resolves.toEqual([
-      { v: 2, key: { _id: 1 }, name: '_id_' },
-      { v: 2, unique: true, key: { email: 1 }, name: 'email_1' },
-      {
-        v: 2,
-        key: { _fts: 'text', _ftsx: 1 },
-        name: 'text',
-        weights: { name: 1 },
-        default_language: 'english',
-        language_override: 'language',
-        textIndexVersion: 3
-      }
-    ])
+
+    let indexes2 = await db._db.collection('userIndex').indexes()
+    expect(indexes2[0]).toMatchObject({ v: 2, key: { _id: 1 }, name: '_id_' })
+    expect(indexes2[1]).toMatchObject({ v: 2, unique: true, key: { email: 1 }, name: 'email_1' })
+    expect(indexes2[2]).toMatchObject({
+      v: 2,
+      key: { _fts: 'text', _ftsx: 1 },
+      name: 'text',
+      weights: { name: 1 },
+      default_language: 'english',
+      language_override: 'language',
+      textIndexVersion: 3
+    })
 
     // No text index change error, i.e. new Error("Index with name: text already exists with different options")
     await expect(userIndexModel._setupIndexes({
