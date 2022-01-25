@@ -116,27 +116,77 @@ module.exports = function(monastery, opendb) {
   })
 
   test('Model indexes', async (done) => {
-    // Setup
     // Need to test different types of indexes
     let db = (await opendb(null)).db
-    let user = db.model('user', {})
-    let user2 = db.model('user2', {})
 
-    // Text index setup
-    let setupIndex1 = await user._setupIndexes({
-      name: { type: 'string', index: 'text' }
+    // Drop previously tested collections
+    if ((await db._db.listCollections().toArray()).find(o => o.name == 'userIndexRaw')) {
+      await db._db.collection('userIndexRaw').drop()
+    }
+    if ((await db._db.listCollections().toArray()).find(o => o.name == 'userIndex')) {
+      await db._db.collection('userIndex').drop()
+    }
+
+    // Unique & text index (after model initialisation, in serial)
+    let userIndexRawModel = db.model('userIndexRaw', {})
+    let setupIndex1 = await userIndexRawModel._setupIndexes({
+      email: { type: 'string', index: 'unique' },
     })
+    let setupIndex2 = await userIndexRawModel._setupIndexes({
+      name: { type: 'string', index: 'text' },
+    })
+    await expect(db._db.collection('userIndexRaw').indexes()).resolves.toEqual([
+      { v: 2, key: { _id: 1 }, name: '_id_' },
+      { v: 2, unique: true, key: { email: 1 }, name: 'email_1' },
+      {
+        v: 2,
+        key: { _fts: 'text', _ftsx: 1 },
+        name: 'text',
+        weights: { name: 1 },
+        default_language: 'english',
+        language_override: 'language',
+        textIndexVersion: 3
+      }
+    ])
+
+    // Unique & text index
+    let userIndexModel = await db.model('userIndex', {
+      waitForIndexes: true,
+      fields: {
+        email: { type: 'string', index: 'unique' },
+        name: { type: 'string', index: 'text' },
+      }
+    })
+    await expect(db._db.collection('userIndex').indexes()).resolves.toEqual([
+      { v: 2, key: { _id: 1 }, name: '_id_' },
+      { v: 2, unique: true, key: { email: 1 }, name: 'email_1' },
+      {
+        v: 2,
+        key: { _fts: 'text', _ftsx: 1 },
+        name: 'text',
+        weights: { name: 1 },
+        default_language: 'english',
+        language_override: 'language',
+        textIndexVersion: 3
+      }
+    ])
 
     // No text index change error, i.e. new Error("Index with name: text already exists with different options")
-    await expect(user._setupIndexes({
+    await expect(userIndexModel._setupIndexes({
       name: { type: 'string', index: 'text' },
       name2: { type: 'string', index: 'text' }
-    })).resolves.toEqual(undefined)
+    })).resolves.toEqual([{
+      "key": { "name": "text", "name2": "text" },
+      "name": "text",
+    }])
 
     // Text index on a different model
-    await expect(user2._setupIndexes({
-      name: { type: 'string', index: 'text' }
-    })).resolves.toEqual(undefined)
+    await expect(userIndexRawModel._setupIndexes({
+      name2: { type: 'string', index: 'text' }
+    })).resolves.toEqual([{
+      "key": {"name2": "text"},
+      "name": "text",
+    }])
 
     db.close()
     done()
@@ -147,7 +197,7 @@ module.exports = function(monastery, opendb) {
     // with text indexes are setup at the same time
     let db = (await opendb(null)).db
     await db.model('user3', {
-      promise: true,
+      waitForIndexes: true,
       fields: {
         location: {
           index: '2dsphere',

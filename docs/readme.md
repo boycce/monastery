@@ -71,6 +71,12 @@ $ DEBUG=monastery:info
 $ DEBUG=monastery:*
 ```
 
+To run isolated tests with Jest:
+
+```bash
+npm run dev -- -t 'Model indexes'
+```
+
 ## Contributing
 
 Coming soon...
