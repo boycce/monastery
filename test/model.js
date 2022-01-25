@@ -115,7 +115,7 @@ module.exports = function(monastery, opendb) {
     })
   })
 
-  test('Model indexes', async (done) => {
+  test('Model indexes', async () => {
     // Need to test different types of indexes
     let db = (await opendb(null)).db
 
@@ -188,10 +188,9 @@ module.exports = function(monastery, opendb) {
     }])
 
     db.close()
-    done()
   })
 
-  test('Model 2dsphere indexes', async (done) => {
+  test('Model 2dsphere indexes', async () => {
     // Setup. The tested model needs to be unique as race condition issue arises when the same model
     // with text indexes are setup at the same time
     let db = (await opendb(null)).db
@@ -249,10 +248,9 @@ module.exports = function(monastery, opendb) {
     })
 
     db.close()
-    done()
   })
 
-  test('Model findBL, findBLProject', async (done) => {
+  test('Model findBL, findBLProject', async () => {
     let db = (await opendb(null)).db
     db.model('bird', { fields: {
       name: { type: 'string' }
@@ -415,7 +413,6 @@ module.exports = function(monastery, opendb) {
     })
 
     db.close()
-    done()
   })
 
 }

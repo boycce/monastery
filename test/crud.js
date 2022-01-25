@@ -2,7 +2,7 @@
 
 module.exports = function(monastery, opendb) {
 
-  test('Basic operator calls', async (done) => {
+  test('Basic operator calls', async () => {
     let db = (await opendb(null)).db
     let user = db.model('user', {
       fields: { name: { type: 'string' }},
@@ -138,10 +138,9 @@ module.exports = function(monastery, opendb) {
     expect(remove.result).toEqual({ n: 1, ok: 1 })
 
     db.close()
-    done()
   })
 
-  test('Insert defaults', async (done) => {
+  test('Insert defaults', async () => {
     let db = (await opendb(null, { defaultObjects: true, serverSelectionTimeoutMS: 2000 })).db
     let db2 = (await opendb(null, { useMilliseconds: true, serverSelectionTimeoutMS: 2000 })).db
     let user = db.model('user', { fields: {
@@ -193,10 +192,9 @@ module.exports = function(monastery, opendb) {
 
     db.close()
     db2.close()
-    done()
   })
 
-  test('update defaults', async (done) => {
+  test('update defaults', async () => {
     let db = (await opendb(null, { useMilliseconds: true, serverSelectionTimeoutMS: 2000 })).db
     let user = db.model('user', {
       fields: {
@@ -255,10 +253,9 @@ module.exports = function(monastery, opendb) {
     expect(updated5.updatedAt).toEqual(1)
 
     db.close()
-    done()
   })
 
-  test('Insert with id casting', async (done) => {
+  test('Insert with id casting', async () => {
     let db = (await opendb(null)).db
     db.model('company', { fields: {
       name: { type: 'string' }
@@ -280,10 +277,9 @@ module.exports = function(monastery, opendb) {
     })
 
     db.close()
-    done()
   })
 
-  test('Find default field population', async (done) => {
+  test('Find default field population', async () => {
     let db = (await opendb(null)).db
     let user = db.model('user', {
       fields: {
@@ -371,10 +367,9 @@ module.exports = function(monastery, opendb) {
     })
 
     db.close()
-    done()
   })
 
-  test('Hooks', async (done) => {
+  test('Hooks', async () => {
     let db = (await opendb(null)).db
     let user = db.model('user', {
       fields: {
@@ -442,7 +437,6 @@ module.exports = function(monastery, opendb) {
     })
 
     db.close()
-    done()
   })
 
 }

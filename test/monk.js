@@ -1,6 +1,6 @@
 module.exports = function(monastery, opendb) {
 
-  test('Monk confilicts', async (done) => {
+  test('Monk confilicts', async () => {
     // Setup
     let db = (await opendb(false)).db
     let monkdb = require('monk')(':badconnection', () => {})
@@ -19,8 +19,8 @@ module.exports = function(monastery, opendb) {
     expect(db.connected).toEqual(db.connected)
     expect(db.model.connected).toEqual(modelNamedConnected)
 
-    // Close test since monk(uri) awaits upoin a connection
-    done()
+    // Close test since monk(uri) awaits upoin a connection (Update, done not needed in latest jest)
+    // done()
   })
 
   test('Monastery connect with promise', (done) => {

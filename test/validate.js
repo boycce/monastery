@@ -625,7 +625,6 @@ module.exports = function(monastery, opendb) {
       amount: { type: 'number', required: true },
     }})
 
-
     // MinLength
     await expect(user.validate({ name: 'Martin Luther' })).resolves.toEqual({name: 'Martin Luther'})
     await expect(user.validate({ name: 'Carl' })).rejects.toContainEqual({
@@ -694,7 +693,7 @@ module.exports = function(monastery, opendb) {
     await expect(user.validate({ amount: 'bad' })).rejects.toContainEqual(mock2)
   })
 
-  test('Schema default objects', async (done) => {
+  test('Schema default objects', async () => {
     let db = (await opendb(null, {
       timestamps: false,
       defaultObjects: true,
@@ -718,10 +717,9 @@ module.exports = function(monastery, opendb) {
     })
 
     db.close()
-    done()
   })
 
-  test('Schema nullObjects', async (done) => {
+  test('Schema nullObjects', async () => {
     let db = (await opendb(null, {
       timestamps: false,
       nullObjects: true,
@@ -739,7 +737,6 @@ module.exports = function(monastery, opendb) {
     await expect(user.validate({ animals: '', names: null })).resolves.toEqual({ animals: null, names: null })
 
     db.close()
-    done()
   })
 
   test('Validation options', async () => {
@@ -827,7 +824,7 @@ module.exports = function(monastery, opendb) {
     })
   })
 
-  test('Validation hooks', async (done) => {
+  test('Validation hooks', async () => {
     let db = (await opendb(null)).db
     let user = db.model('user', {
       fields: {
@@ -877,7 +874,6 @@ module.exports = function(monastery, opendb) {
       })
 
     db.close()
-    done()
   })
 
 }

@@ -1,6 +1,6 @@
 module.exports = function(monastery, opendb) {
 
-  test('Model populate', async (done) => {
+  test('Model populate', async () => {
     // Setup
     let db = (await opendb(null)).db
     let bird = db.model('bird', { fields: {
@@ -80,10 +80,9 @@ module.exports = function(monastery, opendb) {
     }])
 
     db.close()
-    done()
   })
 
-  test('Model populate type=any', async (done) => {
+  test('Model populate type=any', async () => {
     let db = (await opendb(null)).db
     db.model('company', { fields: {
       address: { type: 'any' }
@@ -131,10 +130,9 @@ module.exports = function(monastery, opendb) {
     })
 
     db.close()
-    done()
   })
 
-  test('Model populate/blacklisting via $lookup', async (done) => {
+  test('Model populate/blacklisting via $lookup', async () => {
     // Setup
     let db = (await opendb(null)).db
     let user = db.model('user', {
@@ -217,7 +215,6 @@ module.exports = function(monastery, opendb) {
     })
 
     db.close()
-    done()
   })
 
 }
