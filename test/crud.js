@@ -1,4 +1,4 @@
-let util = require('../lib/util')
+// let util = require('../lib/util')
 
 module.exports = function(monastery, opendb) {
 
@@ -53,13 +53,14 @@ module.exports = function(monastery, opendb) {
     expect(find6).toEqual({ _id: inserted2[0]._id, name: 'Martin Luther1' })
 
     // Missing parameters
-    await expect(user.find()).rejects.toThrow(`Please pass an object or MongoId to options.query`)
-    await expect(user.find(undefined)).rejects.toThrow(`Please pass an object or MongoId to options.query`)
-    await expect(user.find({})).rejects.toThrow(`Please pass an object or MongoId to options.query`)
-    await expect(user.find({ query: null })).rejects.toThrow(`Please pass an object or MongoId to options.query`)
-    await expect(user.find({ query: undefined })).rejects.toThrow(`Please pass an object or MongoId to options.query`)
-    await expect(user.find({ query: { _id: undefined }})).rejects.toThrow(`Please pass an object or MongoId to options.query`)
-    await expect(user.find(1)).rejects.toThrow(`Please pass an object or MongoId to options.query`)
+    await expect(user.find()).rejects.toThrow('Please pass an object or MongoId to options.query')
+    await expect(user.find(undefined)).rejects.toThrow('Please pass an object or MongoId to options.query')
+    await expect(user.find({})).rejects.toThrow('Please pass an object or MongoId to options.query')
+    await expect(user.find({ query: null })).rejects.toThrow('Please pass an object or MongoId to options.query')
+    await expect(user.find({ query: undefined })).rejects.toThrow('Please pass an object or MongoId to options.query')
+    await expect(user.find({ query: { _id: undefined }}))
+      .rejects.toThrow('Please pass an object or MongoId to options.query')
+    await expect(user.find(1)).rejects.toThrow('Please pass an object or MongoId to options.query')
 
     // Bad MongoID
     await expect(user.find({ query: '' })).resolves.toEqual(null)
@@ -89,10 +90,10 @@ module.exports = function(monastery, opendb) {
 
     // Update (no/empty data object)
     await expect(user.update({ query: inserted._id, data: {}}))
-      .rejects.toThrow(`No valid data passed to user.update()`)
+      .rejects.toThrow('No valid data passed to user.update()')
 
     await expect(user.update({ query: inserted._id }))
-      .rejects.toThrow(`No valid data passed to user.update()`)
+      .rejects.toThrow('No valid data passed to user.update()')
 
     // Update (no/empty data object, but has update operators
     await expect(user.update({ query: inserted._id, $set: { name: 'bruce' }}))
@@ -114,7 +115,7 @@ module.exports = function(monastery, opendb) {
     expect(beforeValidateHookCalled).toEqual(false)
 
     // Update multiple
-    let updated2 = await user.update({
+    await user.update({
       query: { _id: { $in: [inserted2[0]._id, inserted2[1]._id] }},
       data: { name: 'Martin Luther3' },
       multi: true
@@ -236,7 +237,7 @@ module.exports = function(monastery, opendb) {
       query: inserted._id,
       data: {},
       timestamps: false
-    })).rejects.toThrow(`No valid data passed to user.update()`)
+    })).rejects.toThrow('No valid data passed to user.update()')
 
     // UpdatedAt override (wont work)
     let updated4 = await user.update({
@@ -259,7 +260,7 @@ module.exports = function(monastery, opendb) {
 
   test('Insert with id casting', async (done) => {
     let db = (await opendb(null)).db
-    let company = db.model('company', { fields: {
+    db.model('company', { fields: {
       name: { type: 'string' }
     }})
     let user = db.model('user', { fields: {
@@ -308,7 +309,7 @@ module.exports = function(monastery, opendb) {
       ],
       pet: { dog: inserted._id }
     }})
-    let updated = await dog.update({
+    await dog.update({
       query: inserted._id,
       data: { user: inserted2._id }
     })
@@ -412,8 +413,8 @@ module.exports = function(monastery, opendb) {
     let userDoc = await user.insert({ data: { first: 'Martin', last: 'Luther' }})
 
     // Catch insert (a)synchronous errors thrown in function or through `next(err)`
-    await expect(user.insert({ data: { first: '' } })).rejects.toThrow(`beforeInsert error 1..`)
-    await expect(user.insert({ data: { first: 'Martin' } })).rejects.toThrow(`beforeInsert error 2..`)
+    await expect(user.insert({ data: { first: '' } })).rejects.toThrow('beforeInsert error 1..')
+    await expect(user.insert({ data: { first: 'Martin' } })).rejects.toThrow('beforeInsert error 2..')
     await expect(user.insert({ data: { first: 'Martin', last: 'Luther' } })).resolves.toEqual({
       _id: expect.any(Object),
       first: 'Martin',
@@ -421,15 +422,17 @@ module.exports = function(monastery, opendb) {
     })
 
     // Catch update (a)synchronous errors thrown in function or through `next(err)`
-    await expect(user.update({ query: userDoc._id, data: { first: '' } })).rejects.toThrow(`beforeUpdate error 1..`)
-    await expect(user.update({ query: userDoc._id, data: { first: 'Martin' } })).rejects.toThrow(`beforeUpdate error 2..`)
+    await expect(user.update({ query: userDoc._id, data: { first: '' } }))
+      .rejects.toThrow('beforeUpdate error 1..')
+    await expect(user.update({ query: userDoc._id, data: { first: 'Martin' } }))
+      .rejects.toThrow('beforeUpdate error 2..')
     await expect(user.update({ query: userDoc._id, data: { first: 'Martin', last: 'Luther' } })).resolves.toEqual({
       first: 'Martin',
       last: 'Luther'
     })
 
     // Catch remove synchronous errors through `next(err)`
-    await expect(user.remove({ query: userDoc._id })).rejects.toThrow(`beforeRemove error..`)
+    await expect(user.remove({ query: userDoc._id })).rejects.toThrow('beforeRemove error..')
 
     // After find continues series
     await expect(user.find({ query: userDoc._id })).resolves.toEqual({

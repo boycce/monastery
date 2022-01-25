@@ -4,7 +4,7 @@ module.exports = function(monastery, opendb) {
     // Setup
     let db = (await opendb(false)).db
     let monkdb = require('monk')(':badconnection', () => {})
-    let user = db.model('user', {})
+    db.model('user', {})
     let modelNamedConnected = db.model('connected', {})
 
     // Any of our monastery properties already exist on the manager?

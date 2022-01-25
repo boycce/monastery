@@ -30,7 +30,7 @@ module.exports = function(monastery, opendb) {
       name: 'Martin Luther',
       myBird: {
         _id: bird1._id,
-        name: "ponyo"
+        name: 'ponyo'
       },
       pets: {
         myBird: bird1._id
@@ -46,7 +46,7 @@ module.exports = function(monastery, opendb) {
       pets: {
         myBird: {
           _id: bird1._id,
-          name: "ponyo"
+          name: 'ponyo'
         },
       }
     })
@@ -62,7 +62,7 @@ module.exports = function(monastery, opendb) {
       name: 'Martin Luther',
       myBird: {
         _id: bird1._id,
-        name: "ponyo"
+        name: 'ponyo'
       },
       pets: {
         myBird: bird1._id
@@ -72,7 +72,7 @@ module.exports = function(monastery, opendb) {
       name: 'Martin Luther2',
       myBird: {
         _id: bird1._id,
-        name: "ponyo"
+        name: 'ponyo'
       },
       pets: {
         myBird: bird1._id
@@ -167,10 +167,10 @@ module.exports = function(monastery, opendb) {
     let find1 = await user.findOne({
       query: user1._id,
       populate: [{
-        "as": "birds",
-        "from": "bird",
-        "let": { id: "$_id" },
-        "pipeline": [
+        'as': 'birds',
+        'from': 'bird',
+        'let': { id: '$_id' },
+        'pipeline': [
           { $match: { $expr: { $eq: ['$owner', '$$id'] }}}
         ]
       }]
@@ -193,10 +193,10 @@ module.exports = function(monastery, opendb) {
     let find2 = await user.findOne({
       query: user1._id,
       populate: [{
-        "as": "anyModel",
-        "from": "bird",
-        "let": { id: "$_id" },
-        "pipeline": [
+        'as': 'anyModel',
+        'from': 'bird',
+        'let': { id: '$_id' },
+        'pipeline': [
           { $match: { $expr: { $eq: ['$owner', '$$id'] }}}
         ]
       }]

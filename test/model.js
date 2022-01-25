@@ -19,13 +19,13 @@ module.exports = function(monastery, opendb) {
          insertOnly: true,
          isInteger: true,
          timestampField: true,
-         type: "integer",
+         type: 'integer',
        },
        updatedAt: {
          default: expect.any(Function),
          isInteger: true,
          timestampField: true,
-         type: "integer",
+         type: 'integer',
        },
     })
 
@@ -79,13 +79,13 @@ module.exports = function(monastery, opendb) {
         insertOnly: true,
         isInteger: true,
         timestampField: true,
-        type: "integer"
+        type: 'integer'
       },
       updatedAt: {
         default: expect.any(Function),
         isInteger: true,
         timestampField: true,
-        type: "integer"
+        type: 'integer'
       }
     })
   })
@@ -129,10 +129,10 @@ module.exports = function(monastery, opendb) {
 
     // Unique & text index (after model initialisation, in serial)
     let userIndexRawModel = db.model('userIndexRaw', {})
-    let setupIndex1 = await userIndexRawModel._setupIndexes({
+    await userIndexRawModel._setupIndexes({
       email: { type: 'string', index: 'unique' },
     })
-    let setupIndex2 = await userIndexRawModel._setupIndexes({
+    await userIndexRawModel._setupIndexes({
       name: { type: 'string', index: 'text' },
     })
     let indexes = await db._db.collection('userIndexRaw').indexes()
@@ -170,21 +170,21 @@ module.exports = function(monastery, opendb) {
       textIndexVersion: 3
     })
 
-    // No text index change error, i.e. new Error("Index with name: text already exists with different options")
+    // No text index change error, i.e. new Error('Index with name: text already exists with different options')
     await expect(userIndexModel._setupIndexes({
       name: { type: 'string', index: 'text' },
       name2: { type: 'string', index: 'text' }
     })).resolves.toEqual([{
-      "key": { "name": "text", "name2": "text" },
-      "name": "text",
+      'key': { 'name': 'text', 'name2': 'text' },
+      'name': 'text',
     }])
 
     // Text index on a different model
     await expect(userIndexRawModel._setupIndexes({
       name2: { type: 'string', index: 'text' }
     })).resolves.toEqual([{
-      "key": {"name2": "text"},
-      "name": "text",
+      'key': {'name2': 'text'},
+      'name': 'text',
     }])
 
     db.close()
@@ -217,10 +217,10 @@ module.exports = function(monastery, opendb) {
       coordinates: expect.any(Array),
       schema: {
         default: undefined,
-        index: "2dsphere",
+        index: '2dsphere',
         isObject: true,
         nullObject: undefined,
-        type: "object"
+        type: 'object'
       }
     })
     expect(db.user3.fields.location2).toEqual({
@@ -228,10 +228,10 @@ module.exports = function(monastery, opendb) {
       coordinates: expect.any(Array),
       schema: {
         default: undefined,
-        index: { type: "2dsphere" },
+        index: { type: '2dsphere' },
         isObject: true,
         nullObject: undefined,
-        type: "object"
+        type: 'object'
       }
     })
 
@@ -244,7 +244,7 @@ module.exports = function(monastery, opendb) {
        _id: expect.any(Object),
        location: {
          coordinates: [172.5880385, -43.3311608],
-         type: "Point"
+         type: 'Point'
        },
     })
 
@@ -254,7 +254,7 @@ module.exports = function(monastery, opendb) {
 
   test('Model findBL, findBLProject', async (done) => {
     let db = (await opendb(null)).db
-    let bird = db.model('bird', { fields: {
+    db.model('bird', { fields: {
       name: { type: 'string' }
     }})
     let user = db.model('user', {
@@ -355,8 +355,8 @@ module.exports = function(monastery, opendb) {
       'hiddenDeepModel': 0,
       'hiddenDeepModels': 0,
       // Deep model blacklists
-      "deepModel.myBird.password": 0,
-      "deepModel2.myBird.password": 0
+      'deepModel.myBird.password': 0,
+      'deepModel2.myBird.password': 0
     })
 
     // Test whitelisting

@@ -15,7 +15,7 @@ module.exports = function(monastery, opendb) {
       }
     })
     let company = await db.company.insert({ data: {
-      logo: { bucket: "corex-dev", date: 1598481616 }
+      logo: { bucket: 'corex-dev', date: 1598481616 }
     }})
     let user = await db.user.insert({ data: {
       company: company._id
@@ -31,13 +31,13 @@ module.exports = function(monastery, opendb) {
     expect(db.company.fields.logo).toEqual({
       image: true,
       isAny: true,
-      type: "any"
+      type: 'any'
     })
 
     // found company
     expect(foundCompany).toEqual({
       _id: company._id,
-      logo: { bucket: "corex-dev", date: 1598481616 },
+      logo: { bucket: 'corex-dev', date: 1598481616 },
     })
 
     // found user
@@ -45,7 +45,7 @@ module.exports = function(monastery, opendb) {
       _id: user._id,
       company: {
         _id: company._id,
-        logo: { bucket: "corex-dev", date: 1598481616 }
+        logo: { bucket: 'corex-dev', date: 1598481616 }
       }
     })
 
@@ -75,7 +75,10 @@ module.exports = function(monastery, opendb) {
       filename: { type: 'string', isString: true },
       filesize: { type: 'number', isNumber: true },
       path: { type: 'string', isString: true },
-      schema: { type: 'object', isObject: true, image: true, nullObject: true, default: undefined, isImageObject: true },
+      schema: {
+        type: 'object', isObject: true, image: true, nullObject: true, default: undefined,
+        isImageObject: true
+      },
       uid: { type: 'string', isString: true }
     }
 
@@ -95,7 +98,7 @@ module.exports = function(monastery, opendb) {
       imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
     })).db
     let plugin = db.imagePluginFile
-    let user = db.model('user', { fields: {
+    db.model('user', { fields: {
       logo: { type: 'image' },
       logos: [{ type: 'image' }],
       users: [{ logo: { type: 'image' } }]
@@ -350,13 +353,13 @@ module.exports = function(monastery, opendb) {
       logo: { type: 'image' }
     }})
 
-    let image = {
-      bucket: 'test',
-      date: 1234,
-      filename: 'test.png',
-      filesize: 1234,
-      path: 'test/test123'
-    }
+    // let image = {
+    //   bucket: 'test',
+    //   date: 1234,
+    //   filename: 'test.png',
+    //   filesize: 1234,
+    //   path: 'test/test123'
+    // }
     let user1 = await db.user._insert({
       logo: null
     })
@@ -474,7 +477,7 @@ module.exports = function(monastery, opendb) {
       imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
     })).db
 
-    let user = db.model('user', { fields: {
+    db.model('user', { fields: {
       logo: { type: 'image' },
       logos: [{ type: 'image' }],
       users: [{ logo: { type: 'image' } }]
@@ -500,7 +503,7 @@ module.exports = function(monastery, opendb) {
     app.use(bodyParser.urlencoded({ extended: true }))
     app.post('/', async function(req, res) {
       try {
-        let result = await db.user.validate(req.body)
+        await db.user.validate(req.body)
         res.send()
       } catch (err) {
         res.status(500).send(err)
@@ -515,7 +518,7 @@ module.exports = function(monastery, opendb) {
         logos: [undefined, imageObjectMock, {}],//0,1=ok
         users: [
           { logo: {} },
-          { logo: { bucket: "" }},
+          { logo: { bucket: '' }},
           { logo: imageObjectMock },//ok
           { logo: null },//ok
         ]

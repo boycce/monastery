@@ -19,22 +19,23 @@
   "scripts": {
     "minor": "standard-version --release-as minor && npm publish",
     "patch": "standard-version && npm publish",
-    "test": "jest",
+    "test": "npm run lint && jest",
     "test-one-example": "jest -t images",
-    "dev": "DEBUG=-monastery:info jest --watchAll --runInBand --verbose=false",
+    "dev": "npm run lint & DEBUG=-monastery:info jest --watchAll --runInBand --verbose=false",
+    "lint": "eslint ./lib ./plugins ./test",
     "docs": "cd docs && bundle exec jekyll serve --livereload --livereload-port 4001"
   },
   "dependencies": {
-    "aws-sdk": "2.742.0",
+    "aws-sdk": "2.1062.0",
     "debug": "4.1.1",
     "file-type": "15.0.0",
     "monk": "7.3.4",
-    "nanoid": "3.1.12",
-    "validator": "13.0.0"
+    "nanoid": "3.2.0",
+    "validator": "13.7.0"
   },
   "devDependencies": {
     "body-parser": "1.19.0",
-    "eslint": "6.8.0",
+    "eslint": "8.7.0",
     "express": "4.17.1",
     "express-fileupload": "1.2.0",
     "jest": "25.3.0",

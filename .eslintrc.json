@@ -1,12 +1,38 @@
 {
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "extends": [
+    "eslint:recommended"
+  ],
+  "globals": {
+    "test": true,
+    "expect": true
+  },
   "parserOptions": {
-    "ecmaVersion": 2018,
-    "sourceType": "module",
     "ecmaFeatures": {
       "jsx": true
-    }
+    },
+    "ecmaVersion": "latest",
+    "sourceType": "module"
   },
+  "plugins": [],
   "rules": {
-    //"quotes": ["error", "double"]
+    "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
+    "max-len": ["error", { "code": 120, "ignorePattern": "^\\s*<(rect|path|line)\\s" }],
+    "no-prototype-builtins": "off",
+    "no-unused-vars": ["error", { "args": "none" }],
+    "object-shorthand": ["error", "consistent"],
+    // "no-restricted-syntax": [
+    //   "error",
+    //   {
+    //     "selector": "ObjectPattern > Property[shorthand=false]",
+    //     "message": "Renaming properties within object deconstructions is not allowed."
+    //   }
+    // ],
+    "quotes": ["error", "single"],
+    "semi": ["error", "never"]
   }
 }

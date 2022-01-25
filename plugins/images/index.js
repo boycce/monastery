@@ -155,8 +155,8 @@ let plugin = module.exports = {
       if (test) return [prunedData]
       return model._update(
         idquery,
-        { "$set": prunedData },
-        { "multi": options.multi || options.create }
+        { '$set': prunedData },
+        { 'multi': options.multi || options.create }
       )
 
     // If errors, remove inserted documents to prevent double ups when the user resaves.
@@ -246,7 +246,7 @@ let plugin = module.exports = {
         // pre-existing image, push to unused
         return plugin._findValidImages(options.files || {}, options.model).then(files => {
           for (let filesArray of files) {
-            if (pre = preExistingImages.find(o => o.dataPath == filesArray.inputPath)) {
+            if ((pre = preExistingImages.find(o => o.dataPath == filesArray.inputPath))) {
               useCount[pre.image.uid]--
             }
           }
@@ -380,7 +380,7 @@ let plugin = module.exports = {
     let list = []
     util.forEach(fields, (field, fieldName) => {
       let path2 = `${path}.${fieldName}`.replace(/^\./, '')
-      let schema = field.schema || {}
+      // let schema = field.schema || {}
 
       // Subdocument field
       if (util.isSubdocument(field)) {//schema.isObject

@@ -157,7 +157,8 @@ module.exports = function(monastery, opendb) {
     })
 
     // Required subdocument property (defined with ignoreUndefined)
-    await expect(user.validate({ animals: { cat: '' }}, { update: true, ignoreUndefined: true })).rejects.toContainEqual({
+    await expect(user.validate({ animals: { cat: '' }}, { update: true, ignoreUndefined: true }))
+    .rejects.toContainEqual({
       status: '400',
       title: 'animals.cat',
       detail: 'This field is required.',
@@ -232,7 +233,6 @@ module.exports = function(monastery, opendb) {
   test('Validation getMostSpecificKeyMatchingPath', async () => {
     let fn = validate._getMostSpecificKeyMatchingPath
     let mock = {
-      'cats.name': true,
       'cats.name': true,
 
       'dogs.name': true,
@@ -318,7 +318,7 @@ module.exports = function(monastery, opendb) {
     // Setup
     // Todo: Setup testing for array array subdocument field messages
     let db = (await opendb(false)).db
-    let arrayWithSchema = (array, schema) => { array.schema = schema; return array }
+    // let arrayWithSchema = (array, schema) => { array.schema = schema; return array }
     let user = db.model('user', {
       fields: {
         name: { type: 'string', minLength: 4 },
@@ -415,14 +415,16 @@ module.exports = function(monastery, opendb) {
       meta: { rule: 'minLength', model: 'user', field: 'name' }
     })
     // array-subdocument-1-field error
-    await expect(user.validate({ catNames: [{ name: 'carla' }, { name: 'ben' }] })).rejects.toContainEqual({
+    await expect(user.validate({ catNames: [{ name: 'carla' }, { name: 'ben' }] }))
+    .rejects.toContainEqual({
       status: '400',
       title: 'catNames.1.name',
       detail: 'min length error (1)',
       meta: { rule: 'minLength', model: 'user', field: 'name' }
     })
     // array-subdocument-2-field error
-    await expect(user.validate({ catNames: [{ name: 'carla' }, { name: 'carla' }, { name: 'ben' }] })).rejects.toContainEqual({
+    await expect(user.validate({ catNames: [{ name: 'carla' }, { name: 'carla' }, { name: 'ben' }] }))
+    .rejects.toContainEqual({
       status: '400',
       title: 'catNames.2.name',
       detail: 'min length error (2)',
@@ -431,28 +433,32 @@ module.exports = function(monastery, opendb) {
 
 
     // array-subdocument-field error (loose $ match)
-    await expect(user.validate({ pigNames: [[{ name: 'ben' }]] })).rejects.toContainEqual({
+    await expect(user.validate({ pigNames: [[{ name: 'ben' }]] }))
+    .rejects.toContainEqual({
       status: '400',
       title: 'pigNames.0.0.name',
       detail: 'min length error ($)',
       meta: { rule: 'minLength', model: 'user', field: 'name' }
     })
     // array-subdocument-1-field error
-    await expect(user.validate({ pigNames: [[{ name: 'carla' }, { name: 'ben' }]] })).rejects.toContainEqual({
+    await expect(user.validate({ pigNames: [[{ name: 'carla' }, { name: 'ben' }]] }))
+    .rejects.toContainEqual({
       status: '400',
       title: 'pigNames.0.1.name',
       detail: 'min length error (1)',
       meta: { rule: 'minLength', model: 'user', field: 'name' }
     })
     // array-subdocument-0-2-field error
-    await expect(user.validate({ pigNames: [[{ name: 'carla' }, { name: 'carla' }, { name: 'ben' }]] })).rejects.toContainEqual({
+    await expect(user.validate({ pigNames: [[{ name: 'carla' }, { name: 'carla' }, { name: 'ben' }]] }))
+    .rejects.toContainEqual({
       status: '400',
       title: 'pigNames.0.2.name',
       detail: 'min length error (deep 0 2)',
       meta: { rule: 'minLength', model: 'user', field: 'name' }
     })
     // array-subdocument-2-0-field error (fallback)
-    await expect(user.validate({ pigNames: [[],[],[{ name: 'carla' },{ name: 'carla' },{ name: 'ben' }]] })).rejects.toContainEqual({
+    await expect(user.validate({ pigNames: [[],[],[{ name: 'carla' },{ name: 'carla' },{ name: 'ben' }]] }))
+    .rejects.toContainEqual({
       status: '400',
       title: 'pigNames.2.2.name',
       detail: 'min length error (deep $ 2)',
@@ -494,7 +500,9 @@ module.exports = function(monastery, opendb) {
     })
 
     // subdocument in an array
-    await expect(user.validate({ animals: [{ name: 'benjamin' }] })).resolves.toEqual({ animals: [{ name: 'benjamin' }] })
+    await expect(user.validate({ animals: [{ name: 'benjamin' }] })).resolves.toEqual({
+      animals: [{ name: 'benjamin' }]
+    })
     await expect(user.validate({ animals: [{ name: 'ben' }] })).rejects.toContainEqual({
       status: '400',
       title: 'animals.0.name',
@@ -588,11 +596,11 @@ module.exports = function(monastery, opendb) {
 
     // Index, mongodb connection error
     await expect(user3._setupIndexes({ name: { type: 'string', index: 'text' }})).rejects
-      .toEqual({ type: "info", detail: "Skipping createIndex on the 'user3' model, no mongodb connection found." })
+      .toEqual({ type: 'info', detail: 'Skipping createIndex on the \'user3\' model, no mongodb connection found.' })
 
     // Model id (Monk ObjectId)
-    let data = await user4.validate({ name: "5d4356299d0f010017602f6b" })
-    await expect(data.name.toString()).toEqual(db.id("5d4356299d0f010017602f6b").toString())
+    let data = await user4.validate({ name: '5d4356299d0f010017602f6b' })
+    await expect(data.name.toString()).toEqual(db.id('5d4356299d0f010017602f6b').toString())
     await expect(data.name).toEqual(expect.any(Object))
 
     // Bad model id (Monk ObjectId)
@@ -693,7 +701,7 @@ module.exports = function(monastery, opendb) {
       serverSelectionTimeoutMS: 2000
     })).db
 
-    let base = { names: [], animals: { dogs: [] }}
+    // let base = { names: [], animals: { dogs: [] }}
     let user = db.model('user', { fields: {
       name: { type: 'string' },
       names: [{ type: 'string' }],
@@ -788,13 +796,13 @@ module.exports = function(monastery, opendb) {
       { people2: [{ people3: [{}, {}] }] },
       { skipValidation: ['people2.$.people3.0.name'] }
     )).rejects.toContainEqual({
-      detail: "This field is required.",
-      status: "400",
-      title: "people2.0.people3.1.name",
+      detail: 'This field is required.',
+      status: '400',
+      title: 'people2.0.people3.1.name',
       meta: {
-        field: "name",
-        model: "user3",
-        rule: "required"
+        field: 'name',
+        model: 'user3',
+        rule: 'required'
       }
     })
 
@@ -808,13 +816,13 @@ module.exports = function(monastery, opendb) {
 
     // Non existing validation field entries
     await expect(user3.validate({ people: [{}] }, { skipValidation: ['people.badField'] })).rejects.toContainEqual({
-      detail: "This field is required.",
-      status: "400",
-      title: "people.0.name",
+      detail: 'This field is required.',
+      status: '400',
+      title: 'people.0.name',
       meta: {
-        model: "user3",
-        field: "name",
-        rule: "required"
+        model: 'user3',
+        field: 'name',
+        rule: 'required'
       }
     })
   })
@@ -841,16 +849,16 @@ module.exports = function(monastery, opendb) {
     let userDoc = await user.insert({ data: { first: 'Martin', last: 'Luther' }})
 
     // Catch validate (a)synchronous errors thrown in function or through `next(err)`
-    await expect(user.validate({ first: '' })).rejects.toThrow(`beforeValidate error 1..`)
-    await expect(user.validate({ first: 'Martin' })).rejects.toThrow(`beforeValidate error 2..`)
+    await expect(user.validate({ first: '' })).rejects.toThrow('beforeValidate error 1..')
+    await expect(user.validate({ first: 'Martin' })).rejects.toThrow('beforeValidate error 2..')
     await expect(user.validate({ first: 'Martin', last: 'Luther' })).resolves.toEqual({
       first: 'Martin',
       last: 'Luther'
     })
 
     // Catch insert (a)synchronous errors thrown in function or through `next(err)`
-    await expect(user.insert({ data: { first: '' } })).rejects.toThrow(`beforeValidate error 1..`)
-    await expect(user.insert({ data: { first: 'Martin' } })).rejects.toThrow(`beforeValidate error 2..`)
+    await expect(user.insert({ data: { first: '' } })).rejects.toThrow('beforeValidate error 1..')
+    await expect(user.insert({ data: { first: 'Martin' } })).rejects.toThrow('beforeValidate error 2..')
     await expect(user.insert({ data: { first: 'Martin', last: 'Luther' } })).resolves.toEqual({
       _id: expect.any(Object),
       first: 'Martin',
@@ -858,12 +866,15 @@ module.exports = function(monastery, opendb) {
     })
 
     // Catch update (a)synchronous errors thrown in function or through `next(err)`
-    await expect(user.update({ query: userDoc._id, data: { first: '' } })).rejects.toThrow(`beforeValidate error 1..`)
-    await expect(user.update({ query: userDoc._id, data: { first: 'Martin' } })).rejects.toThrow(`beforeValidate error 2..`)
-    await expect(user.update({ query: userDoc._id, data: { first: 'Martin', last: 'Luther' } })).resolves.toEqual({
-      first: 'Martin',
-      last: 'Luther'
-    })
+    await expect(user.update({ query: userDoc._id, data: { first: '' } }))
+      .rejects.toThrow('beforeValidate error 1..')
+    await expect(user.update({ query: userDoc._id, data: { first: 'Martin' } }))
+      .rejects.toThrow('beforeValidate error 2..')
+    await expect(user.update({ query: userDoc._id, data: { first: 'Martin', last: 'Luther' } }))
+      .resolves.toEqual({
+        first: 'Martin',
+        last: 'Luther'
+      })
 
     db.close()
     done()
