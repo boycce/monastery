@@ -481,11 +481,26 @@ module.exports = function(monastery, opendb) {
         name: { type: 'string', bigName: 8 },
         animals: [{
           name: { type: 'string', bigName: 8 }
-        }]
+        }],
       },
       rules: {
         bigName: function(value, ruleArg) {
           return value.length >= ruleArg
+        }
+      }
+    })
+    let user2 = db.model('user2', {
+      fields: {
+        name: { type: 'string' },
+        nickname: { type: 'string', requiredIfNoName: true },
+        age: { type: 'number', required: true },
+      },
+      rules: {
+        requiredIfNoName: {
+          ignoreUndefined: false,
+          fn: function(value, ruleArg) {
+            return value || this.name
+          }
         }
       }
     })
@@ -509,6 +524,39 @@ module.exports = function(monastery, opendb) {
       detail: 'Invalid data property for rule "bigName".',
       meta: { rule: 'bigName', model: 'user', field: 'name' }
     })
+
+    // Required rule based off another field (create)
+    await expect(user2.validate({ name: 'benjamin', age: 12 })).resolves.toEqual({
+      name: 'benjamin',
+      age: 12
+    })
+    await expect(user2.validate({ nickname: 'benny', age: 12 })).resolves.toEqual({
+      nickname: 'benny',
+      age: 12
+    })
+    await expect(user2.validate({ })).rejects.toEqual([
+      {
+        'detail': 'Invalid data property for rule "requiredIfNoName".',
+        'meta': { 'field': 'nickname', 'model': 'user2', 'rule': 'requiredIfNoName'},
+        'status': '400',
+        'title': 'nickname'
+      }, {
+        'detail': 'This field is required.',
+        'meta': { 'field': 'age', 'model': 'user2', 'rule': 'required'},
+        'status': '400',
+        'title': 'age'
+      }
+    ])
+    await expect(user2.validate({  }, { ignoreUndefined: true })).resolves.toEqual({})
+
+    // Required rule based off another field (update)
+    await expect(user2.validate({ }, { update: true })).resolves.toEqual({})
+    await expect(user2.validate({ nickname: '' }, { update: true })).rejects.toEqual([{
+      'detail': 'Invalid data property for rule "requiredIfNoName".',
+      'meta': { 'field': 'nickname', 'model': 'user2', 'rule': 'requiredIfNoName'},
+      'status': '400',
+      'title': 'nickname'
+    }])
   })
 
   test('Validated data', async () => {
@@ -532,8 +580,13 @@ module.exports = function(monastery, opendb) {
     // Ignores invalid data
     await expect(user.validate({ badprop: true, schema: {} })).resolves.toEqual({})
 
-    // Allows null data
-    await expect(user.validate({ name: null })).resolves.toEqual({ name: null })
+    // Rejects null for non object/array fields
+    await expect(user.validate({ name: null })).rejects.toEqual([{
+      'detail': 'Value was not a string.',
+      'meta': {'detailLong': undefined, 'field': 'name', 'model': 'user', 'rule': 'isString'},
+      'status':'400',
+      'title': 'name'
+    }])
 
     // String data
     await expect(user.validate({ name: 'Martin Luther' })).resolves.toEqual({ name: 'Martin Luther' })
@@ -556,9 +609,14 @@ module.exports = function(monastery, opendb) {
 
     // Subdocument property data (null)
     await expect(user.validate({ animals: { dog: null }}))
-      .resolves.toEqual({ animals: { dog: null }})
+      .rejects.toEqual([{
+        'detail': 'Value was not a string.',
+        'meta': {'detailLong': undefined, 'field': 'dog', 'model': 'user', 'rule': 'isString'},
+        'status': '400',
+        'title': 'animals.dog',
+      }])
 
-    // Subdocument property data (bad data)
+    // Subdocument property data (unknown data)
     await expect(user.validate({ animals: { dog: 'sparky', cat: 'grumpy' } }))
       .resolves.toEqual({ animals: { dog: 'sparky' } })
 
@@ -668,7 +726,12 @@ module.exports = function(monastery, opendb) {
     await expect(user2.validate({ amount: 0 })).resolves.toEqual({ amount: 0 }) // required
     await expect(user.validate({ amount: '0' })).resolves.toEqual({ amount: 0 }) // required
     await expect(user.validate({ amount: undefined })).resolves.toEqual({})  // not required
-    await expect(user.validate({ amount: null })).resolves.toEqual({ amount: null }) // not required
+    await expect(user.validate({ amount: null })).rejects.toEqual([{ // type error
+      'detail': 'Value was not a number.',
+      'meta': { 'field': 'amount', 'model': 'user', 'rule': 'isNumber'},
+      'status': '400',
+      'title': 'amount'
+    }])
 
     // Number required
     let mock1 = {
@@ -734,6 +797,12 @@ module.exports = function(monastery, opendb) {
     }})
 
     // Subdocument data (null/string)
+    await expect(user.validate({ animals: 'notAnObject' })).rejects.toEqual([{
+      'detail': 'Value was not an object.',
+      'meta': {'detailLong': undefined, 'field': 'animals', 'model': 'user', 'rule': 'isObject'},
+      'status': '400',
+      'title': 'animals'
+    }])
     await expect(user.validate({ animals: '', names: null })).resolves.toEqual({ animals: null, names: null })
 
     db.close()
