@@ -116,10 +116,9 @@ module.exports = function(monastery, opendb) {
   })
 
   test('Model indexes', async () => {
-    // Need to test different types of indexes
+    // Setup: Need to test different types of indexes
     let db = (await opendb(null)).db
-
-    // Drop previously tested collections
+    // Setup: Drop previously tested collections
     if ((await db._db.listCollections().toArray()).find(o => o.name == 'userIndexRaw')) {
       await db._db.collection('userIndexRaw').drop()
     }
@@ -185,6 +184,96 @@ module.exports = function(monastery, opendb) {
     })).resolves.toEqual([{
       'key': {'name2': 'text'},
       'name': 'text',
+    }])
+
+    db.close()
+  })
+
+  test('Model subdocument indexes', async () => {
+    // Setup: Need to test different types of indexes
+    let db = (await opendb(null)).db
+    // Setup: Drop previously tested collections
+    if ((await db._db.listCollections().toArray()).find(o => o.name == 'userIndexSubdoc')) {
+      await db._db.collection('userIndexSubdoc').drop()
+    }
+    // Run
+    let userModel = await db.model('userIndexSubdoc', {
+      fields: {}
+    })
+    await expect(userModel._setupIndexes(
+      {
+        animals: {
+          name: { type: 'string', index: 'unique' },
+        },
+        animals2: {
+          names: {
+            name: { type: 'string', index: 'unique' },
+          },
+        },
+        animals3: {
+          names: {
+            name: { type: 'string', index: 'text' },
+          },
+        },
+      }, {
+        dryRun: true
+      }
+    )).resolves.toEqual([{
+      'key': { 'animals.name': 1 },
+      'name': 'animals.name_1',
+      'unique': true,
+    }, {
+      'key': { 'animals2.names.name': 1 },
+      'name': 'animals2.names.name_1',
+      'unique': true,
+    }, {
+      'key': { 'animals3.names.name': 'text' },
+      'name': 'text',
+    }])
+
+    db.close()
+  })
+
+  test('Model array indexes', async () => {
+    // Setup: Need to test different types of indexes
+    let db = (await opendb(null)).db
+    // Setup: Drop previously tested collections
+    if ((await db._db.listCollections().toArray()).find(o => o.name == 'userIndexArray')) {
+      await db._db.collection('userIndexArray').drop()
+    }
+    // Run
+    let userModel = await db.model('userIndexArray', {
+      fields: {}
+    })
+    await expect(userModel._setupIndexes(
+      {
+        animals: [{
+          name: { type: 'string', index: 'unique' },
+        }],
+        animals2: [{ type: 'string', index: true }],
+        animals3: [[{ type: 'string', index: true }]],
+        animals4: [{
+          names: [{
+            name: { type: 'string', index: 'unique' },
+          }],
+        }],
+      }, {
+        dryRun: true
+      }
+    )).resolves.toEqual([{
+      'key': { 'animals.name': 1 },
+      'name': 'animals.name_1',
+      'unique': true,
+    }, {
+      'key': { 'animals2': 1 },
+      'name': 'animals2_1',
+    }, {
+      'key': { 'animals3.0': 1 },
+      'name': 'animals3.0_1',
+    }, {
+      'key': { 'animals4.names.name': 1 },
+      'name': 'animals4.names.name_1',
+      'unique': true,
     }])
 
     db.close()
