@@ -299,13 +299,8 @@ module.exports = function(monastery, opendb) {
 
         plugin.removeImages(options, req.body, true)
           .then(res => {
-            expect(res[0]).toEqual({ test1: 0, test2: -1, test3: 1, test4: 0 })
+            expect(res[0]).toEqual({ test1: 1, test2: 0, test3: 1, test4: 0 })
             expect(res[1]).toEqual([
-              { Key: 'dir/test1.png' },
-              { Key: 'small/test1.jpg' },
-              { Key: 'medium/test1.jpg' },
-              { Key: 'large/test1.jpg' },
-
               { Key: 'dir/test2.png' },
               { Key: 'small/test2.jpg' },
               { Key: 'medium/test2.jpg' },
@@ -558,6 +553,141 @@ module.exports = function(monastery, opendb) {
           done(err)
         })
     })()
+  })
+
+  test('images reorder', async () => {
+    let db = (await opendb(null, {
+      timestamps: false,
+      serverSelectionTimeoutMS: 2000,
+      imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
+    })).db
+
+    let user = db.model('user', { fields: {
+      logos: [{ type: 'image' }],
+    }})
+
+    let image = {
+      bucket: 'test',
+      date: 1234,
+      filename: 'lion1.png',
+      filesize: 1234,
+      path: 'test/lion1.png',
+      uid: 'lion1'
+    }
+
+    let user1 = await db.user._insert({
+      logos: [image],
+    })
+
+    let plugin = db.imagePluginFile
+    let supertest = require('supertest')
+    let express = require('express')
+    let upload = require('express-fileupload')
+    let app = express()
+    app.use(upload())
+
+    // Reorder
+    app.post('/', async function(req, res) {
+      try {
+        req.body.logos = JSON.parse(req.body.logos)
+        let options = { files: req.files, model: user, query: { _id: user1._id } }
+        let response = await plugin.removeImages(options, req.body, true)
+        expect(response[0]).toEqual({ lion1: 1 })
+        expect(response[1]).toEqual([])
+        res.send()
+      } catch (e) {
+        console.log(e.message || e)
+        res.status(500).send()
+      }
+    })
+    await supertest(app)
+      .post('/')
+      .field('logos', JSON.stringify([ null, image ]))
+      .expect(200)
+
+    db.close()
+  })
+
+  test('images reorder and added image', async () => {
+    // latest (2022.02)
+    let db = (await opendb(null, {
+      timestamps: false,
+      serverSelectionTimeoutMS: 2000,
+      imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
+    })).db
+
+    let user = db.model('user', { fields: {
+      logos: [{ type: 'image' }],
+    }})
+
+    let image = {
+      bucket: 'test',
+      date: 1234,
+      filename: 'lion1.png',
+      filesize: 1234,
+      path: 'test/lion1.png',
+      uid: 'lion1'
+    }
+
+    let user1 = await db.user._insert({
+      logos: [image],
+    })
+
+    let plugin = db.imagePluginFile
+    let supertest = require('supertest')
+    let express = require('express')
+    let upload = require('express-fileupload')
+    let app = express()
+    app.use(upload())
+
+    app.post('/', async function(req, res) {
+      try {
+        req.body.logos = JSON.parse(req.body.logos)
+        let options = { files: req.files, model: user, query: { _id: user1._id } }
+
+        // Remove images
+        let response = await plugin.removeImages(options, req.body, true)
+        expect(response[0]).toEqual({ lion1: 1 }) // useCount
+        expect(response[1]).toEqual([]) // unused
+
+        // File exists
+        let validFiles = await plugin._findValidImages(req.files, user)
+        expect(((validFiles||[])[0]||{}).inputPath).toEqual('logos.0') // Valid inputPath
+
+        // Add images
+        response = await plugin.addImages(options, req.body, true)
+        expect(response[0]).toEqual({
+          logos: [{
+            bucket: 'fake',
+            date: expect.any(Number),
+            filename: 'lion2.jpg',
+            filesize: expect.any(Number),
+            path: expect.any(String),
+            uid: expect.any(String)
+          }, {
+            bucket: 'test', // still the same image-object reference (nothing new)
+            date: expect.any(Number),
+            filename: 'lion1.png',
+            filesize: expect.any(Number),
+            path: expect.any(String),
+            uid: expect.any(String)
+          },],
+        })
+
+        res.send()
+      } catch (e) {
+        console.log(e.message || e)
+        res.status(500).send()
+      }
+    })
+
+    await supertest(app)
+      .post('/')
+      .field('logos', JSON.stringify([ null, image ]))
+      .attach('logos.0', `${__dirname}/assets/lion2.jpg`)
+      .expect(200)
+
+    db.close()
   })
 
 }

@@ -54,8 +54,8 @@ let plugin = module.exports = {
     model.imageFields = plugin._findAndTransformImageFields(model.fields, '')
 
     if (model.imageFields.length) {
-      // Update image fields and whitelists with the new object schema
-      // model._setupFieldsAndWhitelists(model.fields)
+      // Todo?: Update image fields and whitelists with the new object schema
+      //   model._setupFieldsAndWhitelists(model.fields)
       model.beforeUpdate.push(function(data, n) {
         plugin.removeImages(this, data).then(() => n(null, data)).catch(e => n(e))
       })
@@ -91,7 +91,9 @@ let plugin = module.exports = {
      * @param {object} options - monastery operation options {model, query, files, ..}
      * @param {object} data -
      * @param {boolean} test -
-     * @return promise
+     * @return promise(
+     *   {object} data - data object containing new S3 image-object
+     * ])
      * @this plugin
      */
     let { model, query, files } = options
@@ -167,7 +169,7 @@ let plugin = module.exports = {
     })
   },
 
-  removeImages: function(options, data, test) {
+  removeImages: async function(options, data, test) {
     /**
      * Hook before update/remove
      * Removes images not found in data, this means you will need to pass the image objects to every update operation
@@ -179,108 +181,113 @@ let plugin = module.exports = {
      *
      * @ref https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#deleteObjects-property
      * @param {object} options - monastery operation options {query, model, files, multi, ..}
-     * @return promise
+     * @return promise([
+     *   {object} useCount - images that wont be removed, e.g. { lion1: 1 }
+     *   {array} unused - S3 image uris to be removed,  e.g. [{ Key: 'small/lion1.jpg' }, ..]
+     * ])
      * @this plugin
      */
     let pre
     let preExistingImages = []
     let useCount = {}
-    if (typeof options.files == 'undefined') return new Promise(res => res())
+    if (typeof options.files == 'undefined') return
 
     // Find all documents from the same query
-    return options.model._find(options.query, options)
-      .then(docs => {
-        // Find all pre-existing image objects in documents
-        for (let doc of util.toArray(docs)) { //x2
-          for (let imageField of options.model.imageFields) { //x5
-            let images = plugin._findImagesInData(doc, imageField, 0, '').filter(o => o.image)
-            for (let image of images) {
-              preExistingImages.push(image)
-              useCount[image.image.uid] = (useCount[image.image.uid] || 0) + 1
-            }
-          }
+    let docs = await options.model._find(options.query, options)
+
+    // Find all pre-existing image objects in documents
+    for (let doc of util.toArray(docs)) { //x2
+      for (let imageField of options.model.imageFields) { //x5
+        let images = plugin._findImagesInData(doc, imageField, 0, '').filter(o => o.image)
+        for (let image of images) {
+          preExistingImages.push(image)
+          useCount[image.image.uid] = (useCount[image.image.uid] || 0) + 1
         }
+      }
+    }
 
-        // console.log(1, useCount, preExistingImages)
+    // console.log(1, useCount, preExistingImages)
 
-        // Assign pre-existing images within undefined deep objects and missing array items to null
-        // ignore undefined root images
-        let dataFilled = util.deepCopy(data)
-        for (let key in dataFilled) {
-          for (let pre of preExistingImages) {
-            if (!pre.dataPath.match(new RegExp('^' + key + '(\\.|$)'))) continue
-            util.setDeepValue(dataFilled, pre.dataPath, null, true)
-          }
+    // Assign pre-existing images within undefined deep objects and missing array items to null,
+    // ignore undefined root images
+    let dataFilled = util.deepCopy(data)
+    for (let key in dataFilled) {
+      for (let pre of preExistingImages) {
+        if (!pre.dataPath.match(new RegExp('^' + key + '(\\.|$)'))) continue
+        util.setDeepValue(dataFilled, pre.dataPath, null, true)
+      }
+    }
+    // console.log(dataFilled)
+
+    // Check upload errors and find valid uploaded images
+    let files = await plugin._findValidImages(options.files || {}, options.model)
+
+    // Loop all schema image fields
+    for (let imageField of options.model.imageFields) { //x5
+      let images = plugin._findImagesInData(dataFilled, imageField, 0, '')
+      if (!images.length) continue
+      // console.log(images)
+
+      // Data contains null images that once had a pre-existing image
+      for (let image of images) {
+        if (image.image == null && (pre = preExistingImages.find(o => o.dataPath == image.dataPath))) {
+          useCount[pre.image.uid]--
         }
+      }
 
-        // Loop all schema image fields
-        for (let imageField of options.model.imageFields) { //x5
-          let images = plugin._findImagesInData(dataFilled, imageField, 0, '')
-          if (!images.length) continue
-          // console.log(images)
-
-          // Data contains null images that once had a pre-existing image
-          for (let image of images) {
-            if (image.image == null && (pre = preExistingImages.find(o => o.dataPath == image.dataPath))) {
-              useCount[pre.image.uid]--
-            }
+      // Loop images found in the data
+      for (let image of images) {
+        if (image.image != null) {
+          let preExistingImage = preExistingImages.find(o => o.dataPath == image.dataPath)
+          // valid image-object?
+          if (typeof useCount[image.image.uid] == 'undefined') {
+            throw `The passed image object for '${image.dataPath}' does not match any pre-existing
+              images saved on this document.`
+          // Different image from prexisting image
+          } else if (preExistingImage && preExistingImage.image.uid != image.image.uid) {
+            useCount[preExistingImage.image.uid]--
+            useCount[image.image.uid]++
+          // No pre-existing image found
+          } else if (!preExistingImage) {
+            useCount[image.image.uid]++
           }
-
-          // Data contains valid (pre-existing) image-objects? And are we overriding a pre-existing image?
-          for (let image of images) {
-            if (image.image != null) {
-              let pre = preExistingImages.find(o => o.dataPath == image.dataPath)
-              if (typeof useCount[image.image.uid] == 'undefined') {
-                throw `The passed image object for '${image.dataPath}' does not match any pre-existing
-                  images saved on this document.`
-              } else if (pre && pre.image.uid != image.image.uid) {
-                useCount[pre.image.uid]--
-                useCount[image.image.uid]++
-              } else if (!pre) {
-                useCount[image.image.uid]++
-              }
-            }
-          }
-        }
-        // Check upload errors and find valid uploaded images. If any file is overriding a
-        // pre-existing image, push to unused
-        return plugin._findValidImages(options.files || {}, options.model).then(files => {
+          // Any file overriding this image?
           for (let filesArray of files) {
-            if ((pre = preExistingImages.find(o => o.dataPath == filesArray.inputPath))) {
-              useCount[pre.image.uid]--
+            if (image.dataPath == filesArray.inputPath) {
+              useCount[image.image.uid]--
             }
           }
-        })
-
-      }).then(() => {
-        // Retrieve all the unused files
-        let unused = []
-        // console.log(3, useCount)
-        for (let key in useCount) {
-          if (useCount[key] > 0) continue
-          let pre = preExistingImages.find(o => o.image.uid == key)
-          unused.push(
-            // original key can have a different extension
-            { Key: pre.image.path },
-            { Key: `small/${key}.jpg` },
-            { Key: `medium/${key}.jpg` },
-            { Key: `large/${key}.jpg` }
-          )
-          this.manager.info(
-            `Removing '${pre.image.filename}' from '${pre.image.bucket}/${pre.image.path}'`
-          )
         }
-        if (test) return Promise.resolve([useCount, unused])
-        // Delete any unused images from s3. If the image is on a different bucket
-        // the file doesnt get deleted, we only delete from plugin.awsBucket.
-        if (!unused.length) return
-        return new Promise((resolve, reject) => {
-          plugin.s3.deleteObjects({ Bucket: plugin.awsBucket, Delete: { Objects: unused }}, (err, data) => {
-            if (err) reject(err)
-            resolve()
-          })
-        })
+      }
+    }
+
+    // Retrieve all the unused files
+    // console.log(3, useCount)
+    let unused = []
+    for (let key in useCount) {
+      if (useCount[key] > 0) continue
+      let pre = preExistingImages.find(o => o.image.uid == key)
+      unused.push(
+        // original key can have a different extension
+        { Key: pre.image.path },
+        { Key: `small/${key}.jpg` },
+        { Key: `medium/${key}.jpg` },
+        { Key: `large/${key}.jpg` }
+      )
+      this.manager.info(
+        `Removing '${pre.image.filename}' from '${pre.image.bucket}/${pre.image.path}'`
+      )
+    }
+    if (test) return [useCount, unused]
+    // Delete any unused images from s3. If the image is on a different bucket
+    // the file doesnt get deleted, we only delete from plugin.awsBucket.
+    if (!unused.length) return
+    await new Promise((resolve, reject) => {
+      plugin.s3.deleteObjects({ Bucket: plugin.awsBucket, Delete: { Objects: unused }}, (err, data) => {
+        if (err) reject(err)
+        resolve()
       })
+    })
   },
 
   _addImageObjectsToData: function(path, data, image) {
