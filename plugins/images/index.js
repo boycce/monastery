@@ -56,6 +56,9 @@ let plugin = module.exports = {
     if (model.imageFields.length) {
       // Todo?: Update image fields and whitelists with the new object schema
       //   model._setupFieldsAndWhitelists(model.fields)
+      model.beforeValidate.push(function(data, n) {
+        plugin.keepImagePlacement(this, data).then(() => n(null, data)).catch(e => n(e))
+      })
       model.beforeUpdate.push(function(data, n) {
         plugin.removeImages(this, data).then(() => n(null, data)).catch(e => n(e))
       })
@@ -167,6 +170,32 @@ let plugin = module.exports = {
       if (options.create) model._remove(idquery)
       throw err
     })
+  },
+
+  keepImagePlacement: async function(options, data) {
+    /**
+     * Hook before update/remove
+     * Since monastery removes undefined array items on validate, we need to convert any
+     * undefined array items to null where files are located to maintain image ordering
+     * Todo: maybe dont remove undefined array items in general
+     *
+     * E.g.
+     * req.body  = 'photos[0]' : undefined || non existing (set to null)
+     * req.files = 'photos[0]' : { ...binary }
+     *
+     * @param {object} options - monastery operation options {query, model, files, multi, ..}
+     * @return promise
+     * @this plugin
+     */
+    if (typeof options.files == 'undefined') return
+    // Check upload errors and find valid uploaded images
+    let files = await plugin._findValidImages(options.files || {}, options.model)
+    // Set undefined primative-array items to null where files are located
+    for (let filesArray of files) {
+      if (filesArray.inputPath.match(/\.[0-9]+$/)) {
+        util.setDeepValue(data, filesArray.inputPath, null, true, false, true)
+      }
+    }
   },
 
   removeImages: async function(options, data, test) {

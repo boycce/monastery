@@ -1,3 +1,5 @@
+let util = require('../lib/util')
+
 module.exports = function(monastery, opendb) {
 
   // Data no images doesn't throw error
@@ -617,7 +619,7 @@ module.exports = function(monastery, opendb) {
     })).db
 
     let user = db.model('user', { fields: {
-      logos: [{ type: 'image' }],
+      photos: [{ type: 'image' }],
     }})
 
     let image = {
@@ -630,7 +632,7 @@ module.exports = function(monastery, opendb) {
     }
 
     let user1 = await db.user._insert({
-      logos: [image],
+      photos: [image],
     })
 
     let plugin = db.imagePluginFile
@@ -642,22 +644,28 @@ module.exports = function(monastery, opendb) {
 
     app.post('/', async function(req, res) {
       try {
-        req.body.logos = JSON.parse(req.body.logos)
+        // Parse and validate data which is used before in update/insert
         let options = { files: req.files, model: user, query: { _id: user1._id } }
+        let data = await util.parseData(req.body)
+        data = await user.validate(data, { ...options, update: true })
+
+        // Empty photo placeholder not removed in validate?
+        expect(data.photos[0]).toEqual(null)
+        expect(data.photos[1]).toEqual(image)
 
         // Remove images
-        let response = await plugin.removeImages(options, req.body, true)
+        let response = await plugin.removeImages(options, data, true)
         expect(response[0]).toEqual({ lion1: 1 }) // useCount
         expect(response[1]).toEqual([]) // unused
 
-        // File exists
+        // New file exists
         let validFiles = await plugin._findValidImages(req.files, user)
-        expect(((validFiles||[])[0]||{}).inputPath).toEqual('logos.0') // Valid inputPath
+        expect(((validFiles||[])[0]||{}).inputPath).toEqual('photos.0') // Valid inputPath
 
         // Add images
-        response = await plugin.addImages(options, req.body, true)
+        response = await plugin.addImages(options, data, true)
         expect(response[0]).toEqual({
-          logos: [{
+          photos: [{
             bucket: 'fake',
             date: expect.any(Number),
             filename: 'lion2.jpg',
@@ -683,8 +691,17 @@ module.exports = function(monastery, opendb) {
 
     await supertest(app)
       .post('/')
-      .field('logos', JSON.stringify([ null, image ]))
-      .attach('logos.0', `${__dirname}/assets/lion2.jpg`)
+      // Mock multipart/form-data syntax which is not supported by supertest (formdata sent with axios)
+      //  E.g.
+      //    req.body  = 'photos[1][bucket]' : '...'
+      //    req.files = 'photos[0]' : { ...binary }
+      .field('photos[1][bucket]', image.bucket)
+      .field('photos[1][date]', image.date)
+      .field('photos[1][filename]', image.filename)
+      .field('photos[1][filesize]', image.filesize)
+      .field('photos[1][path]', image.path)
+      .field('photos[1][uid]', image.uid)
+      .attach('photos[0]', `${__dirname}/assets/lion2.jpg`)
       .expect(200)
 
     db.close()
