@@ -61,8 +61,10 @@ module.exports = function(monastery, opendb) {
 
     // Type error (number)
     let usernum = db.model('usernum', { fields: { amount: { type: 'number', required: true }}})
+    let usernum2 = db.model('usernum2', { fields: { amount: { type: 'number' }}})
     await expect(usernum.validate({ amount: 0 })).resolves.toEqual({ amount: 0 })
     await expect(usernum.validate({ amount: '0' })).resolves.toEqual({ amount: 0 })
+    await expect(usernum2.validate({ amount: '' })).resolves.toEqual({ amount: null })
     await expect(usernum.validate({ amount: undefined }, { validateUndefined: false })).resolves.toEqual({})
     await expect(usernum.validate({ amount: false })).rejects.toEqual([{
       status: '400',
