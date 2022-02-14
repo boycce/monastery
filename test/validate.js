@@ -2,7 +2,7 @@ let validate = require('../lib/model-validate')
 
 module.exports = function(monastery, opendb) {
 
-  test('Validation basic errors', async () => {
+  test('validation basic errors', async () => {
     // Setup
     let db = (await opendb(false)).db
     let user = db.model('user', { fields: {
@@ -19,7 +19,7 @@ module.exports = function(monastery, opendb) {
       detail: 'This field is required.',
       meta: { rule: 'required', model: 'user', field: 'name' }
     })
-    await expect(user.validate({ name : '' }, { validateUndefined: false })).rejects.toContainEqual({
+    await expect(user.validate({ name : '' })).rejects.toContainEqual({
       status: '400',
       title: 'name',
       detail: 'This field is required.',
@@ -34,7 +34,16 @@ module.exports = function(monastery, opendb) {
     await expect(user.validate({}, { update: true })).resolves.toEqual({})
 
     // Type error (string)
-    await expect(user.validate({ name: 1 })).rejects.toContainEqual({
+    await expect(user.validate({ name: 1 })).resolves.toEqual({ name: '1' })
+    await expect(user.validate({ name: 1.123 })).resolves.toEqual({ name: '1.123' })
+    await expect(user.validate({ name: undefined }, { validateUndefined: false })).resolves.toEqual({})
+    await expect(user.validate({ name: null })).rejects.toContainEqual({
+      status: '400',
+      title: 'name',
+      detail: 'This field is required.',
+      meta: { rule: 'required', model: 'user', field: 'name' }
+    })
+    await expect(user.validate({ name: true })).rejects.toContainEqual({
       status: '400',
       title: 'name',
       detail: 'Value was not a string.',
@@ -42,12 +51,37 @@ module.exports = function(monastery, opendb) {
     })
 
     // Type error (date)
+    await expect(user.validate({ name: 'a', date: null })).resolves.toEqual({ name: 'a', date: null })
     await expect(user.validate({ name: 'a', date: 'fe' })).rejects.toContainEqual({
       status: '400',
       title: 'date',
       detail: 'Value was not a unix timestamp.',
       meta: { rule: 'isDate', model: 'user', field: 'date' }
     })
+
+    // Type error (number)
+    let usernum = db.model('usernum', { fields: { amount: { type: 'number', required: true }}})
+    await expect(usernum.validate({ amount: 0 })).resolves.toEqual({ amount: 0 })
+    await expect(usernum.validate({ amount: '0' })).resolves.toEqual({ amount: 0 })
+    await expect(usernum.validate({ amount: undefined }, { validateUndefined: false })).resolves.toEqual({})
+    await expect(usernum.validate({ amount: false })).rejects.toEqual([{
+      status: '400',
+      title: 'amount',
+      detail: 'Value was not a number.',
+      meta: { rule: 'isNumber', model: 'usernum', field: 'amount' }
+    }])
+    await expect(usernum.validate({ amount: null })).rejects.toEqual([{
+      status: '400',
+      title: 'amount',
+      detail: 'This field is required.',
+      meta: { rule: 'required', model: 'usernum', field: 'amount' },
+    }])
+    await expect(usernum.validate({ amount: null }, { validateUndefined: false })).rejects.toEqual([{
+      status: '400',
+      title: 'amount',
+      detail: 'This field is required.',
+      meta: { rule: 'required', model: 'usernum', field: 'amount' },
+    }])
 
     // Type error (array)
     await expect(user.validate({ name: 'a', colors: 1 })).rejects.toContainEqual({
@@ -224,7 +258,7 @@ module.exports = function(monastery, opendb) {
 
     // Type error within an array (string)
     await expect(user.validate({
-      animals: { cats: [1] }
+      animals: { cats: [true] }
     })).rejects.toContainEqual({
       status: '400',
       title: 'animals.cats.0',
@@ -239,7 +273,7 @@ module.exports = function(monastery, opendb) {
       detail: 'This field is required.',
       meta: { rule: 'required', model: 'user', field: 'color' }
     }
-    await expect(user.validate({ animals: { dogs: [{ name: 'sparky', color: 1 }] }}))
+    await expect(user.validate({ animals: { dogs: [{ name: 'sparky', color: false }] }}))
       .rejects.toContainEqual({
         ...error,
         detail: 'Value was not a string.',
@@ -623,16 +657,9 @@ module.exports = function(monastery, opendb) {
     // Ignores invalid data
     await expect(user.validate({ badprop: true, schema: {} })).resolves.toEqual({})
 
-    // Rejects null for non object/array fields
-    await expect(user.validate({ name: null })).rejects.toEqual([{
-      'detail': 'Value was not a string.',
-      'meta': {'detailLong': undefined, 'field': 'name', 'model': 'user', 'rule': 'isString'},
-      'status':'400',
-      'title': 'name'
-    }])
-
     // String data
     await expect(user.validate({ name: 'Martin Luther' })).resolves.toEqual({ name: 'Martin Luther' })
+    await expect(user.validate({ name: null })).resolves.toEqual({ name: null })
 
     // Array data
     await expect(user.validate({ names: ['blue'] })).resolves.toEqual({ names: ['blue'] })
@@ -652,12 +679,7 @@ module.exports = function(monastery, opendb) {
 
     // Subdocument property data (null)
     await expect(user.validate({ animals: { dog: null }}))
-      .rejects.toEqual([{
-        'detail': 'Value was not a string.',
-        'meta': {'detailLong': undefined, 'field': 'dog', 'model': 'user', 'rule': 'isString'},
-        'status': '400',
-        'title': 'animals.dog',
-      }])
+      .resolves.toEqual({ animals: { dog: null }})
 
     // Subdocument property data (unknown data)
     await expect(user.validate({ animals: { dog: 'sparky', cat: 'grumpy' } }))
@@ -766,15 +788,10 @@ module.exports = function(monastery, opendb) {
     })
 
     // Number valid
-    await expect(user2.validate({ amount: 0 })).resolves.toEqual({ amount: 0 }) // required
-    await expect(user.validate({ amount: '0' })).resolves.toEqual({ amount: 0 }) // required
-    await expect(user.validate({ amount: undefined })).resolves.toEqual({})  // not required
-    await expect(user.validate({ amount: null })).rejects.toEqual([{ // type error
-      'detail': 'Value was not a number.',
-      'meta': { 'field': 'amount', 'model': 'user', 'rule': 'isNumber'},
-      'status': '400',
-      'title': 'amount'
-    }])
+    await expect(user2.validate({ amount: 0 })).resolves.toEqual({ amount: 0 })
+    await expect(user2.validate({ amount: '0' })).resolves.toEqual({ amount: 0 })
+    await expect(user.validate({ amount: undefined })).resolves.toEqual({})
+    await expect(user.validate({ amount: null })).resolves.toEqual({ amount: null })
 
     // Number required
     let mock1 = {
