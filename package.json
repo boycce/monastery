@@ -23,7 +23,7 @@
     "mong": "nodemon resources/mong.js",
     "minor": "standard-version --release-as minor && npm publish",
     "patch": "standard-version --release-as patch && npm publish",
-    "release": "standard-version",
+    "release": "standard-version && npm publish && git push --tags",
     "test": "npm run lint && jest",
     "test-one-example": "jest -t images"
   },
