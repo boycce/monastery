@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.31.5](https://github.com/boycce/monastery/compare/1.31.4...1.31.5) (2022-02-15)
+
+
+### Bug Fixes
+
+* scripts ([417ba13](https://github.com/boycce/monastery/commit/417ba13c1a0862f76fadf97d6d6d063a74e196bd))
+
 ### 1.31.4 (2022-02-15)
 
 
