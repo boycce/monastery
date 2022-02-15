@@ -1,6 +1,6 @@
 module.exports = function(monastery, opendb) {
 
-  test('Find blacklisting', async () => {
+  test('find blacklisting', async () => {
     // Setup
     let db = (await opendb(null)).db
     let bird = db.model('bird', {
@@ -152,7 +152,7 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('Find blacklisting (default fields)', async () => {
+  test('find blacklisting (default fields)', async () => {
     // Setup
     let db = (await opendb(null)).db
     let user = db.model('user', {
@@ -223,7 +223,7 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('Find blacklisting (populate)', async () => {
+  test('find blacklisting (populate)', async () => {
     // Setup
     let db = (await opendb(null)).db
     let bird = db.model('bird', {
@@ -305,7 +305,7 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('Insert/update blacklisting (validate)', async () => {
+  test('insert update blacklisting (validate)', async () => {
     // Setup
     let db = (await opendb(null)).db
     let user = db.model('user', {

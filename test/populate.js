@@ -1,6 +1,6 @@
 module.exports = function(monastery, opendb) {
 
-  test('Model populate', async () => {
+  test('model populate', async () => {
     // Setup
     let db = (await opendb(null)).db
     let bird = db.model('bird', { fields: {
@@ -82,7 +82,7 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('Model populate type=any', async () => {
+  test('model populate type=any', async () => {
     let db = (await opendb(null)).db
     db.model('company', { fields: {
       address: { type: 'any' }
@@ -132,7 +132,7 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('Model populate/blacklisting via $lookup', async () => {
+  test('model populate or blacklisting via $lookup', async () => {
     // Setup
     let db = (await opendb(null)).db
     let user = db.model('user', {

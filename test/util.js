@@ -2,7 +2,7 @@ let util = require('../lib/util')
 
 module.exports = function(monastery, opendb) {
 
-  test('Utilities: formdata', async () => {
+  test('utilities formdata', async () => {
     expect(await util.parseFormData({
       'name': 'Martin',
       'pets[]': '',
@@ -31,7 +31,7 @@ module.exports = function(monastery, opendb) {
       .toEqual('Array items in bracket notation need array indexes "users[][\'name\']", e.g. users[0][name]')
   })
 
-  test('Utilities: isId', async () => {
+  test('utilities isId', async () => {
     let db = (await opendb(false)).db
     expect(db.isId('')).toEqual(false)
     expect(db.isId(1234)).toEqual(false)

@@ -1,6 +1,6 @@
 module.exports = function(monastery, opendb) {
 
-  test('Model setup', async () => {
+  test('model setup', async () => {
     // Setup
     let db = (await opendb(false)).db
     let user = db.model('user', { fields: {
@@ -68,7 +68,7 @@ module.exports = function(monastery, opendb) {
     ))
   })
 
-  test('Model setup with default fields', async () => {
+  test('model setup with default fields', async () => {
     // Setup
     let db = (await opendb(false, { defaultObjects: true })).db
 
@@ -90,7 +90,7 @@ module.exports = function(monastery, opendb) {
     })
   })
 
-  test('Model setup with default objects', async () => {
+  test('model setup with default objects', async () => {
     // Setup
     let db = (await opendb(false, { defaultObjects: true })).db
     let user = db.model('user', { fields: {
@@ -115,7 +115,7 @@ module.exports = function(monastery, opendb) {
     })
   })
 
-  test('Model indexes', async () => {
+  test('model indexes', async () => {
     // Setup: Need to test different types of indexes
     let db = (await opendb(null)).db
     // Setup: Drop previously tested collections
@@ -189,7 +189,7 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('Model subdocument indexes', async () => {
+  test('model subdocument indexes', async () => {
     // Setup: Need to test different types of indexes
     let db = (await opendb(null)).db
     // Setup: Drop previously tested collections
@@ -234,7 +234,7 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('Model array indexes', async () => {
+  test('model array indexes', async () => {
     // Setup: Need to test different types of indexes
     let db = (await opendb(null)).db
     // Setup: Drop previously tested collections
@@ -279,7 +279,7 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('Model 2dsphere indexes', async () => {
+  test('model 2dsphere indexes', async () => {
     // Setup. The tested model needs to be unique as race condition issue arises when the same model
     // with text indexes are setup at the same time
     let db = (await opendb(null)).db
@@ -339,7 +339,7 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('Model findBL, findBLProject', async () => {
+  test('model findBL findBLProject', async () => {
     let db = (await opendb(null)).db
     db.model('bird', { fields: {
       name: { type: 'string' }

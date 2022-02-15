@@ -1,6 +1,6 @@
 module.exports = function(monastery, opendb) {
 
-  test('Virtuals', async () => {
+  test('virtuals', async () => {
     // Setup
     let db = (await opendb(null)).db
     // Test model setup
@@ -147,7 +147,7 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('Insert/update virtuals (validate)', async () => {
+  test('insert update virtuals (validate)', async () => {
     // Setup
     let db = (await opendb(null)).db
     let user = db.model('user', {

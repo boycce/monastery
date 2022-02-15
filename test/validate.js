@@ -118,7 +118,7 @@ module.exports = function(monastery, opendb) {
     })
   })
 
-  test('Validation subdocument errors', async () => {
+  test('validation subdocument errors', async () => {
     // Setup
     let db = (await opendb(false)).db
     let user = db.model('user', { fields: {
@@ -245,7 +245,7 @@ module.exports = function(monastery, opendb) {
     })
   })
 
-  test('Validation array errors', async () => {
+  test('validation array errors', async () => {
     // Setup
     let db = (await opendb(false)).db
     let user = db.model('user', { fields: {
@@ -309,7 +309,7 @@ module.exports = function(monastery, opendb) {
       .rejects.toContainEqual(error)
   })
 
-  test('Validation getMostSpecificKeyMatchingPath', async () => {
+  test('validation getMostSpecificKeyMatchingPath', async () => {
     let fn = validate._getMostSpecificKeyMatchingPath
     let mock = {
       'cats.name': true,
@@ -341,7 +341,7 @@ module.exports = function(monastery, opendb) {
     expect(fn(mock, 'gulls.1')).toEqual('gulls.$')
   })
 
-  test('Validation default messages', async () => {
+  test('validation default messages', async () => {
     // Setup
     let db = (await opendb(false)).db
     let user = db.model('user', {
@@ -393,7 +393,7 @@ module.exports = function(monastery, opendb) {
     })
   })
 
-  test('Validation custom messages', async () => {
+  test('validation custom messages', async () => {
     // Setup
     // Todo: Setup testing for array array subdocument field messages
     let db = (await opendb(false)).db
@@ -435,7 +435,7 @@ module.exports = function(monastery, opendb) {
     })
   })
 
-  test('Validation custom messages for arrays', async () => {
+  test('validation custom messages for arrays', async () => {
     // Setup
     // Todo: Setup testing for array array subdocument field messages
     let db = (await opendb(false)).db
@@ -552,7 +552,7 @@ module.exports = function(monastery, opendb) {
     })
   })
 
-  test('Validation custom rules', async () => {
+  test('validation custom rules', async () => {
     // Setup
     let db = (await opendb(false)).db
     let user = db.model('user', {
@@ -638,7 +638,7 @@ module.exports = function(monastery, opendb) {
     }])
   })
 
-  test('Validated data', async () => {
+  test('validated data', async () => {
     // Setup
     let db = (await opendb(false)).db
     let fields = {
@@ -696,7 +696,7 @@ module.exports = function(monastery, opendb) {
       .resolves.toEqual({ animals: { dogs: [{}] }})
   })
 
-  test('Schema options', async () => {
+  test('schema options', async () => {
     // Setup
     let db = (await opendb(false)).db
     let user = db.model('user', { fields: {
@@ -737,7 +737,7 @@ module.exports = function(monastery, opendb) {
     })
   })
 
-  test('Schema default rules', async () => {
+  test('schema default rules', async () => {
     // Setup
     let db = (await opendb(false)).db
     let user = db.model('user', { fields: {
@@ -818,7 +818,7 @@ module.exports = function(monastery, opendb) {
     await expect(user.validate({ amount: 'bad' })).rejects.toContainEqual(mock2)
   })
 
-  test('Schema default objects', async () => {
+  test('schema default objects', async () => {
     let db = (await opendb(null, {
       timestamps: false,
       defaultObjects: true,
@@ -844,7 +844,7 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('Schema nullObjects', async () => {
+  test('schema nullObjects', async () => {
     let db = (await opendb(null, {
       timestamps: false,
       nullObjects: true,
@@ -870,7 +870,7 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('Validation options', async () => {
+  test('validation options', async () => {
     let db = (await opendb(false)).db
     let user = db.model('user', { fields: {
       name: { type: 'string', required: true }
@@ -955,7 +955,7 @@ module.exports = function(monastery, opendb) {
     })
   })
 
-  test('Validation hooks', async () => {
+  test('validation hooks', async () => {
     let db = (await opendb(null)).db
     let user = db.model('user', {
       fields: {

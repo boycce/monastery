@@ -2,11 +2,12 @@
 
 module.exports = function(monastery, opendb) {
 
-  test('Basic operator calls', async () => {
+  test('basic operator calls', async () => {
     let db = (await opendb(null)).db
     let user = db.model('user', {
-      fields: { name: { type: 'string' }},
-      beforeValidate: [(data, next) => { beforeValidateHookCalled = true; next() }]
+      fields: {
+        name: { type: 'string' },
+      },
     })
 
     // Insert one
@@ -79,60 +80,6 @@ module.exports = function(monastery, opendb) {
     let findOne3 = await user.findOne(inserted2[0]._id.toString())
     expect(findOne3).toEqual({ _id: inserted2[0]._id, name: 'Martin Luther1' })
 
-    // Update
-    let update = await user.update({
-      query: inserted._id,
-      data: { name: 'Martin Luther2' }
-    })
-    expect(update).toEqual({
-      name: 'Martin Luther2'
-    })
-
-    // Update (no/empty data object)
-    await expect(user.update({ query: inserted._id, data: {}}))
-      .rejects.toThrow('No valid data passed to user.update()')
-
-    await expect(user.update({ query: inserted._id }))
-      .rejects.toThrow('No valid data passed to user.update()')
-
-    // Update (no/empty data object, but has update operators
-    await expect(user.update({ query: inserted._id, $set: { name: 'bruce' }}))
-      .resolves.toEqual({ name: 'bruce' })
-
-    await expect(user.update({ query: inserted._id, $pull: { name: 'bruce' }}))
-      .rejects.toThrow('Cannot apply $pull to a non-array value') // gets passed no valid data check
-
-    // Update (data & $set)
-    await expect(user.update({ query: inserted._id, data: {}, $set: { name: 'bruce' }}))
-      .rejects.toThrow('Please only pass options.$set or options.data to user.update()')
-
-    // Update (with operators. Make sure beforeValidate isn't called)
-    var beforeValidateHookCalled = false
-    await user.update({ query: inserted._id, data: { name: 'bruce' }})
-    expect(beforeValidateHookCalled).toEqual(true)
-    beforeValidateHookCalled = false
-    await user.update({ query: inserted._id, $set: { name: 'bruce' }})
-    expect(beforeValidateHookCalled).toEqual(false)
-
-    // Update multiple
-    await user.update({
-      query: { _id: { $in: [inserted2[0]._id, inserted2[1]._id] }},
-      data: { name: 'Martin Luther3' },
-      multi: true
-    })
-    let findUpdated2 = await user.find({
-      query: { _id: { $in: [inserted2[0]._id, inserted2[1]._id] }}
-    })
-    expect(findUpdated2).toEqual([
-      {
-        _id: expect.any(Object),
-        name: 'Martin Luther3'
-      }, {
-        _id: expect.any(Object),
-        name: 'Martin Luther3'
-      }
-    ])
-
     // Remove
     let remove = await user.remove({ query: inserted._id })
     expect(remove.result).toEqual({ n: 1, ok: 1 })
@@ -140,7 +87,7 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('Insert defaults', async () => {
+  test('insert defaults', async () => {
     let db = (await opendb(null, { defaultObjects: true, serverSelectionTimeoutMS: 2000 })).db
     let db2 = (await opendb(null, { useMilliseconds: true, serverSelectionTimeoutMS: 2000 })).db
     let user = db.model('user', { fields: {
@@ -194,6 +141,65 @@ module.exports = function(monastery, opendb) {
     db2.close()
   })
 
+  test('update basics', async () => {
+    let db = (await opendb(null)).db
+    let user = db.model('user', {
+      fields: {
+        name: { type: 'string' },
+      },
+    })
+
+    // Insert
+    let inserted = await user.insert({ data: { name: 'Martin Luther' }})
+    expect(inserted).toEqual({
+      _id: expect.any(Object),
+      name: 'Martin Luther'
+    })
+
+    // Insert multiple
+    let inserted2 = await user.insert({ data: [{ name: 'Martin Luther1' }, { name: 'Martin Luther2' }]})
+    expect(inserted2).toEqual([
+      {
+        _id: expect.any(Object),
+        name: 'Martin Luther1'
+      }, {
+        _id: expect.any(Object),
+        name: 'Martin Luther2'
+      }
+    ])
+
+    // Update
+    await expect(user.update({ query: inserted._id, data: { name: 'Martin Luther2' }}))
+      .resolves.toEqual({ name: 'Martin Luther2' })
+
+    // Update (no/empty data object)
+    await expect(user.update({ query: inserted._id, data: {}}))
+      .rejects.toThrow('No valid data passed to user.update({ data: .. })')
+
+    await expect(user.update({ query: inserted._id }))
+      .rejects.toThrow('Please pass an update operator to user.update(), e.g. data, $unset, etc')
+
+    // Update multiple
+    await user.update({
+      query: { _id: { $in: [inserted2[0]._id, inserted2[1]._id] }},
+      data: { name: 'Martin Luther3' },
+      multi: true
+    })
+    let findUpdated2 = await user.find({
+      query: { _id: { $in: [inserted2[0]._id, inserted2[1]._id] }}
+    })
+    expect(findUpdated2).toEqual([
+      {
+        _id: expect.any(Object),
+        name: 'Martin Luther3'
+      }, {
+        _id: expect.any(Object),
+        name: 'Martin Luther3'
+      }
+    ])
+    db.close()
+  })
+
   test('update defaults', async () => {
     let db = (await opendb(null, { useMilliseconds: true, serverSelectionTimeoutMS: 2000 })).db
     let user = db.model('user', {
@@ -235,7 +241,7 @@ module.exports = function(monastery, opendb) {
       query: inserted._id,
       data: {},
       timestamps: false
-    })).rejects.toThrow('No valid data passed to user.update()')
+    })).rejects.toThrow('No valid data passed to user.update({ data: .. })')
 
     // UpdatedAt override (wont work)
     let updated4 = await user.update({
@@ -255,7 +261,51 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('Insert with id casting', async () => {
+  test('update operators', async () => {
+    let db = (await opendb(null)).db
+    let user = db.model('userOperators', {
+      fields: {
+        name: { type: 'string', minLength: 5 },
+        age: { type: 'number' },
+      },
+      beforeValidate: [(data, next) => { beforeValidateHookCalled = true; next() }]
+    })
+
+    let inserted = await user.insert({
+      data: { name: 'Bruce', age: 12 }
+    })
+
+    // No data object, but has another update operators
+    await expect(user.update({ query: inserted._id, $set: { name: 'bruce' }}))
+      .resolves.toEqual({ name: 'bruce' })
+
+    // Mixing data and $set, and $set skips validation (minLength)
+    await expect(user.update({ query: inserted._id, data: { name: 'bruce2', age: 12 }, $set: { name: 'john' }}))
+      .resolves.toEqual({ age: 12, name: 'john' })
+
+    // Two operators
+    await user.update({ query: inserted._id, $set: { name: 'john' }, $unset: { age: 1 }})
+    await expect(user.findOne({ query: inserted._id })).resolves.toEqual({
+      _id: expect.any(Object),
+      name: 'john',
+    })
+
+    // $pull on a non array (also gets passed no valid data check)
+    await expect(user.update({ query: inserted._id, $pull: { name: 'bruce' }}))
+      .rejects.toThrow('Cannot apply $pull to a non-array value')
+
+    // Non-data operators don't call beforeValidate
+    var beforeValidateHookCalled = false
+    await user.update({ query: inserted._id, data: { name: 'bruce' }})
+    expect(beforeValidateHookCalled).toEqual(true)
+    beforeValidateHookCalled = false
+    await user.update({ query: inserted._id, $set: { name: 'bruce' }})
+    expect(beforeValidateHookCalled).toEqual(false)
+
+    db.close()
+  })
+
+  test('insert with id casting', async () => {
     let db = (await opendb(null)).db
     db.model('company', { fields: {
       name: { type: 'string' }
@@ -279,39 +329,9 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('Find default field population', async () => {
+  test('find default field population', async () => {
     let db = (await opendb(null)).db
     let user = db.model('user', {
-      fields: {
-        name: { type: 'string'},
-        addresses: [{ city: { type: 'string' }, country: { type: 'string' }}],
-        pet:  { dog: { model: 'dog' }},
-        dogs: [{ model: 'dog' }], // virtual association
-      }
-    })
-    let dog = db.model('dog', {
-      fields: {
-        name: { type: 'string' },
-        user: { model: 'user' }
-      }
-    })
-
-    // Insert documents and add
-    let inserted = await dog.insert({ data: {} })
-    let inserted2 = await user.insert({ data: {
-      addresses: [
-        { city: 'Frankfurt' },
-        { city: 'Christchurch', country: 'New Zealand' }
-      ],
-      pet: { dog: inserted._id }
-    }})
-    await dog.update({
-      query: inserted._id,
-      data: { user: inserted2._id }
-    })
-
-    // Update models
-    db.model('user', {
       fields: {
         name: { type: 'string', default: 'Martin Luther' },
         addresses: [{ city: { type: 'string' }, country: { type: 'string', default: 'Germany' } }],
@@ -320,15 +340,41 @@ module.exports = function(monastery, opendb) {
         dogs: [{ model: 'dog' }], // virtual association
       }
     })
-    db.model('dog', {
+    let dog = db.model('dog', {
       fields: {
         name: { type: 'string', default: 'Scruff' },
         user: { model: 'user' }
       }
     })
 
+    // Default field doesn't override null
+    let nulldoc1 = await dog.insert({ data: { name: null }})
+    let nullfind1 = await dog.findOne({ query: nulldoc1._id })
+    expect(nullfind1).toEqual({ _id: nulldoc1._id, name: null })
+
+    // Default field doesn't override empty string
+    let nulldoc2 = await dog.insert({ data: { name: '' }})
+    let nullfind2 = await dog.findOne({ query: nulldoc2._id })
+    expect(nullfind2).toEqual({ _id: nulldoc2._id, name: '' })
+
+    // Default field overrides undefined
+    let nulldoc3 = await dog.insert({ data: { name: undefined }})
+    let nullfind3 = await dog.findOne({ query: nulldoc3._id })
+    expect(nullfind3).toEqual({ _id: nullfind3._id, name: 'Scruff' })
+
     // Default field population test
     // Note that addresses.1.country shouldn't be overriden
+    // Insert documents (without defaults)
+    let inserted = await dog._insert({})
+    let inserted2 = await user._insert({
+      addresses: [
+        { city: 'Frankfurt' },
+        { city: 'Christchurch', country: 'New Zealand' }
+      ],
+      pet: { dog: inserted._id }
+    })
+    await dog._update(inserted._id, { $set: { user: inserted2._id }})
+
     let find1 = await user.findOne({
       query: inserted2._id,
       populate: ['pet.dog', {
@@ -369,7 +415,7 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('Hooks', async () => {
+  test('hooks', async () => {
     let db = (await opendb(null)).db
     let user = db.model('user', {
       fields: {
