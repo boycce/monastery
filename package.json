@@ -2,7 +2,7 @@
   "name": "monastery",
   "description": "⛪ A straight forward MongoDB ODM built around Monk",
   "author": "Ricky Boyce",
-  "version": "1.31.3",
+  "version": "1.31.4",
   "license": "MIT",
   "repository": "github:boycce/monastery",
   "homepage": "https://boycce.github.io/monastery/",
