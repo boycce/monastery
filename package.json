@@ -46,7 +46,7 @@
     "supertest": "4.0.2"
   },
   "standard-version": {
-    "releaseCommitMessageFormat": "v{{currentTag}}",
+    "releaseCommitMessageFormat": "{{currentTag}}",
     "sign": true,
     "skip": {
       "changelog": false,
