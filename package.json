@@ -45,11 +45,11 @@
     "supertest": "4.0.2"
   },
   "standard-version": {
-    "releaseCommitMessageFormat": "{{currentTag}}",
+    "releaseCommitMessageFormat": "v{{currentTag}}",
     "sign": true,
     "skip": {
-      "changelog": true,
-      "tag": true
+      "changelog": false,
+      "tag": false
     }
   }
 }
