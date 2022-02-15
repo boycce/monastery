@@ -46,11 +46,13 @@
     "supertest": "4.0.2"
   },
   "standard-version": {
+    "infile": "changelog.md",
     "releaseCommitMessageFormat": "{{currentTag}}",
     "sign": true,
     "skip": {
       "changelog": false,
       "tag": false
-    }
+    },
+    "tag-prefix": ""
   }
 }
