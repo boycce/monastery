@@ -2,14 +2,7 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-### [1.31.2](https://github.com/boycce/monastery/compare/v1.31.1...v1.31.2) (2022-02-15)
-
-
-### Bug Fixes
-
-* package scripts ([f7935af](https://github.com/boycce/monastery/commit/f7935afb0181ddb3e397bf804b34c841589dfcf0))
-
-### 1.31.1 (2022-02-15)
+### 1.31.3 (2022-02-15)
 
 
 ### Bug Fixes
@@ -24,5 +17,7 @@ All notable changes to this project will be documented in this file. See [standa
 * model-crud ([d421709](https://github.com/boycce/monastery/commit/d421709a70e6611c78e049e98268153c9bafae6d))
 * normalise afterFind ([0ab7f43](https://github.com/boycce/monastery/commit/0ab7f43f25b599e07d9ae751dc3bac8550e53c24))
 * normalised rule arguments and context ([6ba48da](https://github.com/boycce/monastery/commit/6ba48da3b9c643620cebf5442e60bd0318d6780f))
+* package scripts ([f7935af](https://github.com/boycce/monastery/commit/f7935afb0181ddb3e397bf804b34c841589dfcf0))
+* semver ([6f14909](https://github.com/boycce/monastery/commit/6f14909f4405cf26dc04a8603cc3bac232b96798))
 * standard-version ([f553b08](https://github.com/boycce/monastery/commit/f553b08445eb7dd2e85f6bb447e2bb0bc38dda34))
 * util bug, updated tests ([bec1887](https://github.com/boycce/monastery/commit/bec1887f56cb8582b606a066c913c191362a61b0))
