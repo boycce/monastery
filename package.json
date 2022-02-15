@@ -17,14 +17,15 @@
     "mongo odm"
   ],
   "scripts": {
-    "minor": "standard-version --release-as minor && npm publish",
-    "patch": "standard-version && npm publish",
-    "test": "npm run lint && jest",
-    "test-one-example": "jest -t images",
     "dev": "npm run lint & DEBUG=-monastery:info jest --watchAll --runInBand --verbose=false",
-    "lint": "eslint ./lib ./plugins ./test",
     "docs": "cd docs && bundle exec jekyll serve --livereload --livereload-port 4001",
-    "mong": "nodemon resources/mong.js"
+    "lint": "eslint ./lib ./plugins ./test",
+    "mong": "nodemon resources/mong.js",
+    "minor": "standard-version --release-as minor && npm publish",
+    "patch": "standard-version --release-as patch && npm publish",
+    "release": "standard-version && npm publish",
+    "test": "npm run lint && jest",
+    "test-one-example": "jest -t images"
   },
   "dependencies": {
     "aws-sdk": "2.1062.0",
