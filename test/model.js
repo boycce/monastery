@@ -189,6 +189,58 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
+  test('model unique indexes', async () => {
+    let db = (await opendb(null)).db
+    // Setup: Drop previously tested collections
+    if ((await db._db.listCollections().toArray()).find(o => o.name == 'userUniqueIndex')) {
+      await db._db.collection('userUniqueIndex').drop()
+    }
+
+    // Partial unique indexes (allows mulitple null values)
+    await db.model('userUniqueIndex', {
+      waitForIndexes: true,
+      fields: {
+        email: {
+          type: 'string',
+          index: {
+            type: 'unique',
+            partialFilterExpression: {
+              email: { $type: 'string' }
+            }
+          }
+        },
+      }
+    })
+
+    let indexes2 = await db._db.collection('userUniqueIndex').indexes()
+    expect(indexes2[0]).toMatchObject({ v: 2, key: { _id: 1 }, name: '_id_' })
+    expect(indexes2[1]).toMatchObject({ v: 2, unique: true, key: { email: 1 }, name: 'email_1' })
+
+    await expect(db.userUniqueIndex.insert({ data: { 'email': 'ricky@orchid.co.nz' }})).resolves.toEqual({
+      _id: expect.any(Object),
+      email: 'ricky@orchid.co.nz'
+    })
+
+    await expect(db.userUniqueIndex.insert({ data: { 'email': 'ricky@orchid.co.nz' }})).rejects.toEqual(
+      new Error(
+        'E11000 duplicate key error collection: monastery.userUniqueIndex index: email_1 ' +
+        'dup key: { email: "ricky@orchid.co.nz" }'
+      )
+    )
+
+    await expect(db.userUniqueIndex.insert({ data: { 'email': null }})).resolves.toEqual({
+      _id: expect.any(Object),
+      email: null
+    })
+
+    await expect(db.userUniqueIndex.insert({ data: { 'email': null }})).resolves.toEqual({
+      _id: expect.any(Object),
+      email: null
+    })
+
+    db.close()
+  })
+
   test('model subdocument indexes', async () => {
     // Setup: Need to test different types of indexes
     let db = (await opendb(null)).db
