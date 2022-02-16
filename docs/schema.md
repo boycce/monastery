@@ -166,6 +166,24 @@ await db.user.insert({
 }
 ```
 
+Since unique indexes by default don't allow mutliple documents with `null`, you use a partial index (less performant), e.g.
+
+```js
+
+schema.fields = {
+index: {
+  name: {
+    type: 'string',
+    index: {
+      type: 'unique',
+      partialFilterExpression: {
+        email: { $type: 'string' }
+      }
+    }
+  }
+}
+```
+
 ### Custom validation rules
 
 You are able to define custom validation rules to use. (`this` will refer to the data object passed in)
