@@ -309,6 +309,42 @@ module.exports = function(monastery, opendb) {
       .rejects.toContainEqual(error)
   })
 
+  test('validation array schema errors', async () => {
+    // Setup
+    let db = (await opendb(false)).db
+    function arrayWithSchema(array, schema) {
+      array.schema = schema
+      return array
+    }
+    let user = db.model('user', { fields: {
+      animals: arrayWithSchema(
+        [{ type: 'string' }],
+        { required: true, minLength: 2 },
+      )
+    }})
+
+    // MinLength error
+    await expect(user.validate({
+      animals: [],
+    })).rejects.toContainEqual({
+      status: '400',
+      title: 'animals',
+      detail: 'This field is required.',
+      meta: { rule: 'required', model: 'user', field: 'animals' }
+    })
+
+    // MinLength error
+    await expect(user.validate({
+      animals: ['dog'],
+    })).rejects.toContainEqual({
+      status: '400',
+      title: 'animals',
+      detail: 'Value needs to contain a minimum of 2 items.',
+      meta: { rule: 'minLength', model: 'user', field: 'animals' }
+    })
+  })
+
+
   test('validation getMostSpecificKeyMatchingPath', async () => {
     let fn = validate._getMostSpecificKeyMatchingPath
     let mock = {
