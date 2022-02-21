@@ -221,11 +221,9 @@ module.exports = function(monastery, opendb) {
       email: 'ricky@orchid.co.nz'
     })
 
-    await expect(db.userUniqueIndex.insert({ data: { 'email': 'ricky@orchid.co.nz' }})).rejects.toEqual(
-      new Error(
-        'E11000 duplicate key error collection: monastery.userUniqueIndex index: email_1 ' +
-        'dup key: { email: "ricky@orchid.co.nz" }'
-      )
+    await expect(db.userUniqueIndex.insert({ data: { 'email': 'ricky@orchid.co.nz' }})).rejects.toThrow(
+      'E11000 duplicate key error collection: monastery.userUniqueIndex index: email_1 ' +
+      'dup key: { email: "ricky@orchid.co.nz" }'
     )
 
     await expect(db.userUniqueIndex.insert({ data: { 'email': null }})).resolves.toEqual({
