@@ -26,17 +26,18 @@ module.exports = function(monastery, opendb) {
       meta: { rule: 'required', model: 'user', field: 'name' }
     })
 
-    // Required error (insert, and with ignoreRequired)
-    await expect(user.validate({}, { validateUndefined: false })).resolves.toEqual({})
-    await expect(user.validate({}, { validateUndefined: false, update: true })).resolves.toEqual({})
-
     // No required error (update)
     await expect(user.validate({}, { update: true })).resolves.toEqual({})
 
     // Type error (string)
     await expect(user.validate({ name: 1 })).resolves.toEqual({ name: '1' })
     await expect(user.validate({ name: 1.123 })).resolves.toEqual({ name: '1.123' })
-    await expect(user.validate({ name: undefined }, { validateUndefined: false })).resolves.toEqual({})
+    await expect(user.validate({ name: undefined })).rejects.toContainEqual({
+      status: '400',
+      title: 'name',
+      detail: 'This field is required.',
+      meta: { rule: 'required', model: 'user', field: 'name' }
+    })
     await expect(user.validate({ name: null })).rejects.toContainEqual({
       status: '400',
       title: 'name',
@@ -65,20 +66,19 @@ module.exports = function(monastery, opendb) {
     await expect(usernum.validate({ amount: 0 })).resolves.toEqual({ amount: 0 })
     await expect(usernum.validate({ amount: '0' })).resolves.toEqual({ amount: 0 })
     await expect(usernum2.validate({ amount: '' })).resolves.toEqual({ amount: null })
-    await expect(usernum.validate({ amount: undefined }, { validateUndefined: false })).resolves.toEqual({})
     await expect(usernum.validate({ amount: false })).rejects.toEqual([{
       status: '400',
       title: 'amount',
       detail: 'Value was not a number.',
       meta: { rule: 'isNumber', model: 'usernum', field: 'amount' }
     }])
-    await expect(usernum.validate({ amount: null })).rejects.toEqual([{
+    await expect(usernum.validate({ amount: undefined })).rejects.toEqual([{
       status: '400',
       title: 'amount',
       detail: 'This field is required.',
       meta: { rule: 'required', model: 'usernum', field: 'amount' },
     }])
-    await expect(usernum.validate({ amount: null }, { validateUndefined: false })).rejects.toEqual([{
+    await expect(usernum.validate({ amount: null })).rejects.toEqual([{
       status: '400',
       title: 'amount',
       detail: 'This field is required.',
@@ -343,7 +343,6 @@ module.exports = function(monastery, opendb) {
       meta: { rule: 'minLength', model: 'user', field: 'animals' }
     })
   })
-
 
   test('validation getMostSpecificKeyMatchingPath', async () => {
     let fn = validate._getMostSpecificKeyMatchingPath
@@ -906,7 +905,7 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('validation options', async () => {
+  test('validation option skipValidation', async () => {
     let db = (await opendb(false)).db
     let user = db.model('user', { fields: {
       name: { type: 'string', required: true }
@@ -989,6 +988,66 @@ module.exports = function(monastery, opendb) {
         rule: 'required'
       }
     })
+  })
+
+  test('validation option validateUndefined', async () => {
+    // ValidateUndefined runs required rules on all fields, `true` for insert, `false` for update.
+
+    // Setup
+    let db = (await opendb(false)).db
+    let user = db.model('user', { fields: {
+      date: { type: 'number' },
+      name: { type: 'string', required: true },
+    }})
+    let usernum = db.model('usernum', { fields: {
+      amount: { type: 'number', required: true }
+    }})
+    let userdeep = db.model('userdeep', { fields: {
+      date: { type: 'number' },
+      name: {
+        first: { type: 'string', required: true },
+      },
+      names: [{
+        first: { type: 'string', required: true },
+      }]
+    }})
+    let errorRequired = {
+      status: '400',
+      title: 'name',
+      detail: 'This field is required.',
+      meta: expect.any(Object),
+    }
+
+    // Required error for undefined
+    await expect(user.validate({}))
+      .rejects.toEqual([errorRequired])
+    await expect(user.validate({}, { update: true, validateUndefined: true }))
+      .rejects.toEqual([errorRequired])
+    await expect(userdeep.validate({}))
+      .rejects.toEqual([{ ...errorRequired, title: 'name.first' }])
+    await expect(userdeep.validate({ name: {} }, { update: true }))
+      .rejects.toEqual([{ ...errorRequired, title: 'name.first' }])
+    await expect(userdeep.validate({ names: [{}] }, { update: true }))
+      .rejects.toEqual([{ ...errorRequired, title: 'names.0.first' }])
+
+    // Required error for null
+    await expect(user.validate({ name: null }, { update: true }))
+      .rejects.toEqual([errorRequired])
+    await expect(usernum.validate({ amount: null }, { update: true }))
+      .rejects.toEqual([{ ...errorRequired, title: 'amount' }])
+    await expect(user.validate({ name: null }, { update: true, validateUndefined: true }))
+      .rejects.toEqual([errorRequired])
+
+    // Skip required error
+    await expect(user.validate({ name: undefined }, { validateUndefined: false })).resolves.toEqual({})
+    await expect(user.validate({}, { validateUndefined: false })).resolves.toEqual({})
+    await expect(user.validate({}, { update: true })).resolves.toEqual({})
+    await expect(user.validate({}, { update: true, validateUndefined: false })).resolves.toEqual({})
+    await expect(userdeep.validate({}, { update: true })).resolves.toEqual({})
+    await expect(userdeep.validate({ name: {} }, { update: true, validateUndefined: false }))
+      .resolves.toEqual({ name: {} })
+    await expect(userdeep.validate({ names: [{}] }, { update: true, validateUndefined: false }))
+      .resolves.toEqual({ names: [{}] })
   })
 
   test('validation hooks', async () => {
