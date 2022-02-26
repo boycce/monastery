@@ -1,6 +1,7 @@
 ---
 title: Rules
 nav_order: 5
+parent: Schema
 ---
 
 # Validation Rules
