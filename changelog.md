@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.32.0](https://github.com/boycce/monastery/compare/1.31.7...1.32.0) (2022-02-28)
+
+
+### Features
+
+* added getSignedUrl(s) ([3552a4d](https://github.com/boycce/monastery/commit/3552a4d0b21c192a256a590e3ac1cb48b31c6564))
+* added image optiosn filename, and params ([353b2f0](https://github.com/boycce/monastery/commit/353b2f09ed429a5cd8d74a3b2e94493650fb52e4))
+
 ### [1.31.7](https://github.com/boycce/monastery/compare/1.31.6...1.31.7) (2022-02-28)
 
 
