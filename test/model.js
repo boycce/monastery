@@ -115,6 +115,29 @@ module.exports = function(monastery, opendb) {
     })
   })
 
+  test('model reserved rules', async () => {
+    // Setup
+    let db = (await opendb(false, {})).db
+    db.error = () => {} // hiding debug error
+    let user = db.model('user', {
+      fields: {
+        name: {
+          type: 'string',
+          params: {}, // reserved keyword (image plugin)
+          paramsUnreserved: {}
+        },
+      },
+      rules: {
+        params: (value) => {
+          return false // shouldn'r run
+        }
+      }
+    })
+    await expect(user.validate({ name: 'Martin' })).resolves.toMatchObject({
+      name: 'Martin',
+    })
+  })
+
   test('model indexes', async () => {
     // Setup: Need to test different types of indexes
     let db = (await opendb(null)).db

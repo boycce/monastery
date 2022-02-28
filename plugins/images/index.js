@@ -32,7 +32,8 @@ let plugin = module.exports = {
       return
     }
 
-    // Create s3 service instance
+    // Create s3 'service' instance
+    // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#constructor-property
     this.s3 = new S3({
       credentials: {
         accessKeyId: this.awsAccessKeyId,
@@ -121,14 +122,15 @@ let plugin = module.exports = {
         return Promise.all(filesArr.map(file => {
           return new Promise((resolve, reject) => {
             let uid = nanoid.nanoid()
+            let pathFilename = filesArr.imageField.filename ? '/' + filesArr.imageField.filename : ''
             let image = {
               bucket: this.awsBucket,
               date: this.manager.useMilliseconds? Date.now() : Math.floor(Date.now() / 1000),
               filename: file.name,
               filesize: file.size,
-              path: `${plugin.bucketDir}/${uid}.${file.ext}`,
+              path: `${plugin.bucketDir}/${uid}${pathFilename}.${file.ext}`,
               // sizes: ['large', 'medium', 'small'],
-              uid: uid
+              uid: uid,
             }
             this.manager.info(
               `Uploading '${image.filename}' to '${image.bucket}/${image.path}'`
@@ -141,7 +143,11 @@ let plugin = module.exports = {
                 Bucket: this.awsBucket,
                 Key: image.path,
                 Body: file.data,
-                ACL: 'public-read'
+                // The IAM permission "s3:PutObjectACL" must be included in the appropriate policy
+                ACL: 'public-read',
+                // upload params,https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#upload-property
+                ...filesArr.imageField.params,
+
               }, (err, response) => {
                 if (err) return reject(err)
                 plugin._addImageObjectsToData(filesArr.inputPath, data, image)
@@ -161,7 +167,7 @@ let plugin = module.exports = {
       return model._update(
         idquery,
         { '$set': prunedData },
-        { 'multi': options.multi || options.create }
+        { 'multi': options.multi || options.create },
       )
 
     // If errors, remove inserted documents to prevent double ups when the user resaves.
@@ -376,7 +382,7 @@ let plugin = module.exports = {
       return Promise.all(filesArr.map((file, i) => {
         return new Promise((resolve, reject) => {
           fileType.fromBuffer(file.data).then(res => {
-            let maxSize = filesArr.imageField.fileSize
+            let maxSize = filesArr.imageField.filesize
             let formats = filesArr.imageField.formats || plugin.formats
             let allowAny = util.inArray(formats, 'any')
             file.format = res? res.ext : ''
@@ -431,7 +437,9 @@ let plugin = module.exports = {
       // Image field. Test for field.image as field.type may be 'any'
       } else if (field.type == 'image' || field.image) {
         let formats = field.formats
-        let fileSize = field.fileSize
+        let filesize = field.filesize || field.fileSize // old <= v1.31.7
+        let filename = field.filename
+        let params = { ...field.params||{} }
         // Convert image field to subdocument
         fields[fieldName] = {
           bucket: { type: 'string' },
@@ -440,13 +448,15 @@ let plugin = module.exports = {
           filesize: { type: 'number' },
           path: { type: 'string' },
           schema: { image: true, nullObject: true, isImageObject: true },
-          uid: { type: 'string' }
+          uid: { type: 'string' },
         }
         list.push({
           fullPath: path2,
           fullPathRegex: new RegExp('^' + path2.replace(/\.[0-9]+/g, '.[0-9]+').replace(/\./g, '\\.') + '$'),
           formats: formats,
-          fileSize: fileSize
+          filesize: filesize,
+          filename: filename,
+          params: params,
         })
       }
     })

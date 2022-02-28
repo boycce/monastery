@@ -26,9 +26,11 @@ Then in your model schema, e.g.
 ```js
 let user = db.model('user', { fields: {
   logo:  {
-    type: 'image',
-    formats: ['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff'], // optional plugin rule
-    fileSize: 1000 * 1000 * 5 // optional plugin rule, size in bytes
+    type: 'image', // required
+    formats: ['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff'],
+    filename: 'avatar',
+    filesize: 1000 * 1000 * 5, // max size in bytes
+    params: {}, // upload params, https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#upload-property
   },
   logos: [{
     type: 'image'
