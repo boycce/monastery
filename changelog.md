@@ -22,6 +22,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Bug Fixes
 
+* Fixed validateUndefined
 * added partial unqiue index tests ([ff6f193](https://github.com/boycce/monastery/commit/ff6f1938e333407ee17895873d2b42fa5263d7e3))
 * scripts ([bc32680](https://github.com/boycce/monastery/commit/bc326809098ae24686158a0386fbbd6671d86c98))
 
