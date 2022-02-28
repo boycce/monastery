@@ -415,6 +415,40 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
+  test('remove basics', async () => {
+    let db = (await opendb(null)).db
+    let user = db.model('user', {
+      fields: {
+        name: { type: 'string' },
+      },
+    })
+
+    // Insert multiple
+    let inserted2 = await user.insert({ data: [{ name: 'Martin' }, { name: 'Martin' }, { name: 'Martin' }]})
+    expect(inserted2).toEqual([
+      {
+        _id: expect.any(Object),
+        name: 'Martin'
+      }, {
+        _id: expect.any(Object),
+        name: 'Martin'
+      }, {
+        _id: expect.any(Object),
+        name: 'Martin'
+      }
+    ])
+
+    // Remove one
+    await expect(user.remove({ query: { name: 'Martin' }, multi: false }))
+      .resolves.toMatchObject({ deletedCount: 1, result: { n: 1, ok: 1 }})
+
+    // Remove many (default)
+    await expect(user.remove({ query: { name: 'Martin' } }))
+      .resolves.toMatchObject({ deletedCount: 2, result: { n: 2, ok: 1 }})
+
+    db.close()
+  })
+
   test('hooks', async () => {
     let db = (await opendb(null)).db
     let user = db.model('user', {
