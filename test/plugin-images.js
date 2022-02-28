@@ -707,4 +707,59 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
+  test('images getSignedUrls', async () => {
+    // latest (2022.02)
+    let db = (await opendb(null, {
+      timestamps: false,
+      serverSelectionTimeoutMS: 2000,
+      imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
+    })).db
+
+    db.model('user', { fields: {
+      photos: [{ type: 'image' }],
+      photos2: [{ type: 'image', getSignedUrl: true }],
+    }})
+
+    let image = {
+      bucket: 'test',
+      date: 1234,
+      filename: 'lion1.png',
+      filesize: 1234,
+      path: 'test/lion1.png',
+      uid: 'lion1'
+    }
+
+    let userInserted = await db.user._insert({
+      photos: [image, image],
+      photos2: [image, image],
+    })
+
+    // Find signed URL
+    await expect(db.user.findOne({ query: userInserted._id, getSignedUrls: true })).resolves.toEqual({
+      _id: expect.any(Object),
+      photos: [
+        { ...image, signedUrl: expect.stringMatching(/^https/) },
+        { ...image, signedUrl: expect.stringMatching(/^https/) },
+      ],
+      photos2: [
+        { ...image, signedUrl: expect.stringMatching(/^https/) },
+        { ...image, signedUrl: expect.stringMatching(/^https/) },
+      ]
+    })
+    // Find signed URL
+    await expect(db.user.findOne({ query: userInserted._id })).resolves.toEqual({
+      _id: expect.any(Object),
+      photos: [
+        { ...image },
+        { ...image },
+      ],
+      photos2: [
+        { ...image, signedUrl: expect.stringMatching(/^https/) },
+        { ...image, signedUrl: expect.stringMatching(/^https/) },
+      ]
+    })
+
+    db.close()
+  })
+
 }

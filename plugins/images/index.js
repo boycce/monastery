@@ -34,6 +34,7 @@ let plugin = module.exports = {
 
     // Create s3 'service' instance
     // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#constructor-property
+    manager.getSignedUrl = this._getSignedUrl
     this.s3 = new S3({
       credentials: {
         accessKeyId: this.awsAccessKeyId,
@@ -71,6 +72,9 @@ let plugin = module.exports = {
       })
       model.afterInsert.push(function(data, n) {
         plugin.addImages(this, data).then(() => n(null, data)).catch(e => n(e))
+      })
+      model.afterFind.push(function(data, n) {
+        plugin.getSignedUrls(this, data).then(() => n(null, data)).catch(e => n(e))
       })
     }
   },
@@ -176,6 +180,23 @@ let plugin = module.exports = {
       if (options.create) model._remove(idquery)
       throw err
     })
+  },
+
+  getSignedUrls: async function(options, data) {
+    // Not wanting signed urls for this operation?
+    if (util.isDefined(options.getSignedUrls) && !options.getSignedUrls) return
+
+    // Find all image objects in data
+    for (let doc of util.toArray(data)) {
+      for (let imageField of options.model.imageFields) {
+        if (options.getSignedUrls || imageField.getSignedUrl) {
+          let images = plugin._findImagesInData(doc, imageField, 0, '').filter(o => o.image)
+          for (let image of images) {
+            image.image.signedUrl = this._getSignedUrl(image.image.path)
+          }
+        }
+      }
+    }
   },
 
   keepImagePlacement: async function(options, data) {
@@ -439,6 +460,7 @@ let plugin = module.exports = {
         let formats = field.formats
         let filesize = field.filesize || field.fileSize // old <= v1.31.7
         let filename = field.filename
+        let getSignedUrl = field.getSignedUrl
         let params = { ...field.params||{} }
         // Convert image field to subdocument
         fields[fieldName] = {
@@ -456,6 +478,7 @@ let plugin = module.exports = {
           formats: formats,
           filesize: filesize,
           filename: filename,
+          getSignedUrl: getSignedUrl,
           params: params,
         })
       }
@@ -505,6 +528,16 @@ let plugin = module.exports = {
     }
 
     return list
-  }
+  },
+
+  _getSignedUrl: (path, expires=3600) => {
+    // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getSignedUrl-property
+    let signedUrl = plugin.s3.getSignedUrl('getObject', {
+      Bucket: plugin.awsBucket,
+      Key: path,
+      Expires: expires
+    })
+    return signedUrl
+  },
 
 }

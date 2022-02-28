@@ -30,6 +30,7 @@ let user = db.model('user', { fields: {
     formats: ['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff'],
     filename: 'avatar',
     filesize: 1000 * 1000 * 5, // max size in bytes
+    getSignedUrl: true, // get a s3 signed url by default after `find()`
     params: {}, // upload params, https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#upload-property
   },
   logos: [{
@@ -63,4 +64,3 @@ user.update({
 Due to known limitations, we are inaccurately able to validate non-binary file types (e.g. txt, svg) before uploading to S3, and rely on their file processing to remove any malicious files.
 
 ...to be continued
-
