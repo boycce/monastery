@@ -734,29 +734,27 @@ module.exports = function(monastery, opendb) {
       photos2: [image, image],
     })
 
-    // Find signed URL
+    // Find signed URL via query option
+    let imageWithSignedUrl = { ...image, signedUrl: expect.stringMatching(/^https/) }
     await expect(db.user.findOne({ query: userInserted._id, getSignedUrls: true })).resolves.toEqual({
       _id: expect.any(Object),
-      photos: [
-        { ...image, signedUrl: expect.stringMatching(/^https/) },
-        { ...image, signedUrl: expect.stringMatching(/^https/) },
-      ],
-      photos2: [
-        { ...image, signedUrl: expect.stringMatching(/^https/) },
-        { ...image, signedUrl: expect.stringMatching(/^https/) },
-      ]
+      photos: [imageWithSignedUrl, imageWithSignedUrl],
+      photos2: [imageWithSignedUrl, imageWithSignedUrl],
     })
-    // Find signed URL
+
+    // Find signed URL via schema option
     await expect(db.user.findOne({ query: userInserted._id })).resolves.toEqual({
       _id: expect.any(Object),
-      photos: [
-        { ...image },
-        { ...image },
-      ],
-      photos2: [
-        { ...image, signedUrl: expect.stringMatching(/^https/) },
-        { ...image, signedUrl: expect.stringMatching(/^https/) },
-      ]
+      photos: [image, image],
+      photos2: [imageWithSignedUrl, imageWithSignedUrl],
+    })
+
+    // Works with _processAfterFind
+    let rawUser = await db.user._findOne({ _id: userInserted._id })
+    await expect(db.user._processAfterFind(rawUser)).resolves.toEqual({
+      _id: expect.any(Object),
+      photos: [image, image],
+      photos2: [imageWithSignedUrl, imageWithSignedUrl],
     })
 
     db.close()

@@ -74,7 +74,7 @@ let plugin = module.exports = {
         plugin.addImages(this, data).then(() => n(null, data)).catch(e => n(e))
       })
       model.afterFind.push(function(data, n) {
-        plugin.getSignedUrls(this, data).then(() => n(null, data)).catch(e => n(e))
+        plugin.getSignedUrls.call(model, this, data).then(() => n(null, data)).catch(e => n(e))
       })
     }
   },
@@ -128,15 +128,15 @@ let plugin = module.exports = {
             let uid = nanoid.nanoid()
             let pathFilename = filesArr.imageField.filename ? '/' + filesArr.imageField.filename : ''
             let image = {
-              bucket: this.awsBucket,
-              date: this.manager.useMilliseconds? Date.now() : Math.floor(Date.now() / 1000),
+              bucket: plugin.awsBucket,
+              date: plugin.manager.useMilliseconds? Date.now() : Math.floor(Date.now() / 1000),
               filename: file.name,
               filesize: file.size,
               path: `${plugin.bucketDir}/${uid}${pathFilename}.${file.ext}`,
               // sizes: ['large', 'medium', 'small'],
               uid: uid,
             }
-            this.manager.info(
+            plugin.manager.info(
               `Uploading '${image.filename}' to '${image.bucket}/${image.path}'`
             )
             if (test) {
@@ -144,7 +144,7 @@ let plugin = module.exports = {
               resolve()
             } else {
               plugin.s3.upload({
-                Bucket: this.awsBucket,
+                Bucket: plugin.awsBucket,
                 Key: image.path,
                 Body: file.data,
                 // The IAM permission "s3:PutObjectACL" must be included in the appropriate policy
@@ -183,16 +183,23 @@ let plugin = module.exports = {
   },
 
   getSignedUrls: async function(options, data) {
+    /**
+     * Get signed urls for all image objects in data
+     * @param {object} options - monastery operation options {model, query, files, ..}
+     * @param {object} data
+     * @return promise(data)
+     * @this model
+     */
     // Not wanting signed urls for this operation?
     if (util.isDefined(options.getSignedUrls) && !options.getSignedUrls) return
 
     // Find all image objects in data
     for (let doc of util.toArray(data)) {
-      for (let imageField of options.model.imageFields) {
+      for (let imageField of this.imageFields) {
         if (options.getSignedUrls || imageField.getSignedUrl) {
           let images = plugin._findImagesInData(doc, imageField, 0, '').filter(o => o.image)
           for (let image of images) {
-            image.image.signedUrl = this._getSignedUrl(image.image.path)
+            image.image.signedUrl = plugin._getSignedUrl(image.image.path)
           }
         }
       }
@@ -330,7 +337,7 @@ let plugin = module.exports = {
         { Key: `medium/${key}.jpg` },
         { Key: `large/${key}.jpg` }
       )
-      this.manager.info(
+      plugin.manager.info(
         `Removing '${pre.image.filename}' from '${pre.image.bucket}/${pre.image.path}'`
       )
     }
@@ -448,12 +455,12 @@ let plugin = module.exports = {
       // Subdocument field
       if (util.isSubdocument(field)) {//schema.isObject
         // log(`Recurse 1: ${path2}`)
-        list = list.concat(this._findAndTransformImageFields(field, path2))
+        list = list.concat(plugin._findAndTransformImageFields(field, path2))
 
       // Array field
       } else if (util.isArray(field)) {//schema.isArray
         // log(`Recurse 2: ${path2}`)
-        list = list.concat(this._findAndTransformImageFields(field, path2))
+        list = list.concat(plugin._findAndTransformImageFields(field, path2))
 
       // Image field. Test for field.image as field.type may be 'any'
       } else if (field.type == 'image' || field.image) {
@@ -507,7 +514,7 @@ let plugin = module.exports = {
           if (`${dataPath}.${m}`.match(imageField.fullPathRegex)) {
             list.push({ imageField: imageField, dataPath: `${dataPath}.${m}`, image: target[m] })
           } else {
-            list.push(...this._findImagesInData(
+            list.push(...plugin._findImagesInData(
               target[m],
               imageField,
               imageFieldChunkIndex+i+1,
