@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.32.1](https://github.com/boycce/monastery/compare/1.32.0...1.32.1) (2022-03-01)
+
+
+### Bug Fixes
+
+* processAfterFind bug ([3183b79](https://github.com/boycce/monastery/commit/3183b79fc288665000b63e0221fbe8acf6f482aa))
+
 ## [1.32.0](https://github.com/boycce/monastery/compare/1.31.7...1.32.0) (2022-02-28)
 
 
