@@ -30,7 +30,7 @@ let user = db.model('user', { fields: {
     formats: ['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff'],
     filename: 'avatar',
     filesize: 1000 * 1000 * 5, // max size in bytes
-    getSignedUrl: true, // get a s3 signed url after `find()` operations
+    getSignedUrl: true, // get a s3 signed url after every `find()` operation (can be overridden per request)
     params: {}, // upload params, https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#upload-property
   },
   logos: [{
