@@ -3,6 +3,7 @@
 module.exports = function(monastery, opendb) {
 
   test('basic operator calls', async () => {
+    // Todo: take out and group query/id parsing tests
     let db = (await opendb(null)).db
     let user = db.model('user', {
       fields: {
@@ -53,20 +54,23 @@ module.exports = function(monastery, opendb) {
     let find6 = await user.find(inserted2[0]._id.toString())
     expect(find6).toEqual({ _id: inserted2[0]._id, name: 'Martin Luther1' })
 
-    // Missing parameters
-    await expect(user.find()).rejects.toThrow('Please pass an object or MongoId to options.query')
-    await expect(user.find(undefined)).rejects.toThrow('Please pass an object or MongoId to options.query')
-    await expect(user.find({})).rejects.toThrow('Please pass an object or MongoId to options.query')
-    await expect(user.find({ query: null })).rejects.toThrow('Please pass an object or MongoId to options.query')
-    await expect(user.find({ query: undefined })).rejects.toThrow('Please pass an object or MongoId to options.query')
-    await expect(user.find({ query: { _id: undefined }}))
-      .rejects.toThrow('Please pass an object or MongoId to options.query')
-    await expect(user.find(1)).rejects.toThrow('Please pass an object or MongoId to options.query')
+    // Bad ids
+    let badIdOrQuery = 'Please pass an object or MongoId to options.query'
+    await expect(user.find()).rejects.toThrow(badIdOrQuery)
+    await expect(user.find(1)).rejects.toThrow(badIdOrQuery)
+    await expect(user.find(null)).rejects.toThrow(badIdOrQuery)
+    await expect(user.find(undefined)).rejects.toThrow(badIdOrQuery)
+    await expect(user.find({})).rejects.toThrow(badIdOrQuery)
+    await expect(user.find({ query: null })).rejects.toThrow(badIdOrQuery)
+    await expect(user.find({ query: undefined })).rejects.toThrow(badIdOrQuery)
+    await expect(user.find({ query: { _id: undefined }})).rejects.toThrow(badIdOrQuery)
 
-    // Bad MongoID
-    await expect(user.find({ query: '' })).resolves.toEqual(null)
-    await expect(user.find('bad-id')).resolves.toEqual(null)
+    // Parseable
     await expect(user.find('')).resolves.toEqual(null)
+    await expect(user.find('invalid-id')).resolves.toEqual(null)
+    await expect(user.find({ query: '' })).resolves.toEqual(null)
+    await expect(user.find({ query: { _id: '' }})).resolves.toEqual(null)
+    await expect(user.find({ query: { _id: null }})).resolves.toEqual([]) // should throw error
 
     // FindOne (query id)
     let findOne = await user.findOne({ query: inserted._id })
