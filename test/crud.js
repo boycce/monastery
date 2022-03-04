@@ -516,6 +516,26 @@ module.exports = function(monastery, opendb) {
       last: 'Luther'
     })
 
+    // beforeUpdate/beforeInsert should have access to the original non-validated data
+    let user2 = db.model('user2', {
+      fields: {
+        first: { type: 'string' },
+      },
+      beforeInsert: [function (data, next) {
+        if (this.data.bad === true && !data.bad) next(new Error('error1'))
+        else next()
+      }],
+      beforeUpdate: [function (data, next) {
+        if (this.data.bad === true && !data.bad) next(new Error('error2'))
+        else next()
+      }],
+    })
+    let userDoc2 = await user2._insert({ first: 'M' })
+    await expect(user2.insert({ data: { first: 'M' } })).resolves.toMatchObject({ first: 'M' })
+    await expect(user2.insert({ data: { first: 'M', bad: true } })).rejects.toThrow('error1')
+    await expect(user2.update({ query: userDoc2._id, data: { first: 'M',  } })).resolves.toEqual({ first: 'M' })
+    await expect(user2.update({ query: userDoc2._id, data: { first: 'M', bad: true } })).rejects.toThrow('error2')
+
     db.close()
   })
 
