@@ -161,7 +161,7 @@ module.exports = function(monastery, opendb) {
       let express = require('express')
       let upload = require('express-fileupload')
       let app = express()
-      app.use(upload({ limits: { fileSize: 1 * 1000 * 1000, files: 10 }}))
+      app.use(upload({ limits: { filesize: 1 * 1000 * 1000, files: 10 }}))
 
       app.post('/', function(req, res) {
         // Files exist
@@ -292,7 +292,7 @@ module.exports = function(monastery, opendb) {
       let express = require('express')
       let upload = require('express-fileupload')
       let app = express()
-      app.use(upload({ limits: { fileSize: 1 * 1000 * 1000, files: 10 }}))
+      app.use(upload({ limits: { filesize: 1 * 1000 * 1000, files: 10 }}))
 
       app.post('/', function(req, res) {
         req.body.logos = JSON.parse(req.body.logos)
@@ -368,7 +368,7 @@ module.exports = function(monastery, opendb) {
       let express = require('express')
       let upload = require('express-fileupload')
       let app = express()
-      app.use(upload({ limits: { fileSize: 1 * 1000 * 1000, files: 10 }}))
+      app.use(upload({ limits: { filesize: 1 * 1000 * 1000, files: 10 }}))
 
       app.post('/', function(req, res) {
         try {
@@ -417,7 +417,7 @@ module.exports = function(monastery, opendb) {
         imageSvgBad:  { type: 'image' },
         imageSvgGood: { type: 'image', formats: ['svg'] },
         imageSvgAny:  { type: 'image', formats: ['any'] },
-        imageSize1:   { type: 'image', fileSize: 1000 * 100 },
+        imageSize1:   { type: 'image', filesize: 1000 * 100 },
         imageSize2:   { type: 'image' },
       }})
 
@@ -426,7 +426,7 @@ module.exports = function(monastery, opendb) {
       let express = require('express')
       let upload = require('express-fileupload')
       let app = express()
-      app.use(upload({ limits: { fileSize: 1000 * 200, files: 10 }}))
+      app.use(upload({ limits: { filesize: 1000 * 200, files: 10 }}))
 
       app.post('/', async (req, res) => {
         let imageSvgBad = { imageSvgBad: req.files.imageSvgBad }
