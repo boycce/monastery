@@ -1,3 +1,5 @@
+// Todo: split out basic 'type' tests
+
 let validate = require('../lib/model-validate')
 
 module.exports = function(monastery, opendb) {
@@ -51,21 +53,55 @@ module.exports = function(monastery, opendb) {
       meta: { rule: 'isString', model: 'user', field: 'name' }
     })
 
+
     // Type error (date)
-    await expect(user.validate({ name: 'a', date: null })).resolves.toEqual({ name: 'a', date: null })
-    await expect(user.validate({ name: 'a', date: 'fe' })).rejects.toContainEqual({
+    let userdate = db.model('userdate', { fields: { amount: { type: 'date', required: true }}})
+    let userdate2 = db.model('userdate2', { fields: { amount: { type: 'date' }}})
+    await expect(userdate.validate({ amount: 0 })).resolves.toEqual({ amount: 0 })
+    await expect(userdate.validate({ amount: '0' })).resolves.toEqual({ amount: 0 })
+    await expect(userdate.validate({ amount: '1646778655000' })).resolves.toEqual({ amount: 1646778655000 })
+    await expect(userdate2.validate({ amount: '' })).resolves.toEqual({ amount: null })
+    await expect(userdate2.validate({ amount: null })).resolves.toEqual({ amount: null })
+    await expect(userdate.validate({ amount: 'badnum' })).rejects.toEqual([{
       status: '400',
-      title: 'date',
+      title: 'amount',
       detail: 'Value was not a unix timestamp.',
-      meta: { rule: 'isDate', model: 'user', field: 'date' }
-    })
+      meta: { rule: 'isDate', model: 'userdate', field: 'amount' }
+    }])
+    await expect(userdate.validate({ amount: false })).rejects.toEqual([{
+      status: '400',
+      title: 'amount',
+      detail: 'Value was not a unix timestamp.',
+      meta: { rule: 'isDate', model: 'userdate', field: 'amount' }
+    }])
+    await expect(userdate.validate({ amount: undefined })).rejects.toEqual([{
+      status: '400',
+      title: 'amount',
+      detail: 'This field is required.',
+      meta: { rule: 'required', model: 'userdate', field: 'amount' },
+    }])
+    await expect(userdate.validate({ amount: null })).rejects.toEqual([{
+      status: '400',
+      title: 'amount',
+      detail: 'This field is required.',
+      meta: { rule: 'required', model: 'userdate', field: 'amount' },
+    }])
+
 
     // Type error (number)
     let usernum = db.model('usernum', { fields: { amount: { type: 'number', required: true }}})
     let usernum2 = db.model('usernum2', { fields: { amount: { type: 'number' }}})
     await expect(usernum.validate({ amount: 0 })).resolves.toEqual({ amount: 0 })
     await expect(usernum.validate({ amount: '0' })).resolves.toEqual({ amount: 0 })
+    await expect(usernum.validate({ amount: '1646778655000' })).resolves.toEqual({ amount: 1646778655000 })
     await expect(usernum2.validate({ amount: '' })).resolves.toEqual({ amount: null })
+    await expect(usernum2.validate({ amount: null })).resolves.toEqual({ amount: null })
+    await expect(usernum.validate({ amount: 'badnum' })).rejects.toEqual([{
+      status: '400',
+      title: 'amount',
+      detail: 'Value was not a number.',
+      meta: { rule: 'isNumber', model: 'usernum', field: 'amount' }
+    }])
     await expect(usernum.validate({ amount: false })).rejects.toEqual([{
       status: '400',
       title: 'amount',
