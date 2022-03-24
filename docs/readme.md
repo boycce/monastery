@@ -81,6 +81,18 @@ npm run dev -- -t 'Model indexes'
 
 Coming soon...
 
+## Roadmap
+
+- Add FindOneAndUpdate
+- Add before/afterInsertUpdate
+- Deep blackislisitng which aggregates from the order of appearance
+- Automatic subdocument ids
+- Remove ACL default 'public read'
+- Public db.arrayWithSchema method
+- Global after/before hooks
+- Split away from Monk (unless updated)
+- docs: Make the implicit ID query conversion more apparent
+
 ## Special Thanks
 
 [Jerome Gravel-Niquet](https://github.com/jeromegn)
