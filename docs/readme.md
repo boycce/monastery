@@ -91,7 +91,7 @@ Coming soon...
 - ~~Whitelisting a parent will remove any previously blacklisted children~~
 - Automatic subdocument ids
 - Remove ACL default 'public read'
-- Public db.arrayWithSchema method
+- ~~Public db.arrayWithSchema method~~
 - Global after/before hooks
 - Split away from Monk (unless updated)
 - docs: Make the implicit ID query conversion more apparent
