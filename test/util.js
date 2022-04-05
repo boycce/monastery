@@ -39,4 +39,11 @@ module.exports = function(monastery, opendb) {
     expect(db.isId('5ff50fe955da2c00170de734')).toEqual(true)
   })
 
+  test('utilities arrayWithSchema', async () => {
+    let db = (await opendb(false)).db
+    let res = db.arrayWithSchema([{ name: { type: 'string' }}], { minLength: 1 })
+    expect(res).toContainEqual({ name: { type: 'string' }})
+    expect(res.schema).toEqual({ minLength: 1 })
+  })
+
 }
