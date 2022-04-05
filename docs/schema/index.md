@@ -248,9 +248,9 @@ schema.messages = {
   }
   // You can also target any rules set on the array or sub arrays
   // e.g.
-  // let arrayWithSchema = (array, schema) => { array.schema = schema; return array }
-  // petGroups = arrayWithSchema(
-  //   [arrayWithSchema(
+  // // let arrayWithSchema = (array, schema) => { array.schema = schema; return array }, OR you can use db.arrayWithSchema
+  // petGroups = db.arrayWithSchema(
+  //   [db.arrayWithSchema(
   //     [{ name: { type: 'string' }}],
   //     { minLength: 1 }
   //   )],
