@@ -87,7 +87,8 @@ Coming soon...
 - Add before/afterInsertUpdate
 - Bug: Setting an object literal on an ID field ('model') saves successfully
 - Population within array items
-- Deep blackislisitng which aggregates from the order of appearance
+- ~~Blackislisitng which aggregates from the order of appearance~~
+- ~~Whitelisting a parent will remove any previously blacklisted children~~
 - Automatic subdocument ids
 - Remove ACL default 'public read'
 - Public db.arrayWithSchema method
