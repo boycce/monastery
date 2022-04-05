@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.33.0](https://github.com/boycce/monastery/compare/1.32.5...1.33.0) (2022-04-05)
+
+
+### Features
+
+* whitelisting a parent will remove any previously blacklisted children ([d335c2e](https://github.com/boycce/monastery/commit/d335c2e2e9e691b2c0b406f06cb9c2ed14f8bb25))
+
 ### [1.32.5](https://github.com/boycce/monastery/compare/1.32.4...1.32.5) (2022-03-21)
 
 
