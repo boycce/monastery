@@ -85,6 +85,8 @@ Coming soon...
 
 - Add FindOneAndUpdate
 - Add before/afterInsertUpdate
+- Bug: Setting an object literal on an ID field ('model') saves successfully
+- Population within array items
 - Deep blackislisitng which aggregates from the order of appearance
 - Automatic subdocument ids
 - Remove ACL default 'public read'

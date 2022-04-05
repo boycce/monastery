@@ -93,8 +93,6 @@ module.exports = function(monastery, opendb) {
       }
     }})
 
-    // Note: testing mongodb projections
-
     // Test initial blacklist
     let find1 = await user.findOne({
       query: user1._id
@@ -122,37 +120,184 @@ module.exports = function(monastery, opendb) {
       animals: { dog: 'Max', cat: 'Ginger' }
     })
 
-    // Test positive projection
-    let find3 = await user.findOne({
-      query: user1._id,
-      project: ['dog', 'list', 'pets.age']
-    })
-    expect(find3).toEqual({
-      _id: user1._id,
-      dog: 'Bruce',
-      list: [44, 54],
-      pets: [{ age: 5 }, { age: 4 }]
-    })
+    db.close()
+  })
 
-    // Test negative projection
-    let find5 = await user.findOne({
-      query: user1._id,
-      project: [
-        '-list', '-hiddenDeepModel', '-pet', '-pet', '-pets', '-deep', '-deeper', '-deepModel',
-        '-dog', '-animals.cat'
+  test('find blacklisting population', async () => {
+    // inprogresss
+    // Setup
+    let db = monastery('localhost/monastery', {
+      timestamps: false,
+      serverSelectionTimeoutMS: 2000,
+    })
+    let bird = db.model('bird', {
+      fields: {
+        color: { type: 'string', default: 'red' },
+        height: { type: 'number' },
+        name: { type: 'string' },
+        sub: {
+          color: { type: 'string', default: 'red' },
+        },
+        subs: [{
+          color: { type: 'string', default: 'red'},
+        }],
+        wing: {
+          size: { type: 'number' },
+          sizes: {
+            one: { type: 'number' },
+            two: { type: 'number' },
+          }
+        },
+      },
+      findBL: ['wing']
+    })
+    let user = db.model('user', {
+      fields: {
+        dog: { type: 'string' },
+        bird1: { model: 'bird' },
+        bird2: { model: 'bird' },
+        bird3: { model: 'bird' },
+        bird4: { model: 'bird' },
+        bird5: { model: 'bird' },
+      },
+      findBL: [
+        'bird1.name',                                 // bird1.name & bird1.wing blacklisted
+        '-bird2', 'bird2.name',                       // bird2.name blacklisted
+        'bird3.name', '-bird3', 'bird3.height',       // bird3.height blacklisted
+        '-bird4.wing.sizes.one', '-bird4.wing.size',  // ignored
+        // bird4.wing.sizes.two blacklisted (expand in future verion)
+        '-bird5.wing.sizes.one',                      // bird5.wing.sizes.one ignored, wing blacklisted
+        // bird5.wing.sizes.two, wing.size blacklisted (expand in future verion)
       ]
     })
-    expect(find5).toEqual({
+    let bird1 = await bird.insert({
+      data: {
+        name: 'ponyo',
+        height: 40,
+        sub: {},
+        wing: { size: 1, sizes: { one: 1, two: 1 }}
+      }
+    })
+    let userData = {
+      dog: 'Bruce',
+      bird1: bird1._id,
+      bird2: bird1._id,
+      bird3: bird1._id,
+      bird4: bird1._id,
+      bird5: bird1._id
+    }
+    let user1 = await user.insert({ data: userData })
+    let bird1Base = { _id: bird1._id, color: 'red', sub: { color: 'red' }}
+
+    // Test bird1
+    expect(await user.findOne({ query: user1._id, populate: ['bird1'] })).toEqual({
+      ...userData,
       _id: user1._id,
-      animals: { dog: 'Max' },
-      hiddenList: [12, 23],
-      hiddenPets: [{ name: 'secretPet' }]
+      bird1: { ...bird1Base, height: 40 },
+    })
+    // Test bird2
+    expect(await user.findOne({ query: user1._id, populate: ['bird2'] })).toEqual({
+      ...userData,
+      _id: user1._id,
+      bird2: { ...bird1Base, height: 40, wing: { size: 1, sizes: { one: 1, two: 1 }} },
+    })
+    // Test bird3
+    expect(await user.findOne({ query: user1._id, populate: ['bird3'] })).toEqual({
+      ...userData,
+      _id: user1._id,
+      bird3: { ...bird1Base, name: 'ponyo', wing: { size: 1, sizes: { one: 1, two: 1 }} },
+    })
+    // Test bird4
+    expect(await user.findOne({ query: user1._id, populate: ['bird4'] })).toEqual({
+      ...userData,
+      _id: user1._id,
+      bird4: { ...bird1Base, name: 'ponyo', height: 40 },
+    })
+    // Test bird5
+    expect(await user.findOne({ query: user1._id, populate: ['bird5'] })).toEqual({
+      ...userData,
+      _id: user1._id,
+      bird5: { ...bird1Base, name: 'ponyo', height: 40 },
     })
 
     db.close()
   })
 
-  test('find blacklisting (default fields)', async () => {
+  test('find blacklisting getProjection', async () => {
+    let db = (await opendb(null)).db
+    // Setup
+    db.model('bird', {
+      fields: {
+        age: { type: 'number' },
+        name: { type: 'string' },
+        wing: {
+          size: { type: 'number' },
+        },
+      },
+      findBL: ['age', 'wing']
+    })
+    db.model('user', {
+      fields: {
+        name: { type: 'string' },
+        bird1: { model: 'bird' },
+      },
+    })
+    // default
+    expect(db.user._getBlacklistProjection('find')).toEqual({
+      'bird1.wing': 0,
+      'bird1.age': 0,
+      'password': 0,
+    })
+    // blacklist /w invalid field (which goes through)
+    expect(db.user._getBlacklistProjection('find', ['name', 'invalidfield'])).toEqual({
+      'bird1.wing': 0,
+      'bird1.age': 0,
+      'invalidfield': 0,
+      'name': 0,
+      'password': 0,
+    })
+    // whitelist
+    expect(db.user._getBlacklistProjection('find', ['-password', '-bird1.age'])).toEqual({
+      'bird1.wing': 0,
+    })
+    // whitelist parent
+    expect(db.user._getBlacklistProjection('find', ['-bird1'])).toEqual({
+      'password': 0,
+    })
+    // whitelist parent, then blacklist child
+    expect(db.user._getBlacklistProjection('find', ['-bird1', 'bird1.name'])).toEqual({
+      'password': 0,
+      'bird1.name': 0,
+    })
+    // the model's blacklists are applied after deep model's
+    db.user.findBL = ['-bird1.age']
+    expect(db.user._getBlacklistProjection('find')).toEqual({
+      'bird1.wing': 0,
+    })
+    // custom blacklists are applied after the model's, which are after deep model's
+    db.user.findBL = ['-bird1.age']
+    expect(db.user._getBlacklistProjection('find', ['bird1'])).toEqual({
+      'bird1': 0,
+    })
+    // blacklisted parent with a blacklisted child
+    expect(db.user._getBlacklistProjection('find', ['bird1', 'bird1.wing'])).toEqual({
+      'bird1': 0,
+    })
+    // A mess of things
+    expect(db.user._getBlacklistProjection('find', ['-bird1', 'bird1.wing', '-bird1.wing','bird1.wing.size'])).toEqual({
+      'bird1.wing.size': 0,
+    })
+    // blacklisted parent with a whitelisted child (expect blacklist expansion in future version?)
+    // expect(db.user._getBlacklistProjection('find', ['bird1', '-bird1.wing'])).toEqual({
+    //   'bird1.age': 0,
+    //   'bird1.name': 0,
+    // })
+
+    db.close()
+  })
+
+  test('find project', async () => {
+    // Test mongodb native project option
     // Setup
     let db = (await opendb(null)).db
     let user = db.model('user', {
@@ -184,7 +329,6 @@ module.exports = function(monastery, opendb) {
     let find1 = await user.findOne({
       query: user1._id,
       project: ['animal.name', 'animals.name']
-      //blacklist: ['animal.color', 'animals']
     })
     expect(find1).toEqual({
       _id: user1._id,
@@ -209,97 +353,74 @@ module.exports = function(monastery, opendb) {
       ]
     })
 
-    // Test exclusion blacklist
-    let find3 = await user.findOne({
-      query: user1._id,
-      blacklist: ['animal.color', 'animals', 'color']
-    })
-    expect(find3).toEqual({
-      _id: user1._id,
-      name: 'Bruce',
-      animal: { name: 'max' }
-    })
-
     db.close()
   })
 
-  test('find blacklisting (populate)', async () => {
+  test('find project population', async () => {
+    // Test mongodb native project option
     // Setup
     let db = (await opendb(null)).db
     let bird = db.model('bird', {
       fields: {
         name: { type: 'string' },
         age: { type: 'number' },
+        height: { type: 'number' },
         color: { type: 'string', default: 'red' },
         sub: {
           color: { type: 'string', default: 'red' },
         }
-      }
+      },
+      findBL: ['age']
     })
     let user = db.model('user', {
       fields: {
         dog: { type: 'string' },
-        myBird: { model: 'bird' },
-        myBird2: { model: 'bird' }
+        bird: { model: 'bird' },
+        bird2: { model: 'bird' },
+        bird3: { model: 'bird' }
       },
+      findBL: [
+        // allll these should be ignored.....?/////
+        'bird.name',                             // bird.name & bird.age blacklisted
+        '-bird2', 'bird2.name',                  // bird2.name blacklisted
+        'bird3.name', '-bird3', 'bird3.height',  // bird3.height blacklisted
+      ]
     })
     let bird1 = await bird.insert({ data: {
       name: 'ponyo',
       age: 3,
+      height: 40,
       sub: {}
     }})
     let user1 = await user.insert({ data: {
       dog: 'Bruce',
-      myBird: bird1._id,
-      myBird2: bird1._id
+      bird: bird1._id,
+      bird2: bird1._id,
+      bird3: bird1._id
     }})
 
     // Test project
     let find1 = await user.findOne({
       query: user1._id,
-      populate: ['myBird', 'myBird2'],
-      project: ['myBird.age', 'myBird2']
+      populate: ['bird', 'bird2'],
+      project: ['bird.age', 'bird2']
     })
     expect(find1).toEqual({
       _id: user1._id,
-      myBird: { age: 3 },
-      myBird2: { _id: bird1._id, age: 3, name: 'ponyo', color: 'red', sub: { color: 'red' }},
+      bird: { age: 3 },
+      bird2: { _id: bird1._id, age: 3, name: 'ponyo', height: 40, color: 'red', sub: { color: 'red' }}
     })
 
     // Test project (different project details)
     let find2 = await user.findOne({
       query: user1._id,
-      populate: ['myBird', 'myBird2'],
-      project: ['myBird', 'myBird2.age']
+      populate: ['bird', 'bird2'],
+      project: ['bird', 'bird2.height']
     })
     expect(find2).toEqual({
       _id: user1._id,
-      myBird: { _id: bird1._id, age: 3, name: 'ponyo', color: 'red', sub: { color: 'red' }},
-      myBird2: { age: 3 },
-    })
-
-    // Test blacklisting
-    let find22 = await user.findOne({
-      query: user1._id,
-      populate: ['myBird', 'myBird2'],
-      blacklist: ['dog', 'myBird2.name', 'myBird2._id']
-    })
-    expect(find22).toEqual({
-      _id: user1._id,
-      myBird: { _id: bird1._id, age: 3, name: 'ponyo', color: 'red', sub: { color: 'red' }},
-      myBird2: { age: 3, color: 'red', sub: { color: 'red' }}
-    })
-
-    // Test blacklisting overrides
-    let find3 = await user.findOne({
-      query: user1._id,
-      populate: ['myBird', 'myBird2'],
-      blacklist: ['dog', 'myBird2.name', 'myBird2._id', '-myBird2']
-    })
-    expect(find3).toEqual({
-      _id: user1._id,
-      myBird: { _id: bird1._id, age: 3, name: 'ponyo', color: 'red', sub: { color: 'red' }},
-      myBird2: { _id: bird1._id, age: 3, name: 'ponyo', color: 'red', sub: { color: 'red' }}
+      bird: { _id: bird1._id, age: 3, name: 'ponyo', height: 40, color: 'red', sub: { color: 'red' }},
+      bird2: { height: 40 },
     })
 
     db.close()

@@ -56,8 +56,8 @@ let plugin = module.exports = {
     model.imageFields = plugin._findAndTransformImageFields(model.fields, '')
 
     if (model.imageFields.length) {
-      // Todo?: Update image fields and whitelists with the new object schema
-      //   model._setupFieldsAndWhitelists(model.fields)
+      // Todo?: Update image fields / blacklists with the new object schema
+      //   model._setupFields(model.fields)/model._getFieldsFlattened(model.fields)
       model.beforeValidate.push(function(data, n) {
         plugin.keepImagePlacement(this, data).then(() => n(null, data)).catch(e => n(e))
       })

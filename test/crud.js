@@ -391,7 +391,10 @@ module.exports = function(monastery, opendb) {
     expect(find1).toEqual({
       _id: inserted2._id,
       name: 'Martin Luther',
-      addresses: [{ city: 'Frankfurt', country: 'Germany' }, { city: 'Christchurch', country: 'New Zealand' }],
+      addresses: [
+        { city: 'Frankfurt', country: 'Germany' },
+        { city: 'Christchurch', country: 'New Zealand' }
+      ],
       address: { country: 'Germany' },
       pet: { dog: { _id: inserted._id, name: 'Scruff', user: inserted2._id }},
       dogs: [{ _id: inserted._id, name: 'Scruff', user: inserted2._id }]
@@ -407,6 +410,7 @@ module.exports = function(monastery, opendb) {
         as: 'dogs'
       }],
       blacklist: ['address', 'addresses.country', 'dogs.name']
+      // ^ great test (address should cancel addresses if not stopping at the .)
     })
     expect(find2).toEqual({
       _id: inserted2._id,
