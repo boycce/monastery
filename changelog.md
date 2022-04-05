@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.34.0](https://github.com/boycce/monastery/compare/1.33.0...1.34.0) (2022-04-05)
+
+
+### Features
+
+* added db.arraySchema / db.arrayWithSchema ([4210dc3](https://github.com/boycce/monastery/commit/4210dc33486de757a22d0973e661522e19230158))
+
 ## [1.33.0](https://github.com/boycce/monastery/compare/1.32.5...1.33.0) (2022-04-05)
 
 
