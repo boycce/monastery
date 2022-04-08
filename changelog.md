@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.35.0](https://github.com/boycce/monastery/compare/1.34.0...1.35.0) (2022-04-08)
+
+
+### Features
+
+* `false` removes blacklist, added tests for blacklisting/project stirng ([5999859](https://github.com/boycce/monastery/commit/599985972cc14b980148db26c03108feabf23756))
+
 ## [1.34.0](https://github.com/boycce/monastery/compare/1.33.0...1.34.0) (2022-04-05)
 
 
