@@ -21,7 +21,7 @@
   "plugins": [],
   "rules": {
     "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
-    "max-len": ["error", { "code": 120, "ignorePattern": "^\\s*<(rect|path|line)\\s" }],
+    "max-len": ["error", { "code": 125, "ignorePattern": "^\\s*<(rect|path|line)\\s" }],
     "no-prototype-builtins": "off",
     "no-unused-vars": ["error", { "args": "none" }],
     "object-shorthand": ["error", "consistent"],

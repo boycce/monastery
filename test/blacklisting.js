@@ -1,6 +1,6 @@
 module.exports = function(monastery, opendb) {
 
-  test('find blacklisting', async () => {
+  test('find blacklisting basic', async () => {
     // Setup
     let db = (await opendb(null)).db
     let bird = db.model('bird', {
@@ -106,7 +106,7 @@ module.exports = function(monastery, opendb) {
       deep: { deep2: {} },
       deepModel: { myBird: bird1._id }
     })
-
+    /*
     // Test augmented blacklist
     let find2 = await user.findOne({
       query: user1._id,
@@ -119,6 +119,7 @@ module.exports = function(monastery, opendb) {
       pets: [{ name: 'Pluto' }, { name: 'Milo' }],
       animals: { dog: 'Max', cat: 'Ginger' }
     })
+    */
 
     db.close()
   })
@@ -243,13 +244,13 @@ module.exports = function(monastery, opendb) {
       },
     })
     // default
-    expect(db.user._getBlacklistProjection('find')).toEqual({
+    expect(db.user._getProjectionFromBlacklist('find')).toEqual({
       'bird1.wing': 0,
       'bird1.age': 0,
       'password': 0,
     })
     // blacklist /w invalid field (which goes through)
-    expect(db.user._getBlacklistProjection('find', ['name', 'invalidfield'])).toEqual({
+    expect(db.user._getProjectionFromBlacklist('find', ['name', 'invalidfield'])).toEqual({
       'bird1.wing': 0,
       'bird1.age': 0,
       'invalidfield': 0,
@@ -257,38 +258,38 @@ module.exports = function(monastery, opendb) {
       'password': 0,
     })
     // whitelist
-    expect(db.user._getBlacklistProjection('find', ['-password', '-bird1.age'])).toEqual({
+    expect(db.user._getProjectionFromBlacklist('find', ['-password', '-bird1.age'])).toEqual({
       'bird1.wing': 0,
     })
     // whitelist parent
-    expect(db.user._getBlacklistProjection('find', ['-bird1'])).toEqual({
+    expect(db.user._getProjectionFromBlacklist('find', ['-bird1'])).toEqual({
       'password': 0,
     })
     // whitelist parent, then blacklist child
-    expect(db.user._getBlacklistProjection('find', ['-bird1', 'bird1.name'])).toEqual({
+    expect(db.user._getProjectionFromBlacklist('find', ['-bird1', 'bird1.name'])).toEqual({
       'password': 0,
       'bird1.name': 0,
     })
     // the model's blacklists are applied after deep model's
     db.user.findBL = ['-bird1.age']
-    expect(db.user._getBlacklistProjection('find')).toEqual({
+    expect(db.user._getProjectionFromBlacklist('find')).toEqual({
       'bird1.wing': 0,
     })
     // custom blacklists are applied after the model's, which are after deep model's
     db.user.findBL = ['-bird1.age']
-    expect(db.user._getBlacklistProjection('find', ['bird1'])).toEqual({
+    expect(db.user._getProjectionFromBlacklist('find', ['bird1'])).toEqual({
       'bird1': 0,
     })
     // blacklisted parent with a blacklisted child
-    expect(db.user._getBlacklistProjection('find', ['bird1', 'bird1.wing'])).toEqual({
+    expect(db.user._getProjectionFromBlacklist('find', ['bird1', 'bird1.wing'])).toEqual({
       'bird1': 0,
     })
     // A mess of things
-    expect(db.user._getBlacklistProjection('find', ['-bird1', 'bird1.wing', '-bird1.wing','bird1.wing.size'])).toEqual({
+    expect(db.user._getProjectionFromBlacklist('find', ['-bird1', 'bird1.wing', '-bird1.wing','bird1.wing.size'])).toEqual({
       'bird1.wing.size': 0,
     })
     // blacklisted parent with a whitelisted child (expect blacklist expansion in future version?)
-    // expect(db.user._getBlacklistProjection('find', ['bird1', '-bird1.wing'])).toEqual({
+    // expect(db.user._getProjectionFromBlacklist('find', ['bird1', '-bird1.wing'])).toEqual({
     //   'bird1.age': 0,
     //   'bird1.name': 0,
     // })
@@ -296,7 +297,7 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('find project', async () => {
+  test('find project basic', async () => {
     // Test mongodb native project option
     // Setup
     let db = (await opendb(null)).db
@@ -515,6 +516,26 @@ module.exports = function(monastery, opendb) {
         dog: 'Max'
       },
       hiddenList: [12, 23],
+      deep: {
+        deep2: {
+          deep3: {
+            deep4: 'hideme'
+          }
+        }
+      }
+    })
+
+    // Project whitelist
+    let user4 = await user.validate(doc1, {
+      project: [
+        'dog',
+        'pets.name',
+        'deep'
+      ],
+    })
+    expect(user4).toEqual({
+      dog: 'Bruce',
+      pets: [ {name: 'Pluto'}, {name: 'Milo'} ],
       deep: {
         deep2: {
           deep3: {
