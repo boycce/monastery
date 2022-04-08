@@ -7,7 +7,10 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Features
 
-* `false` removes blacklist, added tests for blacklisting/project stirng ([5999859](https://github.com/boycce/monastery/commit/599985972cc14b980148db26c03108feabf23756))
+* Blacklist `false` removes all blacklisting, added tests for blacklisting/project stirng ([5999859](https://github.com/boycce/monastery/commit/599985972cc14b980148db26c03108feabf23756))
+* Add project to insert/update/validate ([1b1eb12](https://github.com/boycce/monastery/commit/1b1eb12bc476ff82445a46489db64b37c13f9513))
+* Whitelisting a parent will remove any previously blacklisted children ([1b1eb12](https://github.com/boycce/monastery/commit/1b1eb12bc476ff82445a46489db64b37c13f9513))
+* Blacklist/project works the same across find/insert/update/validate ([1b1eb12](https://github.com/boycce/monastery/commit/1b1eb12bc476ff82445a46489db64b37c13f9513))
 
 ## [1.34.0](https://github.com/boycce/monastery/compare/1.33.0...1.34.0) (2022-04-05)
 
