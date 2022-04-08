@@ -87,8 +87,10 @@ Coming soon...
 - Add before/afterInsertUpdate
 - Bug: Setting an object literal on an ID field ('model') saves successfully
 - Population within array items
-- ~~Blackislisitng which aggregates from the order of appearance~~
+- ~~Blacklist `false` removes all blacklisting~~
+- ~~Add project to insert/update/validate~~
 - ~~Whitelisting a parent will remove any previously blacklisted children~~
+- ~~Blacklist/project works the same across find/insert/update/validate~~
 - Automatic subdocument ids
 - Remove ACL default 'public read'
 - ~~Public db.arrayWithSchema method~~
