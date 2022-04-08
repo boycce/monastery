@@ -93,7 +93,7 @@ module.exports = function(monastery, opendb) {
       }
     }})
 
-    // Test initial blacklist
+    // initial blacklist
     let find1 = await user.findOne({
       query: user1._id
     })
@@ -106,20 +106,31 @@ module.exports = function(monastery, opendb) {
       deep: { deep2: {} },
       deepModel: { myBird: bird1._id }
     })
-    /*
-    // Test augmented blacklist
+
+    // augmented blacklist
     let find2 = await user.findOne({
       query: user1._id,
       blacklist: ['pet', 'pet', 'deep', 'deepModel', '-dog', '-animals.cat']
     })
-    expect(find2).toEqual({
+    let customBlacklist
+    expect(find2).toEqual((customBlacklist = {
       _id: user1._id,
       dog: 'Bruce',
       list: [44, 54],
       pets: [{ name: 'Pluto' }, { name: 'Milo' }],
       animals: { dog: 'Max', cat: 'Ginger' }
+    }))
+
+    // blacklist string
+    let find3 = await user.findOne({
+      query: user1._id,
+      blacklist: 'pet pet deep deepModel -dog -animals.cat'
     })
-    */
+    expect(find3).toEqual(customBlacklist)
+
+    // blacklist removal
+    let find4 = await user.findOne({ query: user1._id, blacklist: false })
+    expect(find4).toEqual(user1)
 
     db.close()
   })
@@ -219,6 +230,11 @@ module.exports = function(monastery, opendb) {
       ...userData,
       _id: user1._id,
       bird5: { ...bird1Base, name: 'ponyo', height: 40 },
+    })
+    // blacklist removal
+    expect(await user.findOne({ query: user1._id, blacklist: false, populate: ['bird1'] })).toEqual({
+      ...user1,
+      bird1: { ...bird1Base, height: 40, name: 'ponyo', wing: { size: 1, sizes: { one: 1, two: 1 }} },
     })
 
     db.close()
@@ -371,14 +387,14 @@ module.exports = function(monastery, opendb) {
           color: { type: 'string', default: 'red' },
         }
       },
-      findBL: ['age']
+      findBL: ['age'],
     })
     let user = db.model('user', {
       fields: {
         dog: { type: 'string' },
         bird: { model: 'bird' },
         bird2: { model: 'bird' },
-        bird3: { model: 'bird' }
+        bird3: { model: 'bird' },
       },
       findBL: [
         // allll these should be ignored.....?/////
@@ -391,38 +407,47 @@ module.exports = function(monastery, opendb) {
       name: 'ponyo',
       age: 3,
       height: 40,
-      sub: {}
+      sub: {},
     }})
     let user1 = await user.insert({ data: {
       dog: 'Bruce',
       bird: bird1._id,
       bird2: bird1._id,
-      bird3: bird1._id
+      bird3: bird1._id,
     }})
 
-    // Test project
+    // project
     let find1 = await user.findOne({
       query: user1._id,
       populate: ['bird', 'bird2'],
-      project: ['bird.age', 'bird2']
+      project: ['bird.age', 'bird2'],
     })
     expect(find1).toEqual({
       _id: user1._id,
       bird: { age: 3 },
-      bird2: { _id: bird1._id, age: 3, name: 'ponyo', height: 40, color: 'red', sub: { color: 'red' }}
+      bird2: { _id: bird1._id, age: 3, name: 'ponyo', height: 40, color: 'red', sub: { color: 'red' }},
     })
 
-    // Test project (different project details)
+    // project (different project details)
     let find2 = await user.findOne({
       query: user1._id,
       populate: ['bird', 'bird2'],
-      project: ['bird', 'bird2.height']
+      project: ['bird', 'bird2.height'],
     })
-    expect(find2).toEqual({
+    let customProject
+    expect(find2).toEqual((customProject={
       _id: user1._id,
       bird: { _id: bird1._id, age: 3, name: 'ponyo', height: 40, color: 'red', sub: { color: 'red' }},
       bird2: { height: 40 },
+    }))
+
+    // project string
+    let find3 = await user.findOne({
+      query: user1._id,
+      populate: ['bird', 'bird2'],
+      project: 'bird bird2.height',
     })
+    expect(find3).toEqual(customProject)
 
     db.close()
   })
@@ -507,7 +532,8 @@ module.exports = function(monastery, opendb) {
         '-deep' // blacklist a parent
       ],
     })
-    expect(user2).toEqual({
+    let customBlacklist
+    expect(user2).toEqual((customBlacklist = {
       list: [44, 54],
       dog: 'Bruce',
       pet: 'Freddy',
@@ -523,17 +549,27 @@ module.exports = function(monastery, opendb) {
           }
         }
       }
+    }))
+
+    // Blacklist string
+    let user3 = await user.validate(doc1, {
+      blacklist: '-dog -animals.dog pets.name -hiddenList -deep'
     })
+    expect(user3).toEqual(customBlacklist)
+
+    // Blacklist removal
+    let user4 = await user.validate(doc1, { blacklist: false })
+    expect(user4).toEqual(doc1)
 
     // Project whitelist
-    let user4 = await user.validate(doc1, {
+    let user5 = await user.validate(doc1, {
       project: [
         'dog',
         'pets.name',
         'deep'
       ],
     })
-    expect(user4).toEqual({
+    expect(user5).toEqual({
       dog: 'Bruce',
       pets: [ {name: 'Pluto'}, {name: 'Milo'} ],
       deep: {
