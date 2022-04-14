@@ -1,6 +1,6 @@
 module.exports = function(monastery, opendb) {
 
-  test('Monk confilicts', async () => {
+  test('Monk conflicts', async () => {
     // Setup
     let db = (await opendb(false)).db
     let monkdb = require('monk')(':badconnection', () => {})
