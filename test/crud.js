@@ -423,13 +423,71 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
+  test('findOneAndUpdate basics', async () => {
+    // todo: test all findOneAndUpdate options
+
+    let db = (await opendb(null)).db
+    let dog = db.model('dog', {
+      fields: {
+        name: { type: 'string', default: 'Scruff' },
+      }
+    })
+    let user = db.model('user', {
+      fields: {
+        name: { type: 'string', default: 'Martin' },
+        dog: { model: 'dog' },
+      }
+    })
+
+    // Returns omitted field after update, i.e. dog
+    let dog1 = await dog.insert({ data: {} })
+    let user1 = await user.insert({ data: { dog: dog1._id }})
+    expect(await user.findOneAndUpdate({ query: { _id: user1._id }, data: { name: 'Martin2' }})).toEqual({
+      _id: user1._id,
+      name: 'Martin2',
+      dog: dog1._id,
+    })
+
+    // Returns omitted field requiring population after update, i.e. dog
+    expect(await user.findOneAndUpdate({
+      query: { _id: user1._id },
+      data: { name: 'Martin2' },
+      populate: ['dog'],
+    })).toEqual({
+      _id: user1._id,
+      name: 'Martin2',
+      dog: {
+        _id: dog1._id,
+        name: 'Scruff'
+      },
+    })
+
+    // Error finding document to update
+    expect(await user.findOneAndUpdate({
+      query: { _id: db.id() },
+      data: { name: 'Martin2' },
+    })).toEqual(null)
+
+    // Error finding document to update (populate)
+    expect(await user.findOneAndUpdate({
+      query: { _id: db.id() },
+      data: { name: 'Martin2' },
+      populate: ['dog'],
+    })).toEqual(null)
+
+    db.close()
+  })
+
   test('remove basics', async () => {
     let db = (await opendb(null)).db
-    let user = db.model('user', {
+    let user = db.model('userRemove', {
       fields: {
         name: { type: 'string' },
       },
     })
+
+    // Clear (incase of failed a test)
+    user._remove({}, { multi: true })
 
     // Insert multiple
     let inserted2 = await user.insert({ data: [{ name: 'Martin' }, { name: 'Martin' }, { name: 'Martin' }]})
