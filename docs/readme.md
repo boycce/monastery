@@ -83,7 +83,7 @@ Coming soon...
 
 ## Roadmap
 
-- Add FindOneAndUpdate
+- ~~Add FindOneAndUpdate~~
 - Add before/afterInsertUpdate
 - Bug: Setting an object literal on an ID field ('model') saves successfully
 - Population within array items
@@ -95,8 +95,8 @@ Coming soon...
 - Remove ACL default 'public read'
 - ~~Public db.arrayWithSchema method~~
 - Global after/before hooks
-- Split away from Monk (unless updated)
 - docs: Make the implicit ID query conversion more apparent
+- Split away from Monk (unless updated)
 
 ## Special Thanks
 
