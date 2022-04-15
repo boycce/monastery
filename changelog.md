@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.36.0](https://github.com/boycce/monastery/compare/1.35.0...1.36.0) (2022-04-15)
+
+
+### Features
+
+* added findOneAndUpdate ([60b518a](https://github.com/boycce/monastery/commit/60b518a1d09002a794e72fe3476c39c43c0c3b5e))
+
+
+### Bug Fixes
+
+* removed depreciation warnings ([6db73bb](https://github.com/boycce/monastery/commit/6db73bba7916b4c5c98a24fd03b34c0f776abb5c))
+
 ## [1.35.0](https://github.com/boycce/monastery/compare/1.34.0...1.35.0) (2022-04-08)
 
 
