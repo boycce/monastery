@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.36.1](https://github.com/boycce/monastery/compare/1.36.0...1.36.1) (2022-04-16)
+
+
+### Bug Fixes
+
+* findOneAndUpdate population, blacklisting, etc ([19c4fc9](https://github.com/boycce/monastery/commit/19c4fc96d8c94d9dd68af2a74af693c8dc7a4c17))
+
 ## [1.36.0](https://github.com/boycce/monastery/compare/1.35.0...1.36.0) (2022-04-15)
 
 
