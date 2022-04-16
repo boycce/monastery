@@ -145,7 +145,7 @@ module.exports = function(monastery, opendb) {
     db2.close()
   })
 
-  test('update basics', async () => {
+  test('update general', async () => {
     let db = (await opendb(null)).db
     let user = db.model('user', {
       fields: {
@@ -423,9 +423,9 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('findOneAndUpdate basics', async () => {
+  test('findOneAndUpdate general', async () => {
     // todo: test all findOneAndUpdate options
-
+    // todo: test find & update hooks
     let db = (await opendb(null)).db
     let dog = db.model('dog', {
       fields: {
@@ -478,7 +478,7 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('remove basics', async () => {
+  test('remove general', async () => {
     let db = (await opendb(null)).db
     let user = db.model('userRemove', {
       fields: {

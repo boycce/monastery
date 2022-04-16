@@ -1,104 +1,25 @@
+let bird = require('./mock/blacklisting').bird
+let user = require('./mock/blacklisting').user
+let util = require('../lib/util')
+
 module.exports = function(monastery, opendb) {
 
   test('find blacklisting basic', async () => {
     // Setup
     let db = (await opendb(null)).db
-    let bird = db.model('bird', {
-      fields: {
-        name: { type: 'string' },
-      }
-    })
-    let user = db.model('user', {
-      fields: {
-        list: [{ type: 'number' }],
-        dog: { type: 'string' },
-        pet: { type: 'string' },
-        pets: [{
-          name: { type: 'string'},
-          age: { type: 'number'}
-        }],
-        animals: {
-          cat: { type: 'string' },
-          dog: { type: 'string' }
-        },
-        hiddenPets: [{
-          name: { type: 'string'}
-        }],
-        hiddenList: [{ type: 'number'}],
-        deep: {
-          deep2: {
-            deep3: {
-              deep4: { type: 'string' }
-            }
-          }
-        },
-        deeper: {
-          deeper2: {
-            deeper3: {
-              deeper4: { type: 'string' }
-            }
-          }
-        },
-        deepModel: {
-          myBird: { model: 'bird' }
-        },
-        hiddenDeepModel: {
-          myBird: { model: 'bird' }
-        }
-      },
-      findBL: [
-        'dog',
-        'animals.cat',
-        'pets.age',
-        'hiddenPets',
-        'hiddenList',
-        'deep.deep2.deep3',
-        'deeper',
-        'hiddenDeepModel'
-      ],
-    })
-    let bird1 = await bird.insert({ data: { name: 'ponyo' }})
-    let user1 = await user.insert({ data: {
-      list: [44, 54],
-      dog: 'Bruce',
-      pet: 'Freddy',
-      pets: [{ name: 'Pluto', age: 5 }, { name: 'Milo', age: 4 }],
-      animals: {
-        cat: 'Ginger',
-        dog: 'Max'
-      },
-      hiddenPets: [{
-        name: 'secretPet'
-      }],
-      hiddenList: [12, 23],
-      deep: {
-        deep2: {
-          deep3: {
-            deep4: 'hideme'
-          }
-        }
-      },
-      deeper: {
-        deeper2: {
-          deeper3: {
-            deeper4: 'hideme'
-          }
-        }
-      },
-      deepModel: {
-        myBird: bird1._id
-      },
-      hiddenDeepModel: {
-        myBird: bird1._id
-      }
-    }})
+    db.model('bird', bird.schema())
+    db.model('user', user.schema())
+
+    let bird1 = await db.bird.insert({ data: bird.mock() })
+    let user1 = await db.user.insert({ data: user.mock(bird1) })
 
     // initial blacklist
-    let find1 = await user.findOne({
+    let find1 = await db.user.findOne({
       query: user1._id
     })
     expect(find1).toEqual({
       _id: user1._id,
+      bird: bird1._id,
       list: [44, 54],
       pet: 'Freddy',
       pets: [{ name: 'Pluto' }, { name: 'Milo' }],
@@ -108,13 +29,14 @@ module.exports = function(monastery, opendb) {
     })
 
     // augmented blacklist
-    let find2 = await user.findOne({
+    let find2 = await db.user.findOne({
       query: user1._id,
       blacklist: ['pet', 'pet', 'deep', 'deepModel', '-dog', '-animals.cat']
     })
     let customBlacklist
     expect(find2).toEqual((customBlacklist = {
       _id: user1._id,
+      bird: bird1._id,
       dog: 'Bruce',
       list: [44, 54],
       pets: [{ name: 'Pluto' }, { name: 'Milo' }],
@@ -122,119 +44,84 @@ module.exports = function(monastery, opendb) {
     }))
 
     // blacklist string
-    let find3 = await user.findOne({
+    let find3 = await db.user.findOne({
       query: user1._id,
       blacklist: 'pet pet deep deepModel -dog -animals.cat'
     })
     expect(find3).toEqual(customBlacklist)
 
     // blacklist removal
-    let find4 = await user.findOne({ query: user1._id, blacklist: false })
+    let find4 = await db.user.findOne({ query: user1._id, blacklist: false })
     expect(find4).toEqual(user1)
 
     db.close()
   })
 
   test('find blacklisting population', async () => {
-    // inprogresss
     // Setup
-    let db = monastery('localhost/monastery', {
-      timestamps: false,
-      serverSelectionTimeoutMS: 2000,
-    })
-    let bird = db.model('bird', {
-      fields: {
-        color: { type: 'string', default: 'red' },
-        height: { type: 'number' },
-        name: { type: 'string' },
-        sub: {
-          color: { type: 'string', default: 'red' },
-        },
-        subs: [{
-          color: { type: 'string', default: 'red'},
-        }],
-        wing: {
-          size: { type: 'number' },
-          sizes: {
-            one: { type: 'number' },
-            two: { type: 'number' },
-          }
-        },
-      },
-      findBL: ['wing']
-    })
-    let user = db.model('user', {
+    let db = (await opendb(null)).db
+    db.model('bird', bird.schema())
+    db.model('user', {
       fields: {
         dog: { type: 'string' },
-        bird1: { model: 'bird' },
-        bird2: { model: 'bird' },
-        bird3: { model: 'bird' },
-        bird4: { model: 'bird' },
-        bird5: { model: 'bird' },
+        bird: { model: 'bird' },
       },
-      findBL: [
-        'bird1.name',                                 // bird1.name & bird1.wing blacklisted
-        '-bird2', 'bird2.name',                       // bird2.name blacklisted
-        'bird3.name', '-bird3', 'bird3.height',       // bird3.height blacklisted
-        '-bird4.wing.sizes.one', '-bird4.wing.size',  // ignored
-        // bird4.wing.sizes.two blacklisted (expand in future verion)
-        '-bird5.wing.sizes.one',                      // bird5.wing.sizes.one ignored, wing blacklisted
-        // bird5.wing.sizes.two, wing.size blacklisted (expand in future verion)
-      ]
     })
-    let bird1 = await bird.insert({
-      data: {
-        name: 'ponyo',
-        height: 40,
-        sub: {},
-        wing: { size: 1, sizes: { one: 1, two: 1 }}
-      }
-    })
-    let userData = {
-      dog: 'Bruce',
-      bird1: bird1._id,
-      bird2: bird1._id,
-      bird3: bird1._id,
-      bird4: bird1._id,
-      bird5: bird1._id
-    }
-    let user1 = await user.insert({ data: userData })
-    let bird1Base = { _id: bird1._id, color: 'red', sub: { color: 'red' }}
 
-    // Test bird1
-    expect(await user.findOne({ query: user1._id, populate: ['bird1'] })).toEqual({
-      ...userData,
-      _id: user1._id,
-      bird1: { ...bird1Base, height: 40 },
+    let bird1 = await db.bird.insert({ data: bird.mock() })
+    let user1 = await db.user.insert({ data: {
+      dog: 'Bruce',
+      bird: bird1._id,
+    }})
+
+    let bird1Base = {
+      _id: bird1._id,
+      color: 'red',
+      sub: { color: 'red' }
+    }
+
+    // 'bird1.name',                                 // bird1.name & bird1.wing blacklisted
+    // '-bird2', 'bird2.name',                       // bird2.name blacklisted
+    // 'bird3.name', '-bird3', 'bird3.height',       // bird3.height blacklisted
+    // '-bird4.wing.sizes.one', '-bird4.wing.size',  // ignored
+    //        bird4.wing.sizes.two blacklisted (expand in future verion)
+    // '-bird5.wing.sizes.one',                      // bird5.wing.sizes.one ignored, wing blacklisted
+    //        bird5.wing.sizes.two, wing.size blacklisted (expand in future verion)
+
+    // test 1
+    db.user.findBL = ['bird.name']
+    expect(await db.user.findOne({ query: user1._id, populate: ['bird'] })).toEqual({
+      ...user1,
+      bird: { ...bird1Base, height: 12 },
     })
-    // Test bird2
-    expect(await user.findOne({ query: user1._id, populate: ['bird2'] })).toEqual({
-      ...userData,
-      _id: user1._id,
-      bird2: { ...bird1Base, height: 40, wing: { size: 1, sizes: { one: 1, two: 1 }} },
+    // test 2
+    db.user.findBL = ['-bird', 'bird.name']
+    expect(await db.user.findOne({ query: user1._id, populate: ['bird'] })).toEqual({
+      ...user1,
+      bird: { ...bird1Base, height: 12, wing: { size: 1, sizes: { one: 1, two: 1 }} },
     })
-    // Test bird3
-    expect(await user.findOne({ query: user1._id, populate: ['bird3'] })).toEqual({
-      ...userData,
-      _id: user1._id,
-      bird3: { ...bird1Base, name: 'ponyo', wing: { size: 1, sizes: { one: 1, two: 1 }} },
+    // test 3
+    db.user.findBL = ['bird.name', '-bird', 'bird.height']
+    expect(await db.user.findOne({ query: user1._id, populate: ['bird'] })).toEqual({
+      ...user1,
+      bird: { ...bird1Base, name: 'Ponyo', wing: { size: 1, sizes: { one: 1, two: 1 }} },
     })
-    // Test bird4
-    expect(await user.findOne({ query: user1._id, populate: ['bird4'] })).toEqual({
-      ...userData,
-      _id: user1._id,
-      bird4: { ...bird1Base, name: 'ponyo', height: 40 },
+    // test 4
+    db.user.findBL = ['-bird.wing.sizes.one', '-bird.wing.size']
+    expect(await db.user.findOne({ query: user1._id, populate: ['bird'] })).toEqual({
+      ...user1,
+      bird: { ...bird1Base, name: 'Ponyo', height: 12 },
     })
-    // Test bird5
-    expect(await user.findOne({ query: user1._id, populate: ['bird5'] })).toEqual({
-      ...userData,
-      _id: user1._id,
-      bird5: { ...bird1Base, name: 'ponyo', height: 40 },
+    // test 5
+    db.user.findBL = ['-bird.wing.sizes.one']
+    expect(await db.user.findOne({ query: user1._id, populate: ['bird'] })).toEqual({
+      ...user1,
+      bird: { ...bird1Base, name: 'Ponyo', height: 12 },
     })
     // blacklist removal
-    expect(await user.findOne({ query: user1._id, blacklist: false, populate: ['bird1'] })).toEqual({
+    expect(await db.user.findOne({ query: user1._id, blacklist: false, populate: ['bird'] })).toEqual({
       ...user1,
-      bird1: { ...bird1Base, height: 40, name: 'ponyo', wing: { size: 1, sizes: { one: 1, two: 1 }} },
+      bird: { ...bird1Base, height: 12, name: 'Ponyo', wing: { size: 1, sizes: { one: 1, two: 1 }} },
     })
 
     db.close()
@@ -580,6 +467,74 @@ module.exports = function(monastery, opendb) {
         }
       }
     })
+    db.close()
+  })
+
+  test('findOneAndUpdate blacklisting general', async () => {
+    // todo: test all findOneAndUpdate options
+    // todo: test find & update hooks
+    let db = (await opendb(null)).db
+    db.model('bird', bird.schema())
+    db.model('user', user.schema())
+
+    let bird1 = await db.bird.insert({ data: bird.mock() })
+    let user1 = await db.user.insert({ data: user.mock(bird1) })
+
+    // augmented blacklist
+    let find2 = await db.user.findOneAndUpdate({
+      query: user1._id,
+      data: { dog: 'Bruce2', pet: 'Freddy2' }, // pet shouldn't update
+      blacklist: ['pet', 'deep', 'deepModel', '-dog', '-animals.cat'],
+    })
+    expect(find2).toEqual({
+      _id: user1._id,
+      bird: bird1._id,
+      dog: 'Bruce2',
+      list: [44, 54],
+      pets: [{ name: 'Pluto' }, { name: 'Milo' }],
+      animals: { dog: 'Max', cat: 'Ginger' },
+    })
+    expect(await db.user.findOne({ query: user1._id, project: ['pet'] })).toEqual({
+      _id: user1._id,
+      pet: 'Freddy',
+    })
+
+    db.close()
+  })
+
+  test('findOneAndUpdate blacklisting populate', async () => {
+    let db = (await opendb(null)).db
+    db.model('bird', bird.schema())
+    db.model('user', user.schema())
+
+    let bird1 = await db.bird.insert({ data: bird.mock() })
+    let user1 = await db.user.insert({ data: user.mock(bird1) })
+
+    // augmented blacklist
+    let find2 = await db.user.findOneAndUpdate({
+      query: user1._id,
+      data: { dog: 'Bruce2', pet: 'Freddy2' }, // pet shouldn't update
+      blacklist: [
+        'pet', 'deep', 'deepModel', '-dog', '-animals.cat',
+        'bird.name', '-bird', 'bird.height' // <- populated model
+      ],
+      populate: ['bird'],
+    })
+    expect(find2).toEqual({
+      _id: user1._id,
+      bird: {
+        ...util.omit(bird1, ['height']),
+      },
+      dog: 'Bruce2',
+      list: [44, 54],
+      pets: [{ name: 'Pluto' }, { name: 'Milo' }],
+      animals: { dog: 'Max', cat: 'Ginger' },
+    })
+    expect(await db.user.findOne({ query: user1._id, project: ['pet'] })).toEqual({
+      _id: user1._id,
+      pet: 'Freddy',
+    })
+
     db.close()
   })
 
