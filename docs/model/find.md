@@ -11,12 +11,12 @@ Find document(s) in a collection and call related hook: `schema.afterFind`
 
 `options` *(object)*
 
-- `options.query` *(object\|id)*
-- [[`options.populate`](#populate)] *(array)*
-- [`options.sort`] *(string\|array\|object)*: same as the mongodb option, but allows string parsing e.g. 'name', 'name:1'
-- [`options.blacklist`] *(array\|string\|false)*: augment `schema.findBL`. `false` will remove all blacklisting
-- [`options.getSignedUrls`] *(boolean)*: get signed urls for all image objects
-- [`options.project`] *(string\|array\|object)*: return only these fields, ignores blacklisting
+- `query` *(object\|id)*
+- [[`populate`](#populate)] *(array)*
+- [`sort`] *(string\|array\|object)*: same as the mongodb option, but allows string parsing e.g. 'name', 'name:1'
+- [`blacklist`] *(array\|string\|false)*: augment `schema.findBL`. `false` will remove all blacklisting
+- [`getSignedUrls`] *(boolean)*: get signed urls for all image objects
+- [`project`] *(string\|array\|object)*: return only these fields, ignores blacklisting
 - [[`any mongodb option`](http://mongodb.github.io/node-mongodb-native/3.2/api/Collection.html#find)] *(any)*
 
 [`callback`] *(function)*: pass instead of return a promise
