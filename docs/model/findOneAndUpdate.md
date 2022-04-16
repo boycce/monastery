@@ -9,7 +9,7 @@ Find a document and update it in one atomic operation (unless using `opt.populat
 
 ### Arguments
 
-Same argument signatures as [`model.find`](./find) and [`model.find`](./update).
+Same argument signatures as [`model.find`](./find) and [`model.update`](./update).
 
 ### Returns
 
