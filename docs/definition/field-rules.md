@@ -1,12 +1,14 @@
 ---
-title: Rules
+title: Field Rules
 nav_order: 5
-parent: Schema
+parent: Model Definition
 ---
 
-# Validation Rules
+# Field Rules
 
-  All rules except for `type` and `required` are ignored if the data value is a **null** or an **empty string**
+  - Field rules are ignored if the value is **undefined**, **null**, or an **empty string** (except `required` and `type`)
+  - `type` is only ignored if the value is **undefined**
+  - `required` is never ignored
 
   Rule | Rule argument
   - | -

@@ -8,9 +8,9 @@ has_children: true
 
 Created via [`manager.model`](../manager/model).
 
-#### Monk collection instance methods
+#### Monk collection instance operators
 
-Additionally models inherit most of the [monk collection](https://automattic.github.io/monk/docs/collection/) instance methods which are available under `model`.
+Additionally models inherit most of the [monk collection](https://automattic.github.io/monk/docs/collection/) instance operators which are available under `model`.
 
   * model.[_aggregate](https://automattic.github.io/monk/docs/collection/aggregate.html)
   * model.[_bulkWrite](https://automattic.github.io/monk/docs/collection/bulkWrite.html)

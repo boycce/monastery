@@ -6,8 +6,8 @@
 
 * User friendly API design, built around the awesome [Monk](https://automattic.github.io/monk/)
 * Simple CRUD operations with model population
-* Model validation deriving from your schema
-* Custom error messages can be defined in your schema
+* Model validation deriving from your model definitions
+* Custom error messages can be defined in your model definition
 * Normalised error responses ready for client consumption
 * Automatic mongodb index setup
 
@@ -83,15 +83,16 @@ Coming soon...
 
 ## Roadmap
 
+- Add Aggregate
 - ~~Add FindOneAndUpdate~~
-- Add before/afterInsertUpdate
+- ~~Add beforeInsertUpdate / afterInsertUpdate~~
 - Bug: Setting an object literal on an ID field ('model') saves successfully
 - Population within array items
 - ~~Blacklist false removes all blacklisting~~
 - ~~Add project to insert/update/validate~~
 - ~~Whitelisting a parent will remove any previously blacklisted children~~
 - ~~Blacklist/project works the same across find/insert/update/validate~~
-- Automatic subdocument ids
+- Automatic embedded document ids/createdAt/updatedAt fields
 - Remove ACL default 'public read'
 - ~~Public db.arrayWithSchema method~~
 - Global after/before hooks

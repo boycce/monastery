@@ -5,7 +5,7 @@ parent: Model
 
 # `model.validate`
 
-Validate a model and call related hook: `schema.beforeValidate`
+Validate a model and calls the model hook: `beforeValidate`
 
 
 ### Arguments
@@ -14,10 +14,11 @@ Validate a model and call related hook: `schema.beforeValidate`
 
 [`options`] *(object)*
 
-- [`options.skipValidation`] (string\|array): skip validation for this field name(s)
-- [`options.blacklist`] *(array\|string\|false)*: augment the model's blacklist. `false` will remove all blacklisting
-- [`options.timestamps`] *(boolean)*: whether `createdAt` and `updatedAt` are inserted, or `updatedAt` is updated, depending on the `options.update` value. Defaults to the `manager.timestamps` value
-- [`options.update`] *(boolean)*: If true, required rules will be skipped, defaults to false
+- [`skipValidation`] (string\|array): skip validation for this field name(s)
+- [[`blacklist`](#blacklisting)] *(array\|string\|false)*: augment the model's blacklist. `false` will remove all blacklisting
+- [`project`] *(string\|array\|object)*: project these fields, ignores blacklisting
+- [`timestamps`] *(boolean)*: whether `createdAt` and `updatedAt` are inserted, or `updatedAt` is updated, depending on the `update` value. Defaults to the `manager.timestamps` value
+- [`update`] *(boolean)*: If true, required rules will be skipped, defaults to false
 
 ### Returns
 
@@ -34,39 +35,35 @@ db.model('user', {
   }
 })
 
-db.user.validate({
+await db.user.validate({
   name: 'Martin Luther',
   unknownField: 'Some data'
-
-}).then(data => {
-  // { name: "Martin Luther" }
 })
+// { name: "Martin Luther" }
 
-db.user.validate({
+await db.user.validate({
   name: 'Martin Luther'
   address: { city: 'Eisleben' }
-
-}).catch(errs => {
-  // [{
-  //   detail: "Value needs to be at least 10 characters long.",
-  //   status: "400",
-  //   title: "address.city",
-  //   meta: {
-  //     field: "city",
-  //     model: "user",
-  //     rule: "minLength"
-  //   }
-  // }]
 })
-
+// Error [{
+//   detail: "Value needs to be at least 10 characters long.",
+//   status: "400",
+//   title: "address.city",
+//   meta: {
+//     field: "city",
+//     model: "user",
+//     rule: "minLength"
+//   }
+// }]
 ```
+
 ### Blacklisting
 
-Depending on the `update` option, you can augment the model's `schema.insertBL` or `schema.updateBL` by passing a custom `blacklist`:
+Depending on the `update` option, you can augment the model's `insertBL` or `updateBL` by passing a custom `blacklist`:
 
 ```js
 // Prevents `name` and `pets.$.name` (array) from being returned.
 user.validate({}, { blacklist: ['name', 'pets.name'] })
-// You can also whitelist any blacklisted fields found in schema's blacklist
+// You can also whitelist any blacklisted fields found in insertBL/updateBL
 user.validate({}, { blacklist: ['-name', '-pet'] })
 ```

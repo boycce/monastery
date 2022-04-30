@@ -5,7 +5,7 @@ parent: Model
 
 # `model.findOneAndUpdate`
 
-Find a document and update it in one atomic operation (unless using `opt.populate`), requires a write lock for the duration of the operation. Calls related hooks: `schema.beforeUpdate`,  `schema.afterUpdate`,  `schema.afterFind`.
+Find a document and update it in one atomic operation (unless using `opt.populate`), requires a write lock for the duration of the operation. Calls the following model hooks: `beforeUpdate`,  `afterUpdate`,  `afterFind`.
 
 ### Arguments
 

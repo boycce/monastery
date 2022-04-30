@@ -9,7 +9,7 @@ Setup model definitions from a folder location
 
 ### Arguments
 
-1. `path` *(string)*: path to model definitions, the filenames are used as the corresponding model name.
+`path` *(string)*: path to model definitions, the filenames are used as the corresponding model name.
 
 ### Returns
 
