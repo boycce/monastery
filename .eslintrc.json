@@ -9,7 +9,8 @@
   ],
   "globals": {
     "test": true,
-    "expect": true
+    "expect": true,
+    "oid": true
   },
   "parserOptions": {
     "ecmaFeatures": {

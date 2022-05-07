@@ -335,7 +335,7 @@ module.exports = function(monastery, opendb) {
 
   test('find default field population', async () => {
     let db = (await opendb(null)).db
-    let user = db.model('user', {
+    db.model('user', {
       fields: {
         name: { type: 'string', default: 'Martin Luther' },
         addresses: [{ city: { type: 'string' }, country: { type: 'string', default: 'Germany' } }],
@@ -344,7 +344,7 @@ module.exports = function(monastery, opendb) {
         dogs: [{ model: 'dog' }], // virtual association
       }
     })
-    let dog = db.model('dog', {
+    db.model('dog', {
       fields: {
         name: { type: 'string', default: 'Scruff' },
         user: { model: 'user' }
@@ -352,35 +352,35 @@ module.exports = function(monastery, opendb) {
     })
 
     // Default field doesn't override null
-    let nulldoc1 = await dog.insert({ data: { name: null }})
-    let nullfind1 = await dog.findOne({ query: nulldoc1._id })
+    let nulldoc1 = await db.dog.insert({ data: { name: null }})
+    let nullfind1 = await db.dog.findOne({ query: nulldoc1._id })
     expect(nullfind1).toEqual({ _id: nulldoc1._id, name: null })
 
     // Default field doesn't override empty string
-    let nulldoc2 = await dog.insert({ data: { name: '' }})
-    let nullfind2 = await dog.findOne({ query: nulldoc2._id })
+    let nulldoc2 = await db.dog.insert({ data: { name: '' }})
+    let nullfind2 = await db.dog.findOne({ query: nulldoc2._id })
     expect(nullfind2).toEqual({ _id: nulldoc2._id, name: '' })
 
     // Default field overrides undefined
-    let nulldoc3 = await dog.insert({ data: { name: undefined }})
-    let nullfind3 = await dog.findOne({ query: nulldoc3._id })
+    let nulldoc3 = await db.dog.insert({ data: { name: undefined }})
+    let nullfind3 = await db.dog.findOne({ query: nulldoc3._id })
     expect(nullfind3).toEqual({ _id: nullfind3._id, name: 'Scruff' })
 
     // Default field population test
-    // Note that addresses.1.country shouldn't be overriden
+    // Note that addresses.1.country shouldn't be overridden
     // Insert documents (without defaults)
-    let inserted = await dog._insert({})
-    let inserted2 = await user._insert({
+    let dog1 = await db.dog._insert({})
+    let user1 = await db.user._insert({
       addresses: [
         { city: 'Frankfurt' },
         { city: 'Christchurch', country: 'New Zealand' }
       ],
-      pet: { dog: inserted._id }
+      pet: { dog: dog1._id }
     })
-    await dog._update(inserted._id, { $set: { user: inserted2._id }})
+    await db.dog._update(dog1._id, { $set: { user: user1._id }})
 
-    let find1 = await user.findOne({
-      query: inserted2._id,
+    let find1 = await db.user.findOne({
+      query: user1._id,
       populate: ['pet.dog', {
         from: 'dog',
         localField: '_id',
@@ -389,20 +389,20 @@ module.exports = function(monastery, opendb) {
       }]
     })
     expect(find1).toEqual({
-      _id: inserted2._id,
+      _id: user1._id,
       name: 'Martin Luther',
       addresses: [
-        { city: 'Frankfurt', country: 'Germany' },
-        { city: 'Christchurch', country: 'New Zealand' }
+        { _id: expect.any(oid), city: 'Frankfurt', country: 'Germany' },
+        { _id: expect.any(oid), city: 'Christchurch', country: 'New Zealand' }
       ],
       address: { country: 'Germany' },
-      pet: { dog: { _id: inserted._id, name: 'Scruff', user: inserted2._id }},
-      dogs: [{ _id: inserted._id, name: 'Scruff', user: inserted2._id }]
+      pet: { dog: { _id: dog1._id, name: 'Scruff', user: user1._id }},
+      dogs: [{ _id: dog1._id, name: 'Scruff', user: user1._id }]
     })
 
     // Blacklisted default field population test
-    let find2 = await user.findOne({
-      query: inserted2._id,
+    let find2 = await db.user.findOne({
+      query: user1._id,
       populate: ['pet.dog', {
         from: 'dog',
         localField: '_id',
@@ -413,11 +413,11 @@ module.exports = function(monastery, opendb) {
       // ^ great test (address should cancel addresses if not stopping at the .)
     })
     expect(find2).toEqual({
-      _id: inserted2._id,
+      _id: user1._id,
       name: 'Martin Luther',
-      addresses: [{ city: 'Frankfurt' }, { city: 'Christchurch' }],
-      pet: { dog: { _id: inserted._id, name: 'Scruff', user: inserted2._id }},
-      dogs: [{ _id: inserted._id, user: inserted2._id }]
+      addresses: [{ _id: expect.any(oid), city: 'Frankfurt' }, { _id: expect.any(oid), city: 'Christchurch' }],
+      pet: { dog: { _id: dog1._id, name: 'Scruff', user: user1._id }},
+      dogs: [{ _id: dog1._id, user: user1._id }]
     })
 
     db.close()

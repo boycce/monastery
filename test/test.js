@@ -12,6 +12,8 @@
  *   - expect.objectContaining:
  */
 
+global.oid = require('mongodb').ObjectID
+
 let monastery = require('../lib')
 let opendb = async function(uri, opts) {
   let db = monastery(
