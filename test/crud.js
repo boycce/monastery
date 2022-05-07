@@ -392,8 +392,8 @@ module.exports = function(monastery, opendb) {
       _id: user1._id,
       name: 'Martin Luther',
       addresses: [
-        { _id: expect.any(oid), city: 'Frankfurt', country: 'Germany' },
-        { _id: expect.any(oid), city: 'Christchurch', country: 'New Zealand' }
+        { city: 'Frankfurt', country: 'Germany' },
+        { city: 'Christchurch', country: 'New Zealand' }
       ],
       address: { country: 'Germany' },
       pet: { dog: { _id: dog1._id, name: 'Scruff', user: user1._id }},
@@ -415,7 +415,7 @@ module.exports = function(monastery, opendb) {
     expect(find2).toEqual({
       _id: user1._id,
       name: 'Martin Luther',
-      addresses: [{ _id: expect.any(oid), city: 'Frankfurt' }, { _id: expect.any(oid), city: 'Christchurch' }],
+      addresses: [{ city: 'Frankfurt' }, { city: 'Christchurch' }],
       pet: { dog: { _id: dog1._id, name: 'Scruff', user: user1._id }},
       dogs: [{ _id: dog1._id, user: user1._id }]
     })
