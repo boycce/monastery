@@ -906,16 +906,18 @@ module.exports = function(monastery, opendb) {
         },
       },
     })
-
-    // Subdocument data (null/string)
-    await expect(user.validate({ location: null })).rejects.toEqual([{
+    let requiredError = [{
       'detail': 'This field is required.',
       'meta': {'detailLong': undefined, 'field': 'location', 'model': 'user', 'rule': 'required'},
       'status': '400',
       'title': 'location'
-    }])
+    }]
+    // required errors
+    await expect(user.validate({ location: null })).rejects.toEqual(requiredError)
+    await expect(user.validate({ location: '' })).rejects.toEqual(requiredError)
+    await expect(user.validate({ location: undefined })).rejects.toEqual(requiredError)
+    // required no error
     await expect(user.validate({ location: {} })).resolves.toEqual({ location: {} })
-
     db.close()
   })
 
