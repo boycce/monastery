@@ -808,8 +808,10 @@ module.exports = function(monastery, opendb) {
     })
   })
 
-  test('schema default rules', async () => {
+  test('schema options default', async () => {
     // Setup
+    // todo: test objects
+    // todo: change test name
     let db = (await opendb(false)).db
     let user = db.model('user', { fields: {
       name: { type: 'string', minLength: 7 },
@@ -889,7 +891,35 @@ module.exports = function(monastery, opendb) {
     await expect(user.validate({ amount: 'bad' })).rejects.toContainEqual(mock2)
   })
 
-  test('schema default objects', async () => {
+  test('schema options objects', async () => {
+    let db = (await opendb(null, {
+      timestamps: false,
+      nullObjects: true,
+      serverSelectionTimeoutMS: 2000
+    })).db
+    let user = db.model('user', {
+      fields: {
+        location: {
+          lat: { type: 'number' },
+          lng: { type: 'number' },
+          schema: { required: true },
+        },
+      },
+    })
+
+    // Subdocument data (null/string)
+    await expect(user.validate({ location: null })).rejects.toEqual([{
+      'detail': 'This field is required.',
+      'meta': {'detailLong': undefined, 'field': 'location', 'model': 'user', 'rule': 'required'},
+      'status': '400',
+      'title': 'location'
+    }])
+    await expect(user.validate({ location: {} })).resolves.toEqual({ location: {} })
+
+    db.close()
+  })
+
+  test('validate defaultObjects', async () => {
     let db = (await opendb(null, {
       timestamps: false,
       defaultObjects: true,
@@ -915,7 +945,7 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('schema nullObjects', async () => {
+  test('validate nullObjects', async () => {
     let db = (await opendb(null, {
       timestamps: false,
       nullObjects: true,
