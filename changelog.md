@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.36.2](https://github.com/boycce/monastery/compare/1.36.1...1.36.2) (2022-05-26)
+
+
+### Bug Fixes
+
+* nullObjects were skipping required rules ([315af00](https://github.com/boycce/monastery/commit/315af000ea274a165e58a39b850508bd3a417642))
+* refactored tests (oid) ([439aa27](https://github.com/boycce/monastery/commit/439aa279c5073d1652b8a6b81f2fce7ae403b0d5))
+* tests (oid) ([bd92970](https://github.com/boycce/monastery/commit/bd92970957c9cb0bd5e0a4b4c4433fd4b6c6b7d7))
+
 ### [1.36.1](https://github.com/boycce/monastery/compare/1.36.0...1.36.1) (2022-04-16)
 
 
