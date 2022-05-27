@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.36.3](https://github.com/boycce/monastery/compare/1.36.2...1.36.3) (2022-05-27)
+
+
+### Bug Fixes
+
+* order maintained when mixing of formData/dotNotation with normal key values ([898fa90](https://github.com/boycce/monastery/commit/898fa90a25e81ae1d2413e32ca67173fdef733a9))
+
 ### [1.36.2](https://github.com/boycce/monastery/compare/1.36.1...1.36.2) (2022-05-26)
 
 
