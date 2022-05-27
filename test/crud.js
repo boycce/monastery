@@ -309,6 +309,77 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
+  test('update mixing formData', async() => {
+    // Mixing data
+    let db = (await opendb(null)).db
+    let consignment = db.model('consignment', {
+      fields: {
+        specialInstructions: [{
+          text: { type: 'string' },
+          createdAt: { type: 'date' },
+          updatedByName: { type: 'string' },
+          importance: { type: 'string' },
+        }],
+      },
+    })
+    let inserted = await consignment.insert({
+      data: {
+        specialInstructions: [{
+          text: 'filler',
+          createdAt: 1653601752472,
+          updatedByName: 'Paul',
+          importance: 'low'
+        }]
+      }
+    })
+    let specialInstructions = [
+      {
+        text: 'POD added by driver',
+        createdAt: 1653603212886,
+        updatedByName: 'Paul Driver 3',
+        importance: 'low'
+      }, {
+        text: 'filler',
+        createdAt: 1653601752472,
+        updatedByName: 'Paul',
+        importance: 'low'
+      }
+    ]
+    // Key order maintained (not always guaranteed)
+    await consignment.update({
+      query: inserted._id,
+      data: {
+        'specialInstructions[0][text]': 'filler',
+        'specialInstructions[0][createdAt]': 1653601752472,
+        'specialInstructions[0][updatedByName]': 'Paul',
+        'specialInstructions[0][importance]': 'low',
+        specialInstructions: specialInstructions.map(o => ({ ...o })),
+      }
+    })
+    await expect(consignment.findOne({ query: inserted._id })).resolves.toEqual({
+      _id: expect.any(Object),
+      specialInstructions: specialInstructions,
+    })
+
+    // Key order maintained (not always guaranteed)
+    await consignment.update({
+      query: inserted._id,
+      data: {
+        specialInstructions: specialInstructions.map(o => ({ ...o })),
+        'specialInstructions[0][text]': 'filler',
+        'specialInstructions[0][createdAt]': 1653601752472,
+        'specialInstructions[0][updatedByName]': 'Paul',
+        'specialInstructions[0][importance]': 'low',
+      }
+    })
+    await expect(consignment.findOne({ query: inserted._id })).resolves.toEqual({
+      _id: expect.any(Object),
+      specialInstructions: [specialInstructions[1], specialInstructions[1]],
+    })
+
+    db.close()
+  })
+
   test('insert with id casting', async () => {
     let db = (await opendb(null)).db
     db.model('company', { fields: {
