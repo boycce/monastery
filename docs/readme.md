@@ -10,6 +10,8 @@
 * Custom error messages can be defined in your model definition
 * Normalised error responses ready for client consumption
 * Automatic mongodb index setup
+* CRUD operations can accept bracket (multipart/form-data) and dot notation data formats, you can also mix these together
+
 
 ## Install
 

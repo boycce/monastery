@@ -345,7 +345,7 @@ module.exports = function(monastery, opendb) {
         importance: 'low'
       }
     ]
-    // Key order maintained (not always guaranteed)
+    // Key order maintained (not always guaranteed in browsers)
     await consignment.update({
       query: inserted._id,
       data: {
@@ -361,7 +361,7 @@ module.exports = function(monastery, opendb) {
       specialInstructions: specialInstructions,
     })
 
-    // Key order maintained (not always guaranteed)
+    // Key order maintained (not always guaranteed in browsers)
     await consignment.update({
       query: inserted._id,
       data: {
