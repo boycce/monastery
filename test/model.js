@@ -117,8 +117,7 @@ module.exports = function(monastery, opendb) {
 
   test('model reserved rules', async () => {
     // Setup
-    let db = (await opendb(false, {})).db
-    db.error = () => {} // hiding debug error
+    let db = (await opendb(false, { hideErrors: true })).db // hide debug error
     let user = db.model('user', {
       fields: {
         name: {

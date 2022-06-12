@@ -17,7 +17,7 @@
     "mongo odm"
   ],
   "scripts": {
-    "dev": "npm run lint & DEBUG=-monastery:info jest --watchAll --runInBand --verbose=false",
+    "dev": "npm run lint & jest --watchAll --runInBand --verbose=false",
     "docs": "cd docs && bundle exec jekyll serve --livereload --livereload-port 4001",
     "lint": "eslint ./lib ./plugins ./test",
     "mong": "nodemon resources/mong.js",

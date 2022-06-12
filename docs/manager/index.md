@@ -13,6 +13,8 @@ Monastery constructor, same as the [monk constructor](https://automattic.github.
 `uri` *(string\|array)*: A [mongo connection string URI](https://docs.mongodb.com/manual/reference/connection-string/). Replica sets can be an array or comma separated.
 
 [`options`] *(object)*:
+  - [`hideWarnings=false`] *(boolean)*: hide monastery warnings
+  - [`hideErrors=false`] *(boolean)*: hide monastery errors
   - [`defaultObjects=false`] *(boolean)*: when [inserting](../model/insert.html#defaults-example), undefined embedded documents and arrays are defined
   - [`nullObjects=false`] *(boolean)*: embedded documents and arrays can be set to null or an empty string (which gets converted to null). You can override this per field via `nullObject: true`.
   - [`timestamps=true`] *(boolean)*: whether to use [`createdAt` and `updatedAt`](../definition), this can be overridden per operation

@@ -18,13 +18,24 @@ let plugin = module.exports = {
      * @this plugin
      */
 
+    // Depreciation warnings
+    if (options.bucketDir) { // > 1.36.2
+      manager.warn('imagePlugin.bucketDir has been depreciated in favour of imagePlugin.path')
+      options.path = function (uid, basename, ext, file) { `${options.bucketDir}/${uid}.${ext}` }
+    }
+
     // Settings
+    this.awsAcl = options.awsAcl || 'public-read'
     this.awsBucket = options.awsBucket
     this.awsAccessKeyId = options.awsAccessKeyId
     this.awsSecretAccessKey = options.awsSecretAccessKey
-    this.bucketDir = options.bucketDir || 'full'
+    this.bucketDir = options.bucketDir || 'full' // depreciated > 1.36.2
+    this.filesize = options.filesize
     this.formats = options.formats || ['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff']
+    this.getSignedUrl = options.getSignedUrl
     this.manager = manager
+    this.params = options.params ? util.deepCopy(options.params) : {},
+    this.path = options.path || function (uid, basename, ext, file) { return `full/${uid}.${ext}` }
 
     if (!options.awsBucket || !options.awsAccessKeyId || !options.awsSecretAccessKey) {
       manager.error('Monastery imagePlugin: awsBucket, awsAccessKeyId, or awsSecretAccessKey is not defined')
@@ -34,7 +45,7 @@ let plugin = module.exports = {
 
     // Create s3 'service' instance
     // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#constructor-property
-    manager.getSignedUrl = this._getSignedUrl
+    manager._getSignedUrl = this._getSignedUrl
     this.s3 = new S3({
       credentials: {
         accessKeyId: this.awsAccessKeyId,
@@ -114,9 +125,13 @@ let plugin = module.exports = {
     if (util.isArray(data)) {
       return Promise.reject('Adding images to mulitple data objects is not supported.')
 
+    // We currently don't support an array of data objects.
+    } else if (!util.isObject(data)) {
+      return Promise.reject('No creat e/ update data object passed to addImages?')
+
     // We require the update query OR data object to contain _id. This is because non-id queries
     // will not suffice when updating the document(s) against the same query again.
-    } else if (!data._id && (!query || !query._id)) {
+    } else if (!(data||{})._id && (!query || !query._id)) {
       return Promise.reject('Adding images requires the update operation to query via _id\'s.')
     }
 
@@ -126,36 +141,36 @@ let plugin = module.exports = {
         return Promise.all(filesArr.map(file => {
           return new Promise((resolve, reject) => {
             let uid = nanoid.nanoid()
-            let pathFilename = filesArr.imageField.filename ? '/' + filesArr.imageField.filename : ''
+            let path = filesArr.imageField.path || plugin.path
             let image = {
-              bucket: plugin.awsBucket,
+              bucket: filesArr.imageField.awsBucket || plugin.awsBucket,
               date: plugin.manager.useMilliseconds? Date.now() : Math.floor(Date.now() / 1000),
               filename: file.name,
               filesize: file.size,
-              path: `${plugin.bucketDir}/${uid}${pathFilename}.${file.ext}`,
+              path: path(uid, file.name, file.ext, file),
               // sizes: ['large', 'medium', 'small'],
               uid: uid,
+            }
+            let s3Options = {
+              // ACL: Some IAM permissions "s3:PutObjectACL" must be included in the policy
+              // params: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#upload-property
+              ACL: filesArr.imageField.awsAcl || plugin.awsAcl,
+              Body: file.data,
+              Bucket: image.bucket,
+              Key: image.path,
+              ...(filesArr.imageField.params || plugin.params),
             }
             plugin.manager.info(
               `Uploading '${image.filename}' to '${image.bucket}/${image.path}'`
             )
             if (test) {
               plugin._addImageObjectsToData(filesArr.inputPath, data, image)
-              resolve()
+              resolve(s3Options)
             } else {
-              plugin.s3.upload({
-                Bucket: plugin.awsBucket,
-                Key: image.path,
-                Body: file.data,
-                // The IAM permission "s3:PutObjectACL" must be included in the appropriate policy
-                ACL: 'public-read',
-                // upload params,https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#upload-property
-                ...filesArr.imageField.params,
-
-              }, (err, response) => {
+              plugin.s3.upload(s3Options, (err, response) => {
                 if (err) return reject(err)
                 plugin._addImageObjectsToData(filesArr.inputPath, data, image)
-                resolve()
+                resolve(s3Options)
               })
             }
           })
@@ -163,11 +178,11 @@ let plugin = module.exports = {
       }))
 
     // Save the data against the matching document(s)
-    }).then(() => {
-      // Remove update's _output object
+    }).then((s3Options) => {
       let prunedData = { ...data }
+      // Remove update's _output object
       delete prunedData._output
-      if (test) return [prunedData]
+      if (test) return [prunedData, s3Options]
       return model._update(
         idquery,
         { '$set': prunedData },
@@ -196,10 +211,11 @@ let plugin = module.exports = {
     // Find all image objects in data
     for (let doc of util.toArray(data)) {
       for (let imageField of this.imageFields) {
-        if (options.getSignedUrls || imageField.getSignedUrl) {
+        if (options.getSignedUrls
+            || (util.isDefined(imageField.getSignedUrl) ? imageField.getSignedUrl : plugin.getSignedUrl)) {
           let images = plugin._findImagesInData(doc, imageField, 0, '').filter(o => o.image)
           for (let image of images) {
-            image.image.signedUrl = plugin._getSignedUrl(image.image.path)
+            image.image.signedUrl = plugin._getSignedUrl(image.image.path, 3600, imageField.awsBucket)
           }
         }
       }
@@ -346,7 +362,10 @@ let plugin = module.exports = {
     // the file doesnt get deleted, we only delete from plugin.awsBucket.
     if (!unused.length) return
     await new Promise((resolve, reject) => {
-      plugin.s3.deleteObjects({ Bucket: plugin.awsBucket, Delete: { Objects: unused }}, (err, data) => {
+      plugin.s3.deleteObjects({
+        Bucket: plugin.awsBucket,
+        Delete: { Objects: unused }
+      }, (err, data) => {
         if (err) reject(err)
         resolve()
       })
@@ -410,7 +429,7 @@ let plugin = module.exports = {
       return Promise.all(filesArr.map((file, i) => {
         return new Promise((resolve, reject) => {
           fileType.fromBuffer(file.data).then(res => {
-            let maxSize = filesArr.imageField.filesize
+            let filesize = filesArr.imageField.filesize || plugin.filesize
             let formats = filesArr.imageField.formats || plugin.formats
             let allowAny = util.inArray(formats, 'any')
             file.format = res? res.ext : ''
@@ -421,9 +440,9 @@ let plugin = module.exports = {
               title: filesArr.inputPath + (i? `.${i}` : ''),
               detail: `The file size for '${file.nameClipped}' is too big.`
             })
-            else if (maxSize && maxSize < file.size) reject({ // file.size == bytes
+            else if (filesize && filesize < file.size) reject({ // file.size == bytes
               title: filesArr.inputPath + (i? `.${i}` : ''),
-              detail: `The file size for '${file.nameClipped}' is bigger than ${(maxSize/1000/1000).toFixed(1)}MB.`
+              detail: `The file size for '${file.nameClipped}' is bigger than ${(filesize/1000/1000).toFixed(1)}MB.`
             })
             else if (file.ext == 'unknown') reject({
               title: filesArr.inputPath + (i? `.${i}` : ''),
@@ -446,8 +465,10 @@ let plugin = module.exports = {
      * @param {object|array} fields
      * @param {string} path
      * @return [{}, ...]
+     * @this plugin
      */
     let list = []
+    let that = this
     util.forEach(fields, (field, fieldName) => {
       let path2 = `${path}.${fieldName}`.replace(/^\./, '')
       // let schema = field.schema || {}
@@ -464,11 +485,28 @@ let plugin = module.exports = {
 
       // Image field. Test for field.image as field.type may be 'any'
       } else if (field.type == 'image' || field.image) {
-        let formats = field.formats
-        let filesize = field.filesize || field.fileSize // old <= v1.31.7
-        let filename = field.filename
-        let getSignedUrl = field.getSignedUrl
-        let params = { ...field.params||{} }
+        if (field.fileSize) { // > v1.31.7
+          this.manager.warn(`${path2}.fileSize has been depreciated in favour of ${path2}.filesize`)
+          field.filesize = field.filesize || field.fileSize
+        }
+        if (field.filename) { // > v1.36.3
+          this.manager.warn(`${path2}.filename has been depreciated in favour of ${path2}.path()`)
+          field.path = field.path
+            || function(uid, basename, ext, file) { return `${that.bucketDir}/${uid}/${field.filename}.${ext}` }
+        }
+
+        list.push({
+          awsAcl: field.awsAcl,
+          awsBucket: field.awsBucket,
+          filename: field.filename,
+          filesize: field.filesize,
+          formats: field.formats,
+          fullPath: path2,
+          fullPathRegex: new RegExp('^' + path2.replace(/\.[0-9]+/g, '.[0-9]+').replace(/\./g, '\\.') + '$'),
+          getSignedUrl: field.getSignedUrl,
+          path: field.path,
+          params: field.params ? util.deepCopy(field.params) : undefined,
+        })
         // Convert image field to subdocument
         fields[fieldName] = {
           bucket: { type: 'string' },
@@ -479,15 +517,6 @@ let plugin = module.exports = {
           schema: { image: true, nullObject: true, isImageObject: true },
           uid: { type: 'string' },
         }
-        list.push({
-          fullPath: path2,
-          fullPathRegex: new RegExp('^' + path2.replace(/\.[0-9]+/g, '.[0-9]+').replace(/\./g, '\\.') + '$'),
-          formats: formats,
-          filesize: filesize,
-          filename: filename,
-          getSignedUrl: getSignedUrl,
-          params: params,
-        })
       }
     })
     return list
@@ -537,12 +566,17 @@ let plugin = module.exports = {
     return list
   },
 
-  _getSignedUrl: (path, expires=3600) => {
-    // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getSignedUrl-property
+  _getSignedUrl: (path, expires=3600, bucket) => {
+    /**
+     * @param {string} path - aws file path
+     * @param {number} <expires> - seconds
+     * @param {number} <bucket>
+     * @see https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getSignedUrl-property
+     */
     let signedUrl = plugin.s3.getSignedUrl('getObject', {
-      Bucket: plugin.awsBucket,
+      Bucket: bucket || plugin.awsBucket,
+      Expires: expires,
       Key: path,
-      Expires: expires
     })
     return signedUrl
   },

@@ -10,11 +10,15 @@ To use the default image plugin shipped with monastery, you need to use the opti
 ```js
   let db = monastery('localhost/mydb', {
     imagePlugin: {
+      awsAcl: 'public-read', // default
       awsBucket: 'your-bucket-name',
       awsAccessKeyId: 'your-key-here',
       awsSecretAccessKey: 'your-key-here',
-      bucketDir: 'full', // default
-      formats: ['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff'] // or 'any' to include everything
+      filesize: undefined, // default (max filesize in bytes)
+      formats: ['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff'], // default (use 'any' to allow all extensions)
+      getSignedUrl: false, // default (get a S3 signed url after `model.find()`, can be defined per request)
+      path: (uid, basename, ext, file) => `/full/${uid}.${ext}`, // default
+      params: {}, // upload params (https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#upload-property)
     }
   })
 ```
@@ -25,15 +29,12 @@ Then in your model definition, e.g.
 let user = db.model('user', {
   fields: {
     logo:  {
-      type: 'image', // required
-      formats: ['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff'],
-      filename: 'avatar',
-      filesize: 1000 * 1000 * 5, // max size in bytes
-      getSignedUrl: true, // get a s3 signed url after every `find()` operation (can be overridden per request)
-      params: {}, // upload params, https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#upload-property
+      type: 'image',
+      // ...any imagePlugin option, excluding awsAccessKeyId and awsSecretAccessKey
     },
     logos: [{
-      type: 'image'
+      type: 'image',
+      // ...any imagePlugin option, excluding awsAccessKeyId and awsSecretAccessKey
     }],
   }
 })
@@ -61,6 +62,6 @@ user.update({
 
 ### File types
 
-Due to known limitations, we are inaccurately able to validate non-binary file types (e.g. txt, svg) before uploading to S3, and rely on their file processing to remove any malicious files.
+Due to known limitations, we are not able to verify the contents of non-binary files, only the filename extension (e.g. .txt, .svg) before uploading to S3
 
 ...to be continued

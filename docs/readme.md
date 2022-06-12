@@ -65,12 +65,10 @@ db.user.insert({
 ```
 ## Debugging
 
-This package uses [Debug](https://github.com/visionmedia/debug) which allows you to see different levels of output:
+This package uses [debug](https://github.com/visionmedia/debug) which allows you to set different levels of output via the `DEBUG` environment variable. Due to known limations `monastery:warning` and `monastery:error` are forced on, you can however disable these via [manager settings](./manager).
 
 ```bash
-$ DEBUG=monastery:info
-# or show all levels of output, currently shows the same output as above
-$ DEBUG=monastery:*
+$ DEBUG=monastery:info # shows operation information
 ```
 
 To run isolated tests with Jest:

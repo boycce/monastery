@@ -387,79 +387,6 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('images addImages formats & filesizes', async () => {
-    let db = (await opendb(null, {
-      timestamps: false,
-      serverSelectionTimeoutMS: 2000,
-      imagePlugin: {
-        awsBucket: 'fake',
-        awsAccessKeyId: 'fake',
-        awsSecretAccessKey: 'fake',
-        formats: ['jpg', 'jpeg', 'png', 'ico']
-      }
-    })).db
-
-    let user = db.model('user', { fields: {
-      imageIco:     { type: 'image' },
-      imageWebp:    { type: 'image', formats: ['webp'] },
-      imageSvgBad:  { type: 'image' },
-      imageSvgGood: { type: 'image', formats: ['svg'] },
-      imageSvgAny:  { type: 'image', formats: ['any'] },
-      imageSize1:   { type: 'image', filesize: 1000 * 100 },
-      imageSize2:   { type: 'image' },
-    }})
-
-    let plugin = db.imagePluginFile
-    let supertest = require('supertest')
-    let express = require('express')
-    let upload = require('express-fileupload')
-    let app = express()
-    app.use(upload({ limits: { fileSize: 1000 * 200, files: 10 }}))
-
-    app.post('/', async (req, res) => {
-      try {
-        let imageSvgBad = { imageSvgBad: req.files.imageSvgBad }
-        let imageSize1 = { imageSize1: req.files.imageSize1 }
-        let imageSize2 = { imageSize2: req.files.imageSize2 }
-        delete req.files.imageSvgBad
-        delete req.files.imageSize1
-        delete req.files.imageSize2
-        // Ico, Webp, and imageSvgGood will throw an error first if it's not a valid type
-        await expect(plugin._findValidImages(req.files, user)).resolves.toEqual(expect.any(Array))
-        await expect(plugin._findValidImages(imageSvgBad, user)).rejects.toEqual({
-          title: 'imageSvgBad',
-          detail: 'The file format \'svg\' for \'bad.svg\' is not supported'
-        })
-        await expect(plugin._findValidImages(imageSize1, user)).rejects.toEqual({
-          title: 'imageSize1',
-          detail: 'The file size for \'lion1.png\' is bigger than 0.1MB.'
-        })
-        await expect(plugin._findValidImages(imageSize2, user)).rejects.toEqual({
-          title: 'imageSize2',
-          detail: 'The file size for \'lion2.jpg\' is too big.'
-        })
-        res.send()
-      } catch (e) {
-        console.log(e.message || e)
-        res.status(500).send()
-      }
-    })
-
-    // Start tests
-    await supertest(app)
-      .post('/')
-      .attach('imageIco', `${__dirname}/assets/image.ico`)
-      .attach('imageWebp', `${__dirname}/assets/image.webp`)
-      .attach('imageSvgBad', `${__dirname}/assets/bad.svg`)
-      .attach('imageSvgGood', `${__dirname}/assets/bad.svg`)
-      .attach('imageSvgAny', `${__dirname}/assets/bad.svg`)
-      .attach('imageSize1', `${__dirname}/assets/lion1.png`)
-      .attach('imageSize2', `${__dirname}/assets/lion2.jpg`)
-      .expect(200)
-
-    db.close()
-  })
-
   test('images addImages bad file objects', async () => {
     let db = (await opendb(null, {
       timestamps: false,
@@ -688,17 +615,199 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('images getSignedUrls', async () => {
+  test('images option defaults', async () => {
+    // testing (awsAcl filesize formats getSignedUrl path params)
+    let db = (await opendb(null, {
+      timestamps: false,
+      serverSelectionTimeoutMS: 2000,
+      imagePlugin: {
+        awsBucket: 'fake',
+        awsAccessKeyId: 'fake',
+        awsSecretAccessKey: 'fake',
+      }
+    })).db
+
+    let user = db.model('user', {
+      fields: {
+        logo: { type: 'image' },
+      }
+    })
+
+    let plugin = db.imagePluginFile
+    let supertest = require('supertest')
+    let express = require('express')
+    let upload = require('express-fileupload')
+    let app = express()
+    app.use(upload({ limits: { fileSize: 1000 * 480, files: 10 }}))
+
+    // Basic tests
+    expect(plugin.awsAcl).toEqual('public-read')
+    expect(plugin.filesize).toEqual(undefined)
+    expect(plugin.formats).toEqual(['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff'])
+    expect(plugin.getSignedUrl).toEqual(undefined)
+    expect(plugin.path).toEqual(expect.any(Function))
+    expect(plugin.params).toEqual({})
+
+    // Images not signed
+    let image
+    let userInserted = await db.user._insert({
+      logo: (image = {
+        bucket: 'fake',
+        date: 1234,
+        filename: 'lion1.png',
+        filesize: 1234,
+        path: 'test/lion1.png',
+        uid: '1234'
+      })
+    })
+    await expect(db.user.findOne({ query: userInserted._id })).resolves.toEqual({
+      _id: expect.any(Object),
+      logo: image,
+    })
+
+    app.post('/', async (req, res) => {
+      try {
+        // Files exist
+        expect(req.files.logo).toEqual(expect.any(Object))
+        let response = await plugin.addImages(
+          { model: user, files: req.files, query: { _id: 1234 }},
+          req.body || {},
+          true,
+        )
+        // Updated data object
+        expect(response[0]).toEqual({
+          logo: {
+            bucket: 'fake',
+            date: expect.any(Number),
+            filename: 'logo.png',
+            filesize: expect.any(Number),
+            path: expect.stringMatching(/^full\/.*png$/),
+            uid: expect.any(String),
+          },
+        })
+        // S3 options
+        expect(response[1]).toEqual([
+          [{
+            ACL: 'public-read',
+            Body: expect.any(Object),
+            Bucket: 'fake',
+            Key: expect.stringMatching(/^full\/.*png$/),
+          }],
+        ])
+        res.send()
+      } catch (e) {
+        console.log(e.message || e)
+        res.status(500).send()
+      }
+    })
+
+    // Start tests
+    await supertest(app)
+      .post('/')
+      .attach('logo', `${__dirname}/assets/logo.png`)
+      .expect(200)
+
+    db.close()
+  })
+
+  test('images options formats & filesizes', async () => {
+    let db = (await opendb(null, {
+      timestamps: false,
+      serverSelectionTimeoutMS: 2000,
+      imagePlugin: {
+        awsBucket: 'fake',
+        awsAccessKeyId: 'fake',
+        awsSecretAccessKey: 'fake',
+        formats: ['jpg', 'jpeg', 'png', 'ico'],
+        filesize: 1000 * 270,
+      }
+    })).db
+
+    let user = db.model('user', { fields: {
+      imageIco:     { type: 'image' },
+      imageWebp:    { type: 'image', formats: ['webp'] },
+      imageSvgBad:  { type: 'image' },
+      imageSvgGood: { type: 'image', formats: ['svg'] },
+      imageSvgAny:  { type: 'image', formats: ['any'] },
+      imageSize1:   { type: 'image', filesize: 1000 * 100 },
+      imageSize2:   { type: 'image' },
+      imageSize3:   { type: 'image' },
+    }})
+
+    let plugin = db.imagePluginFile
+    let supertest = require('supertest')
+    let express = require('express')
+    let upload = require('express-fileupload')
+    let app = express()
+    app.use(upload({ limits: { fileSize: 1000 * 480, files: 10 }}))
+
+    app.post('/', async (req, res) => {
+      try {
+        let imageSvgBad = { imageSvgBad: req.files.imageSvgBad }
+        let imageSize1 = { imageSize1: req.files.imageSize1 }
+        let imageSize2 = { imageSize2: req.files.imageSize2 }
+        let imageSize3 = { imageSize3: req.files.imageSize3 }
+        delete req.files.imageSvgBad
+        delete req.files.imageSize1
+        delete req.files.imageSize2
+        delete req.files.imageSize3
+        // Ico, Webp, and imageSvgGood will throw an error first if it's not a valid type
+        await expect(plugin._findValidImages(req.files, user)).resolves.toEqual(expect.any(Array))
+        await expect(plugin._findValidImages(imageSvgBad, user)).rejects.toEqual({
+          title: 'imageSvgBad',
+          detail: 'The file format \'svg\' for \'bad.svg\' is not supported'
+        })
+        await expect(plugin._findValidImages(imageSize1, user)).rejects.toEqual({
+          title: 'imageSize1',
+          detail: 'The file size for \'lion1.png\' is bigger than 0.1MB.'
+        })
+        await expect(plugin._findValidImages(imageSize2, user)).rejects.toEqual({
+          title: 'imageSize2',
+          detail: 'The file size for \'lion2.jpg\' is bigger than 0.3MB.'
+        })
+        await expect(plugin._findValidImages(imageSize3, user)).rejects.toEqual({
+          title: 'imageSize3',
+          detail: 'The file size for \'house.jpg\' is too big.'
+        })
+        res.send()
+      } catch (e) {
+        console.log(e.message || e)
+        res.status(500).send()
+      }
+    })
+
+    // Start tests
+    await supertest(app)
+      .post('/')
+      .attach('imageIco', `${__dirname}/assets/image.ico`)
+      .attach('imageWebp', `${__dirname}/assets/image.webp`)
+      .attach('imageSvgBad', `${__dirname}/assets/bad.svg`)
+      .attach('imageSvgGood', `${__dirname}/assets/bad.svg`)
+      .attach('imageSvgAny', `${__dirname}/assets/bad.svg`)
+      .attach('imageSize1', `${__dirname}/assets/lion1.png`)
+      .attach('imageSize2', `${__dirname}/assets/lion2.jpg`)
+      .attach('imageSize3', `${__dirname}/assets/house.jpg`)
+      .expect(200)
+
+    db.close()
+  })
+
+  test('images option getSignedUrls', async () => {
     // latest (2022.02)
     let db = (await opendb(null, {
       timestamps: false,
       serverSelectionTimeoutMS: 2000,
-      imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
+      imagePlugin: {
+        awsBucket: 'fake',
+        awsAccessKeyId: 'fake',
+        awsSecretAccessKey: 'fake',
+        getSignedUrl: true,
+      },
     })).db
 
     db.model('user', { fields: {
-      photos: [{ type: 'image' }],
-      photos2: [{ type: 'image', getSignedUrl: true }],
+      photos: [{ type: 'image', getSignedUrl: false }],
+      photos2: [{ type: 'image' }],
     }})
 
     let image = {
@@ -709,6 +818,10 @@ module.exports = function(monastery, opendb) {
       path: 'test/lion1.png',
       uid: 'lion1'
     }
+    let imageWithSignedUrl = {
+      ...image,
+      signedUrl: expect.stringMatching(/^https/)
+    }
 
     let userInserted = await db.user._insert({
       photos: [image, image],
@@ -716,7 +829,6 @@ module.exports = function(monastery, opendb) {
     })
 
     // Find signed URL via query option
-    let imageWithSignedUrl = { ...image, signedUrl: expect.stringMatching(/^https/) }
     await expect(db.user.findOne({ query: userInserted._id, getSignedUrls: true })).resolves.toEqual({
       _id: expect.any(Object),
       photos: [imageWithSignedUrl, imageWithSignedUrl],
@@ -737,6 +849,166 @@ module.exports = function(monastery, opendb) {
       photos: [image, image],
       photos2: [imageWithSignedUrl, imageWithSignedUrl],
     })
+
+    db.close()
+  })
+
+  test('images options awsAcl, awsBucket, params, path', async () => {
+    let db = (await opendb(null, {
+      timestamps: false,
+      serverSelectionTimeoutMS: 2000,
+      imagePlugin: {
+        awsAcl: 'private',
+        awsBucket: 'fake',
+        awsAccessKeyId: 'fake',
+        awsSecretAccessKey: 'fake',
+        params: { ContentLanguage: 'DE'},
+        path: (uid, basename, ext, file) => `images/${basename}`,
+      }
+    })).db
+
+    let user = db.model('user', {
+      fields: {
+        optionDefaults: { type: 'image' },
+        optionOverrides: {
+          type: 'image',
+          awsAcl: 'public-read-write',
+          awsBucket: 'fake2',
+          params: { ContentLanguage: 'NZ'},
+          path: (uid, basename, ext, file) => `images2/${basename}`,
+        },
+      }
+    })
+
+    let plugin = db.imagePluginFile
+    let supertest = require('supertest')
+    let express = require('express')
+    let upload = require('express-fileupload')
+    let app = express()
+    app.use(upload())
+
+    app.post('/', async function(req, res) {
+      try {
+        // Files exist
+        expect(req.files.optionDefaults).toEqual(expect.any(Object))
+        expect(req.files.optionOverrides).toEqual(expect.any(Object))
+        let response = await plugin.addImages(
+          { model: user, files: req.files, query: { _id: 1234 }},
+          req.body || {},
+          true,
+        )
+        // Updated data object
+        expect(response[0]).toEqual({
+          optionDefaults: {
+            bucket: 'fake',
+            date: expect.any(Number),
+            filename: 'logo.png',
+            filesize: expect.any(Number),
+            path: 'images/logo.png',
+            uid: expect.any(String),
+          },
+          optionOverrides: {
+            bucket: 'fake2',
+            date: expect.any(Number),
+            filename: 'logo2.png',
+            filesize: expect.any(Number),
+            path: 'images2/logo2.png',
+            uid: expect.any(String),
+          },
+        })
+        // S3 options
+        expect(response[1]).toEqual([
+          [{
+            ACL: 'private',
+            Body: expect.any(Object),
+            Bucket: 'fake',
+            ContentLanguage: 'DE',
+            Key: 'images/logo.png',
+          }],
+          [{
+            ACL: 'public-read-write',
+            Body: expect.any(Object),
+            Bucket: 'fake2',
+            ContentLanguage: 'NZ',
+            Key: 'images2/logo2.png',
+          }],
+        ])
+        res.send()
+      } catch (e) {
+        console.log(e.message||e)
+        res.status(500).send()
+      }
+    })
+
+    // Start tests
+    await supertest(app)
+      .post('/')
+      .attach('optionDefaults', `${__dirname}/assets/logo.png`)
+      .attach('optionOverrides', `${__dirname}/assets/logo2.png`)
+      .expect(200)
+
+    db.close()
+  })
+
+  test('images option depreciations', async () => {
+    // testing (filename bucketDir)
+    let db = (await opendb(null, {
+      hideWarnings: true,
+      timestamps: false,
+      serverSelectionTimeoutMS: 2000,
+      imagePlugin: {
+        awsBucket: 'fake',
+        awsAccessKeyId: 'fake',
+        awsSecretAccessKey: 'fake',
+        bucketDir: 'old',
+      }
+    })).db
+
+    let user = db.model('user', {
+      fields: {
+        logo: { type: 'image', filename: 'oldLogo' },
+      }
+    })
+
+    let plugin = db.imagePluginFile
+    let supertest = require('supertest')
+    let express = require('express')
+    let upload = require('express-fileupload')
+    let app = express()
+    app.use(upload({ limits: { fileSize: 1000 * 480, files: 10 }}))
+
+    app.post('/', async (req, res) => {
+      try {
+        // Files exist
+        expect(req.files.logo).toEqual(expect.any(Object))
+        let response = await plugin.addImages(
+          { model: user, files: req.files, query: { _id: 1234 }},
+          req.body || {},
+          true,
+        )
+        // Updated data object
+        expect(response[0]).toEqual({
+          logo: {
+            bucket: 'fake',
+            date: expect.any(Number),
+            filename: 'logo.png',
+            filesize: expect.any(Number),
+            path: expect.stringMatching(/^old\/.*\/oldLogo\.png$/),
+            uid: expect.any(String),
+          },
+        })
+        res.send()
+      } catch (e) {
+        console.log(e.message || e)
+        res.status(500).send()
+      }
+    })
+
+    // Start tests
+    await supertest(app)
+      .post('/')
+      .attach('logo', `${__dirname}/assets/logo.png`)
+      .expect(200)
 
     db.close()
   })
