@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.37.0](https://github.com/boycce/monastery/compare/1.36.3...1.37.0) (2022-06-12)
+
+
+### Features
+
+* added manager options (path, params, getSignedUrl, filesize, awsAcl) ([3e95609](https://github.com/boycce/monastery/commit/3e95609385820ecfd606500676fa87f8c9b4f02d))
+
+
+### Bug Fixes
+
+* warnings printing by default ([e1dc442](https://github.com/boycce/monastery/commit/e1dc442f20c78fcc65e19afaf5f0f8410bbcc31d))
+
 ### [1.36.3](https://github.com/boycce/monastery/compare/1.36.2...1.36.3) (2022-05-27)
 
 
