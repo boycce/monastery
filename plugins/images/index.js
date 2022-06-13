@@ -25,7 +25,7 @@ let plugin = module.exports = {
     }
 
     // Settings
-    this.awsAcl = options.awsAcl || 'public-read'
+    this.awsAcl = options.awsAcl || 'private' // default
     this.awsBucket = options.awsBucket
     this.awsAccessKeyId = options.awsAccessKeyId
     this.awsSecretAccessKey = options.awsSecretAccessKey
