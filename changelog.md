@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.37.1](https://github.com/boycce/monastery/compare/1.37.0...1.37.1) (2022-06-13)
+
+
+### Bug Fixes
+
+* add _id to upserted document ([a78512f](https://github.com/boycce/monastery/commit/a78512f16b39422160756fe91ef4d4a3239f5890))
+
 ## [1.37.0](https://github.com/boycce/monastery/compare/1.36.3...1.37.0) (2022-06-12)
 
 
