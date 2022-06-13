@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.37.2](https://github.com/boycce/monastery/compare/1.37.1...1.37.2) (2022-06-13)
+
+
+### Bug Fixes
+
+* changed the default awsAcl from public-read to private ([ba383b5](https://github.com/boycce/monastery/commit/ba383b5f363dafe3b893e08de1a124b7ce96df44))
+
 ### [1.37.1](https://github.com/boycce/monastery/compare/1.37.0...1.37.1) (2022-06-13)
 
 
