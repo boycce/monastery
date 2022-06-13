@@ -201,6 +201,15 @@ module.exports = function(monastery, opendb) {
         name: 'Martin Luther3'
       }
     ])
+
+    // Upsert
+    let newId = db.id()
+    await expect(user.update({ query: newId, data: { name: 'Martin Luther3' }, upsert: true }))
+      .resolves.toEqual({ _id: newId, name: 'Martin Luther3' }) // inserted
+
+    await expect(user.update({ query: inserted._id, data: { name: 'Martin Luther4' }, upsert: true }))
+      .resolves.toEqual({ name: 'Martin Luther4' }) // updated
+
     db.close()
   })
 
