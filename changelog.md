@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.38.0](https://github.com/boycce/monastery/compare/1.37.3...1.38.0) (2022-06-17)
+
+
+### Features
+
+* added options.metadata ([cb4ca43](https://github.com/boycce/monastery/commit/cb4ca43a395c1f90a5e37b8cc95472053e2b3b36))
+
 ### [1.37.3](https://github.com/boycce/monastery/compare/1.37.2...1.37.3) (2022-06-17)
 
 
