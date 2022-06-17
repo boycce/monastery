@@ -18,7 +18,10 @@ To use the default image plugin shipped with monastery, you need to use the opti
       formats: ['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff'], // default (use 'any' to allow all extensions)
       getSignedUrl: false, // default (get a S3 signed url after `model.find()`, can be defined per request)
       path: (uid, basename, ext, file) => `/full/${uid}.${ext}`, // default
-      params: {}, // upload params (https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#upload-property)
+      metadata: {},
+      // Any s3 upload param, which takes precedence over the params above
+      // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#upload-property)
+      params: {},
     }
   })
 ```

@@ -75,6 +75,7 @@ module.exports = function(monastery, opendb) {
       date: { type: 'number', isNumber: true },
       filename: { type: 'string', isString: true },
       filesize: { type: 'number', isNumber: true },
+      metadata: { type: 'any', isAny: true },
       path: { type: 'string', isString: true },
       schema: {
         type: 'object', isObject: true, image: true, nullObject: true, default: undefined,
@@ -645,6 +646,7 @@ module.exports = function(monastery, opendb) {
     expect(plugin.filesize).toEqual(undefined)
     expect(plugin.formats).toEqual(['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff'])
     expect(plugin.getSignedUrl).toEqual(undefined)
+    expect(plugin.metadata).toEqual(undefined)
     expect(plugin.path).toEqual(expect.any(Function))
     expect(plugin.params).toEqual({})
 
@@ -853,7 +855,7 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('images options awsAcl, awsBucket, params, path', async () => {
+  test('images options awsAcl, awsBucket, metadata, params, path', async () => {
     let db = (await opendb(null, {
       timestamps: false,
       serverSelectionTimeoutMS: 2000,
@@ -862,6 +864,7 @@ module.exports = function(monastery, opendb) {
         awsBucket: 'fake',
         awsAccessKeyId: 'fake',
         awsSecretAccessKey: 'fake',
+        metadata: { small: '*x200' , medium: '*x800', large: '*x1600' },
         params: { ContentLanguage: 'DE'},
         path: (uid, basename, ext, file) => `images/${basename}`,
       }
@@ -874,6 +877,7 @@ module.exports = function(monastery, opendb) {
           type: 'image',
           awsAcl: 'public-read-write',
           awsBucket: 'fake2',
+          metadata: { small: '*x100' , medium: '*x400', large: '*x800' },
           params: { ContentLanguage: 'NZ'},
           path: (uid, basename, ext, file) => `images2/${basename}`,
         },
@@ -904,6 +908,7 @@ module.exports = function(monastery, opendb) {
             date: expect.any(Number),
             filename: 'logo.png',
             filesize: expect.any(Number),
+            metadata: { small: '*x200' , medium: '*x800', large: '*x1600' },
             path: 'images/logo.png',
             uid: expect.any(String),
           },
@@ -912,6 +917,7 @@ module.exports = function(monastery, opendb) {
             date: expect.any(Number),
             filename: 'logo2.png',
             filesize: expect.any(Number),
+            metadata: { small: '*x100' , medium: '*x400', large: '*x800' },
             path: 'images2/logo2.png',
             uid: expect.any(String),
           },
@@ -924,6 +930,7 @@ module.exports = function(monastery, opendb) {
             Bucket: 'fake',
             ContentLanguage: 'DE',
             Key: 'images/logo.png',
+            Metadata:  { small: '*x200' , medium: '*x800', large: '*x1600' },
           }],
           [{
             ACL: 'public-read-write',
@@ -931,6 +938,7 @@ module.exports = function(monastery, opendb) {
             Bucket: 'fake2',
             ContentLanguage: 'NZ',
             Key: 'images2/logo2.png',
+            Metadata: { small: '*x100' , medium: '*x400', large: '*x800' },
           }],
         ])
         res.send()

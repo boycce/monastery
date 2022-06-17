@@ -34,6 +34,7 @@ let plugin = module.exports = {
     this.formats = options.formats || ['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff']
     this.getSignedUrl = options.getSignedUrl
     this.manager = manager
+    this.metadata = options.metadata ? util.deepCopy(options.metadata) : undefined,
     this.params = options.params ? util.deepCopy(options.params) : {},
     this.path = options.path || function (uid, basename, ext, file) { return `full/${uid}.${ext}` }
 
@@ -147,8 +148,8 @@ let plugin = module.exports = {
               date: plugin.manager.useMilliseconds? Date.now() : Math.floor(Date.now() / 1000),
               filename: file.name,
               filesize: file.size,
+              metadata: filesArr.imageField.metadata || plugin.metadata,
               path: path(uid, file.name, file.ext, file),
-              // sizes: ['large', 'medium', 'small'],
               uid: uid,
             }
             let s3Options = {
@@ -158,6 +159,7 @@ let plugin = module.exports = {
               Body: file.data,
               Bucket: image.bucket,
               Key: image.path,
+              Metadata: image.metadata,
               ...(filesArr.imageField.params || plugin.params),
             }
             plugin.manager.info(
@@ -347,11 +349,12 @@ let plugin = module.exports = {
       if (useCount[key] > 0) continue
       let pre = preExistingImages.find(o => o.image.uid == key)
       unused.push(
-        // original key can have a different extension
+        // original key can have a different extension, but always expect generated assets
+        // to be in jpg
         { Key: pre.image.path },
         { Key: `small/${key}.jpg` },
         { Key: `medium/${key}.jpg` },
-        { Key: `large/${key}.jpg` }
+        { Key: `large/${key}.jpg` },
       )
       plugin.manager.info(
         `Removing '${pre.image.filename}' from '${pre.image.bucket}/${pre.image.path}'`
@@ -504,6 +507,7 @@ let plugin = module.exports = {
           fullPath: path2,
           fullPathRegex: new RegExp('^' + path2.replace(/\.[0-9]+/g, '.[0-9]+').replace(/\./g, '\\.') + '$'),
           getSignedUrl: field.getSignedUrl,
+          metadata: field.metadata ? util.deepCopy(field.metadata) : undefined,
           path: field.path,
           params: field.params ? util.deepCopy(field.params) : undefined,
         })
@@ -513,6 +517,7 @@ let plugin = module.exports = {
           date: { type: 'number' },
           filename: { type: 'string' },
           filesize: { type: 'number' },
+          metadata: { type: 'any' },
           path: { type: 'string' },
           schema: { image: true, nullObject: true, isImageObject: true },
           uid: { type: 'string' },
