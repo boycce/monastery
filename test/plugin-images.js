@@ -641,7 +641,7 @@ module.exports = function(monastery, opendb) {
     app.use(upload({ limits: { fileSize: 1000 * 480, files: 10 }}))
 
     // Basic tests
-    expect(plugin.awsAcl).toEqual('public-read')
+    expect(plugin.awsAcl).toEqual('private')
     expect(plugin.filesize).toEqual(undefined)
     expect(plugin.formats).toEqual(['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff'])
     expect(plugin.getSignedUrl).toEqual(undefined)
@@ -688,7 +688,7 @@ module.exports = function(monastery, opendb) {
         // S3 options
         expect(response[1]).toEqual([
           [{
-            ACL: 'public-read',
+            ACL: 'private',
             Body: expect.any(Object),
             Bucket: 'fake',
             Key: expect.stringMatching(/^full\/.*png$/),
