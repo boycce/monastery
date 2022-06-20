@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.38.1](https://github.com/boycce/monastery/compare/1.38.0...1.38.1) (2022-06-20)
+
+
+### Bug Fixes
+
+* changed ACL default ([cc92624](https://github.com/boycce/monastery/commit/cc926243728d0752940359fe4ae4a490f21b5750))
+
 ## [1.38.0](https://github.com/boycce/monastery/compare/1.37.3...1.38.0) (2022-06-17)
 
 
