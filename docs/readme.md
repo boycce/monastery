@@ -93,7 +93,7 @@ Coming soon...
 - ~~Whitelisting a parent will remove any previously blacklisted children~~
 - ~~Blacklist/project works the same across find/insert/update/validate~~
 - Automatic embedded document ids/createdAt/updatedAt fields
-- ~~Change ACL default 'public read' to 'private'~~
+- ~~Ability to change ACL default on the manager~~
 - ~~Public db.arrayWithSchema method~~
 - Global after/before hooks
 - docs: Make the implicit ID query conversion more apparent
