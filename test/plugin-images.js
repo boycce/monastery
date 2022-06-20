@@ -864,7 +864,7 @@ module.exports = function(monastery, opendb) {
         awsBucket: 'fake',
         awsAccessKeyId: 'fake',
         awsSecretAccessKey: 'fake',
-        metadata: { small: '*x200' , medium: '*x800', large: '*x1600' },
+        metadata: { small: '*x300' , medium: '*x800', large: '*x1600' },
         params: { ContentLanguage: 'DE'},
         path: (uid, basename, ext, file) => `images/${basename}`,
       }
@@ -908,7 +908,7 @@ module.exports = function(monastery, opendb) {
             date: expect.any(Number),
             filename: 'logo.png',
             filesize: expect.any(Number),
-            metadata: { small: '*x200' , medium: '*x800', large: '*x1600' },
+            metadata: { small: '*x300' , medium: '*x800', large: '*x1600' },
             path: 'images/logo.png',
             uid: expect.any(String),
           },
@@ -930,7 +930,7 @@ module.exports = function(monastery, opendb) {
             Bucket: 'fake',
             ContentLanguage: 'DE',
             Key: 'images/logo.png',
-            Metadata:  { small: '*x200' , medium: '*x800', large: '*x1600' },
+            Metadata:  { small: '*x300' , medium: '*x800', large: '*x1600' },
           }],
           [{
             ACL: 'public-read-write',
