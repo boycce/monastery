@@ -68,3 +68,8 @@ user.update({
 Due to known limitations, we are not able to verify the contents of non-binary files, only the filename extension (e.g. .txt, .svg) before uploading to S3
 
 ...to be continued
+
+### Image sizes
+
+I've put together a AWS Lambda function which you can use to generate small/medium/large image sizes automatically for any new files uploaded to your bucket.
+[https://github.com/boycce/s3-lambda-thumbnail-generator#install-bucket](https://github.com/boycce/s3-lambda-thumbnail-generator#install-bucket)
