@@ -9,7 +9,6 @@ let plugin = module.exports = {
     /**
      * Monastery plugin that allows models to automatically process and store uploaded images
      * e.g. fields.avatar: { image: true }
-     * e.g. fields.photos: [{ image: true, //sizes: { large: [800,  600], .. } (not implemented) }]
      *
      * Note we cannot accurately test for non binary file-types, e.g. 'txt', 'csv'
      *
