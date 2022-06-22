@@ -15,7 +15,7 @@ Update document(s) in a collection and calls model hooks: `beforeUpdate`,  `afte
 - [`data`](#data) *(object)* - data that's validated against the model fields (always wrapped in `{ $set: .. }`)
 - [[`blacklist`](#blacklisting)]*(array\|string\|false)*: augment `definition.updateBL`. `false` will remove all blacklisting
 - [`project`] *(string\|array\|object)*: project these fields, ignores blacklisting
-- [`skipValidation`] (string\|array): skip validation for this field name(s)
+- [`skipValidation`] (string\|array\|boolean): skip validation for these field name(s), or `true` for all fields
 - [`sort`] *(string\|object\|array)*: same as the mongodb option, but  allows for string parsing e.g. 'name', 'name:1'
 - [`timestamps`] *(boolean)*: whether `updatedAt` is automatically updated, defaults to the `manager.timestamps` value
 - [[`any mongodb option`](http://mongodb.github.io/node-mongodb-native/3.2/api/Collection.html#update)] *(any)*
