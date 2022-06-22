@@ -73,3 +73,16 @@ Due to known limitations, we are not able to verify the contents of non-binary f
 
 I've put together a AWS Lambda function which you can use to generate small/medium/large image sizes automatically for any new files uploaded to your bucket.
 [https://github.com/boycce/s3-lambda-thumbnail-generator#install-bucket](https://github.com/boycce/s3-lambda-thumbnail-generator#install-bucket)
+
+You can override the function's default image sizes via the `metadata` option globally in the manager options, or per file:
+```js
+// Per file
+let user = db.model('user', {
+  fields: {
+    logo:  {
+      type: 'image',
+      metadata: { small: '*x100', medium: '*x500', large: '*x900' },
+    },
+  }
+}
+```
