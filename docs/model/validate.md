@@ -14,7 +14,7 @@ Validate a model and calls the model hook: `beforeValidate`
 
 [`options`] *(object)*
 
-- [`skipValidation`] (string\|array): skip validation for this field name(s)
+- [`skipValidation`] (string\|array\/boolean): skip validation for thse field name(s), or `true` for all fields
 - [[`blacklist`](#blacklisting)] *(array\|string\|false)*: augment the model's blacklist. `false` will remove all blacklisting
 - [`project`] *(string\|array\|object)*: project these fields, ignores blacklisting
 - [`timestamps`] *(boolean)*: whether `createdAt` and `updatedAt` are inserted, or `updatedAt` is updated, depending on the `update` value. Defaults to the `manager.timestamps` value
