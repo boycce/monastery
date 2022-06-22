@@ -14,7 +14,7 @@ Validate and insert document(s) in a collection and calls model hooks: `beforeIn
 - `data` *(object\|array)* - Data that is validated against the model fields. Key names can be in dot or bracket notation which is handy for HTML FormData.
 - [[`blacklist`](#blacklisting)] *(array\|string\|false)*: augment `definition.insertBL`. `false` will remove all blacklisting
 - [`project`] *(string\|array\|object)*: project these fields, ignores blacklisting
-- [`skipValidation`] (string\|array|boolean): skip validation for these field name(s), or `true` for all fields
+- [`skipValidation`] (string\|array\|boolean): skip validation for these field name(s), or `true` for all fields
 - [`timestamps`] *(boolean)*: whether `createdAt` and `updatedAt` are automatically inserted, defaults to `manager.timestamps`
 - [[`any mongodb option`](http://mongodb.github.io/node-mongodb-native/3.2/api/Collection.html#insert)] *(any)*
 
