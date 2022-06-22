@@ -81,7 +81,7 @@ let user = db.model('user', {
   fields: {
     logo:  {
       type: 'image',
-      metadata: { small: '*x100', medium: '*x500', large: '*x900' },
+      metadata: { small: '*x300', medium: '*x800', large: '*x1200' },
     },
   }
 }
