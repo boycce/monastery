@@ -74,7 +74,7 @@ user.find({ query: {...}, populate: ['myBook'] })
 ```
 
 You can also populate within embedded document fields. Although at this time arrays are not supported,
-you would need to use the [example below](#more-control).
+you would need to use the [example below](#populate-multiple-documents-into-virtual-fields).
 ```js
 user.find({ query: {...}, populate: ['myBooks.book'] })
 ```
