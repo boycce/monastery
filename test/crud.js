@@ -213,6 +213,45 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
+  test('update general max', async () => {
+    let db = (await opendb(null)).db
+    let user = db.model('user', {
+      fields: {
+        name: { type: 'string' },
+        active: { type: 'boolean' },
+      },
+    })
+
+    // Insert
+    let inserted = await user.insert({ data: { name: 'Martin Luther' }})
+
+    expect(inserted).toEqual({
+      _id: expect.any(Object),
+      name: 'Martin Luther',
+    })
+
+    let updatedUser1 = await user.update({
+      query: { _id: inserted._id },
+      data: { name: 'Martin' },
+      blacklist: ['active'],
+    })
+
+    expect(updatedUser1).toEqual({ name: 'Martin' })
+
+    let updatedUser2 = await user._update(
+      { _id: db.id(inserted._id) },
+      { $set: { name: 'Martin2' }},
+    )
+
+
+    expect(updatedUser2).toEqual({ n: 1, nModified: 1, ok: 1 })
+
+    // Mongo connected?
+    // Try native updates
+
+    db.close()
+  })
+
   test('update defaults', async () => {
     let db = (await opendb(null, { useMilliseconds: true, serverSelectionTimeoutMS: 2000 })).db
     let user = db.model('user', {

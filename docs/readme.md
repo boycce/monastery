@@ -96,6 +96,7 @@ Coming soon...
 - ~~Ability to change ACL default on the manager~~
 - ~~Public db.arrayWithSchema method~~
 - Global after/before hooks
+- before hooks can receive a data array, remove this
 - docs: Make the implicit ID query conversion more apparent
 - Split away from Monk (unless updated)
 
