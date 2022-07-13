@@ -212,7 +212,10 @@ Since unique indexes by default don't allow multiple documents with `null`, you 
 
 ### Custom field rules
 
-You are able to define custom field rules to use. (`this` will refer to the data object passed in)
+You are able to define custom field rules to use. 
+
+- `this` will refer to the data object passed in
+- by default, custom rules will ignore `undefined` values
 
 ```js
 {
@@ -223,6 +226,9 @@ You are able to define custom field rules to use. (`this` will refer to the data
     },
     // Full definition
     isGrandMaster: {
+      validateUndefined: false,   // default
+      validateNull: true,         // default
+      validateEmptyString: true,  // default
       message: function(value, ruleArgument, path, model) {
         return 'Only grand masters are permitted'
       },
