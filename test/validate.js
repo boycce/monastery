@@ -816,11 +816,13 @@ module.exports = function(monastery, opendb) {
     let user = db.model('user', { fields: {
       name: { type: 'string', minLength: 7 },
       email: { type: 'string', isEmail: true },
-      names: { type: 'string', enum: ['Martin', 'Luther'] },
       amount: { type: 'number' },
     }})
     let user2 = db.model('user', { fields: {
       amount: { type: 'number', required: true },
+    }})
+    let user3 = db.model('user', { fields: {
+      names: { type: 'string', enum: ['Martin', 'Luther'], default: 'Martin' },
     }})
 
     // MinLength
@@ -850,8 +852,9 @@ module.exports = function(monastery, opendb) {
     })
 
     // Enum
-    await expect(user.validate({ names: 'Martin' })).resolves.toEqual({ names: 'Martin' })
-    await expect(user.validate({ names: 'bad name' })).rejects.toContainEqual({
+    await expect(user3.validate({})).resolves.toEqual({ names: 'Martin' })
+    await expect(user3.validate({ names: 'Luther' })).resolves.toEqual({ names: 'Luther' })
+    await expect(user3.validate({ names: 'bad name' })).rejects.toContainEqual({
       detail: 'Invalid enum value',
       status: '400',
       title: 'names',
