@@ -77,6 +77,12 @@ To run isolated tests with Jest:
 npm run dev -- -t 'Model indexes'
 ```
 
+## Versions
+
+- Monk: `v7.3.4`
+- MongoDB NodeJS driver: `v3.2.3`
+- MongoDB: [`v4.0.0`](https://www.mongodb.com/docs/drivers/node/current/compatibility/#compatibility)
+
 ## Contributing
 
 Coming soon...
