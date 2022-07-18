@@ -77,12 +77,6 @@ To run isolated tests with Jest:
 npm run dev -- -t 'Model indexes'
 ```
 
-## Versions
-
-- Monk: `v7.3.4`
-- MongoDB NodeJS driver: `v3.2.3`
-- MongoDB: [`v4.0.0`](https://www.mongodb.com/docs/drivers/node/current/compatibility/#compatibility)
-
 ## Contributing
 
 Coming soon...
@@ -105,6 +99,12 @@ Coming soon...
 - before hooks can receive a data array, remove this
 - docs: Make the implicit ID query conversion more apparent
 - Split away from Monk (unless updated)
+
+## Versions
+
+- Monk: `v7.3.4`
+- MongoDB NodeJS driver: `v3.2.3`
+- MongoDB: [`v4.0.0`](https://www.mongodb.com/docs/drivers/node/current/compatibility/#compatibility)
 
 ## Special Thanks
 
