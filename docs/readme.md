@@ -103,8 +103,8 @@ Coming soon...
 ## Versions
 
 - Monk: `v7.3.4`
-- MongoDB NodeJS driver: `v3.2.3`
-- MongoDB: [`v4.0.0`](https://www.mongodb.com/docs/drivers/node/current/compatibility/#compatibility)
+- MongoDB NodeJS driver: `v3.2.3` ([compatibility](https://www.mongodb.com/docs/drivers/node/current/compatibility/#compatibility))
+- MongoDB: [`v4.0.0`](https://www.mongodb.com/docs/v4.2/reference/)
 
 ## Special Thanks
 
