@@ -1,6 +1,4 @@
-let fileType = require('file-type')
-let nanoid = require('nanoid')
-let S3 = require('aws-sdk/clients/s3')
+// requiring: nanoid, file-type, aws-sdk/clients/s3
 let util = require('../../lib/util')
 
 let plugin = module.exports = {
@@ -43,15 +41,17 @@ let plugin = module.exports = {
       return
     }
 
-    // Create s3 'service' instance
+    // Create s3 'service' instance (defer require since it takes 120ms to load)
     // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#constructor-property
     manager._getSignedUrl = this._getSignedUrl
-    this.s3 = new S3({
-      credentials: {
-        accessKeyId: this.awsAccessKeyId,
-        secretAccessKey: this.awsSecretAccessKey
-      }
-    })
+    this.s3 = () => {
+      return this._s3 || (this._s3 = new (require('aws-sdk/clients/s3'))({
+        credentials: {
+          accessKeyId: this.awsAccessKeyId,
+          secretAccessKey: this.awsSecretAccessKey
+        }
+      }))
+    }
 
     // Add before model hook
     manager.beforeModel.push(this.setupModel.bind(this))
@@ -140,7 +140,7 @@ let plugin = module.exports = {
       return Promise.all(files.map(filesArr => {
         return Promise.all(filesArr.map(file => {
           return new Promise((resolve, reject) => {
-            let uid = nanoid.nanoid()
+            let uid = require('nanoid').nanoid()
             let path = filesArr.imageField.path || plugin.path
             let image = {
               bucket: filesArr.imageField.awsBucket || plugin.awsBucket,
@@ -168,7 +168,7 @@ let plugin = module.exports = {
               plugin._addImageObjectsToData(filesArr.inputPath, data, image)
               resolve(s3Options)
             } else {
-              plugin.s3.upload(s3Options, (err, response) => {
+              plugin.s3().upload(s3Options, (err, response) => {
                 if (err) return reject(err)
                 plugin._addImageObjectsToData(filesArr.inputPath, data, image)
                 resolve(s3Options)
@@ -364,7 +364,7 @@ let plugin = module.exports = {
     // the file doesnt get deleted, we only delete from plugin.awsBucket.
     if (!unused.length) return
     await new Promise((resolve, reject) => {
-      plugin.s3.deleteObjects({
+      plugin.s3().deleteObjects({
         Bucket: plugin.awsBucket,
         Delete: { Objects: unused }
       }, (err, data) => {
@@ -430,7 +430,7 @@ let plugin = module.exports = {
     return Promise.all(validFiles.map(filesArr => {
       return Promise.all(filesArr.map((file, i) => {
         return new Promise((resolve, reject) => {
-          fileType.fromBuffer(file.data).then(res => {
+          require('file-type').fromBuffer(file.data).then(res => {
             let filesize = filesArr.imageField.filesize || plugin.filesize
             let formats = filesArr.imageField.formats || plugin.formats
             let allowAny = util.inArray(formats, 'any')
@@ -577,7 +577,7 @@ let plugin = module.exports = {
      * @param {number} <bucket>
      * @see https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getSignedUrl-property
      */
-    let signedUrl = plugin.s3.getSignedUrl('getObject', {
+    let signedUrl = plugin.s3().getSignedUrl('getObject', {
       Bucket: bucket || plugin.awsBucket,
       Expires: expires,
       Key: path,
