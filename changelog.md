@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.38.2](https://github.com/boycce/monastery/compare/1.38.1...1.38.2) (2022-07-31)
+
+
+### Bug Fixes
+
+* init load time ([2273f11](https://github.com/boycce/monastery/commit/2273f11a654a9cfe05ee15ed682203a8752237d6))
+
 ### [1.38.1](https://github.com/boycce/monastery/compare/1.38.0...1.38.1) (2022-06-20)
 
 
