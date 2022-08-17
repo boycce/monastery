@@ -99,6 +99,7 @@ Coming soon...
 - before hooks can receive a data array, remove this
 - docs: Make the implicit ID query conversion more apparent
 - Split away from Monk (unless updated)
+- Add a warning if an invalid model is referenced in jthe schema
 
 ## Versions
 
