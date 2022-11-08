@@ -11,7 +11,7 @@ Find document(s) in a collection and call the model hook: `afterFind`
 
 `options` *(object)*
 
-- `query` *(object\|id)*
+- `query` *(object\|id)*: [`MongoDB query document`](https://www.mongodb.com/docs/v4.4/tutorial/query-documents/), or id
 - [[`blacklist`](#blacklisting)] *(array\|string\|false)*: augment `definition.findBL`. `false` will remove all blacklisting
 - [`getSignedUrls`] *(boolean)*: get signed urls for all image objects
 - [[`populate`](#populate)] *(array)*
