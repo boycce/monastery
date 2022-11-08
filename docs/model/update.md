@@ -11,7 +11,7 @@ Update document(s) in a collection and calls model hooks: `beforeUpdate`,  `afte
 
 `options` *(object)*
 
-- `query` *(object\|id)*
+- `query` *(object\|id)*: [`MongoDB query document`](https://www.mongodb.com/docs/v4.4/tutorial/query-documents/), or id
 - [`data`](#data) *(object)* - data that's validated against the model fields (always wrapped in `{ $set: .. }`)
 - [[`blacklist`](#blacklisting)]*(array\|string\|false)*: augment `definition.updateBL`. `false` will remove all blacklisting
 - [`project`] *(string\|array\|object)*: project these fields, ignores blacklisting
