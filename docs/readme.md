@@ -100,6 +100,7 @@ Coming soon...
 - docs: Make the implicit ID query conversion more apparent
 - Split away from Monk (unless updated)
 - Add a warning if an invalid model is referenced in jthe schema
+- Remove leading forward slashes from custom image paths (AWS adds this as a seperate folder)
 
 ## Versions
 
