@@ -43,7 +43,7 @@ let user = db.model('user', {
 })
 ```
 
-Then when inserting or updating a document you need to set `files` to an obkect containing containing your parsed files, [express-fileupload](https://github.com/richardgirges/express-fileupload) works great with an express setup, e.g.
+Then when inserting or updating a document you need to set `options.files` to an object containing your parsed files, [express-fileupload](https://github.com/richardgirges/express-fileupload) works great with an express setup, e.g.
 
 ```js
 user.update({
@@ -53,7 +53,13 @@ user.update({
 })
 ```
 
-When updating, you need to make sure you always pass all of your image objects again back into `data` since any images not found will be removed automatically from your S3 bucket. A nice way to handle image/non-image updates is by appending `?files=true` to your API route calls, e.g.
+### Updating documents
+
+When updating a document with `options.files`, you need to make sure to **always** include previously uploaded file objects in `options.data` otherwise these will be removed automatically from your S3 bucket (via a comparsion check against your previous document). 
+
+You can reuse the image objects (e.g. `{ bucket, data, uid, ... }`) for other file field values on the same document. You can't however copy image objects across documents and collections.
+
+You can skip all file processing by not defining `options.files`. A nice way to sepearte file and non-file updates is by appending ?files=true to your API route calls, e.g.
 
 ```js
 user.update({
