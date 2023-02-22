@@ -322,7 +322,8 @@ let plugin = module.exports = {
           // valid image-object?
           if (typeof useCount[image.image.uid] == 'undefined') {
             throw `The passed image object for '${image.dataPath}' does not match any pre-existing
-              images saved on this document.`
+              images saved on this document. Make sure that this image dosen't come from another document or 
+              collection, and is indeed saved on this document.`
           // Different image from prexisting image
           } else if (preExistingImage && preExistingImage.image.uid != image.image.uid) {
             useCount[preExistingImage.image.uid]--
