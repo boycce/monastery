@@ -13,6 +13,7 @@ Remove document(s) in a collection and calls model hooks: `beforeRemove`,  `afte
 
 - `query` *(object\|id)*: [`MongoDB query document`](https://www.mongodb.com/docs/v4.4/tutorial/query-documents/), or id
 - [`sort`] *(string\|object\|array)*: same as the mongodb option, but  allows for string parsing e.g. 'name', 'name:1'
+- [`multi`] *(boolean)*: set to false remove only the first document that match the query criteria
 - [[`any mongodb option`](http://mongodb.github.io/node-mongodb-native/3.2/api/Collection.html#remove)] *(any)*
 
 [`callback`] *(function)*: pass instead of return a promise
