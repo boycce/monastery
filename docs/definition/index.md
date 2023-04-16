@@ -43,7 +43,7 @@ Model definition object.
     pets: [{ // array of embedded documents
       name: { type: 'string' },
       type: { type: 'string' },
-    }]
+    }],
     // You can add a rule on an embedded-document/array using the following structure
     address: {
       name: { type: 'string' },
