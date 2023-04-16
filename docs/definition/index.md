@@ -44,13 +44,20 @@ Model definition object.
       name: { type: 'string' },
       type: { type: 'string' },
     }]
-    // You can add a rule on the embedded document or array using the following structure
+    // You can add a rule on an embedded-document/array using the following structure
     pets: {
-      type: [{
+      pet: {
         name: { type: 'string' },
         type: { type: 'string' },
-      }],
-      minLength: 1,
+        schema: { minLength: 1 },
+      },
+      pets: db.arrayWithSchema(
+        [{
+          name: { type: 'string' },
+          type: { type: 'string' },
+        }],
+        { minLength: 1 },
+      )
     }
   }
 }
