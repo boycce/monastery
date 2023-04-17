@@ -68,58 +68,6 @@ module.exports = function(monastery, opendb) {
     ))
   })
 
-  test('model setup with type object', async () => {
-    // Setup
-    let db = (await opendb(false)).db
-    let user = db.model('user', { fields: {
-      name: { 
-        type: { cat: { type: 'string' }}, // subdocument
-        minLength: 4,
-      },
-      name2: { 
-        type: [{ type: 'string' }], // array
-        minLength: 4,
-      },
-    }})
-
-    // subdocument object type
-    expect(user.fields.name).toEqual({
-      cat: { isString: true, type: 'string' },
-      schema: { isObject: true, type: 'object', minLength: 4 }
-    })
-    // array object type
-    expect(JSON.stringify(user.fields.name2)).toEqual(JSON.stringify(
-      [{ type: 'string', isString: true }]
-    ))
-    expect(user.fields.name2.schema).toEqual({ 
-      type: 'array', 
-      isArray: true,
-      minLength: 4,
-    })
-  })
-
-  test('model setup with invalid schema type object', async () => {
-    // Setup
-    let db = (await opendb(false, { hideErrors: true })).db // hide debug error
-    let user = db.model('user', { fields: {
-      // valid subdocument
-      name: { 
-        type: { type: 'string' },
-      },
-      // schema with invlaid object type
-      name2: { 
-        type: { type: 'string' },
-        minLength: 10,
-      },
-    }})
-
-    expect(user.fields.name).toEqual({
-      type: { isString: true, type: 'string' },
-      schema: { isObject: true, type: 'object' },
-    })
-    expect(user.fields.name2).toEqual(undefined)
-  })
-
   test('model setup with default fields', async () => {
     // Setup
     let db = (await opendb(false, { defaultObjects: true })).db
@@ -166,6 +114,52 @@ module.exports = function(monastery, opendb) {
       schema: { isObject: true, type: 'object', default: expect.any(Function) }
     })
   })
+
+  test('model setup with schema', async () => {
+    // Setup
+    let db = (await opendb(false)).db
+    let objectSchemaTypeRef = { name: { type: 'string', minLength: 5 } }
+    let user = db.model('user', { 
+      fields: {
+        pet: { ...objectSchemaTypeRef, schema: { virtual: true }}, 
+        pets: db.arrayWithSchema(
+          [objectSchemaTypeRef],
+          { virtual: true },
+        ),
+      }
+    })
+    // Object with schema
+    expect(user.fields.pet).toEqual({
+      name: {
+        type: 'string', 
+        isString: true,
+        minLength: 5,
+      },
+      schema: {
+        type: 'object', 
+        isObject: true,
+        virtual: true,
+      },
+    })
+    // Array with schema
+    expect(user.fields.pets[0]).toEqual({
+      name: {
+        type: 'string', 
+        isString: true,
+        minLength: 5,
+      },
+      schema: {
+        type: 'object', 
+        isObject: true,
+      },
+    })
+    expect(user.fields.pets.schema).toEqual({
+      type: 'array', 
+      isArray: true,
+      virtual: true,
+    })
+  })
+
 
   test('model reserved rules', async () => {
     // Setup
