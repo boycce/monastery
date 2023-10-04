@@ -24,9 +24,11 @@ $ npm install --save monastery
 ## Usage
 
 ```javascript
+import monastery from 'monastery'
+
 // Initialise a monastery manager
-const db = require('monastery')('localhost/mydb')
-// const db = require('monastery')('user:pass@localhost:port/mydb')
+const db = monastery('localhost/mydb')
+// const db = monastery('user:pass@localhost:port/mydb')
 
 // Define a model
 db.model('user', {
