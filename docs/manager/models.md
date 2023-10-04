@@ -9,7 +9,7 @@ Setup model definitions from a folder location
 
 ### Arguments
 
-`path` *(string)*: path to model definitions, the filenames are used as the corresponding model name.
+`path` *(string)*: path to model definitions, the filenames are used as the corresponding model name. Make sure the model definition is exported as the default
 
 ### Returns
 
@@ -23,7 +23,7 @@ db.model.{model-name}
 
 ```js
 // ./models/user.js
-export default {
+export default { // Make sure the model definition is exported as the default
   fields: {
     name: { type: 'string', required: true },
     email: { type: 'email', required: true, index: 'unique' }
