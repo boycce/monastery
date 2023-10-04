@@ -13,7 +13,7 @@ module.exports = function(monastery, opendb) {
     }})
 
     // no fields defined
-    expect(db.model('user2').fields).toEqual({
+    expect(db.model('user2', { fields: {} }).fields).toEqual({
       createdAt: {
          default: expect.any(Function),
          insertOnly: true,
@@ -73,7 +73,7 @@ module.exports = function(monastery, opendb) {
     let db = (await opendb(false, { defaultObjects: true })).db
 
     // Default fields
-    expect(db.model('user2').fields).toEqual({
+    expect(db.model('user2', { fields: {} }).fields).toEqual({
       createdAt: {
         default: expect.any(Function),
         insertOnly: true,
@@ -195,7 +195,7 @@ module.exports = function(monastery, opendb) {
     }
 
     // Unique & text index (after model initialisation, in serial)
-    let userIndexRawModel = db.model('userIndexRaw', {})
+    let userIndexRawModel = db.model('userIndexRaw', {fields: {}})
     await userIndexRawModel._setupIndexes({
       email: { type: 'string', index: 'unique' },
     })
