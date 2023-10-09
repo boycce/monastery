@@ -104,6 +104,7 @@ Coming soon...
 - Add a warning if an invalid model is referenced in jthe schema
 - Remove leading forward slashes from custom image paths (AWS adds this as a seperate folder)
 - double check await db.model.remove({ query: idfromparam }) doesnt cause issues for null, undefined or '', but continue to allow {}
+- ~~can't insert/update model id (maybe we can allow this and add _id to default insert/update blacklists)~~
 
 ## Versions
 
