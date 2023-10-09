@@ -765,6 +765,11 @@ module.exports = function(monastery, opendb) {
     // Subdocument -> array -> subdocument data (empty)
     await expect(user.validate({ animals: { dogs: [{}] }}))
       .resolves.toEqual({ animals: { dogs: [{}] }})
+
+    // _id is blacklisted by default
+    let id = db.id()
+    await expect(user.validate({ _id: id })).resolves.toEqual({})
+    await expect(user.validate({ _id: id }, { update: true })).resolves.toEqual({})
   })
 
   test('schema options', async () => {

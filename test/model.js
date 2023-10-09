@@ -14,6 +14,11 @@ module.exports = function(monastery, opendb) {
 
     // no fields defined
     expect(db.model('user2', { fields: {} }).fields).toEqual({
+      _id: {
+         insertOnly: true,
+         isId: true,
+         type: 'id',
+       },
       createdAt: {
          default: expect.any(Function),
          insertOnly: true,
@@ -74,6 +79,11 @@ module.exports = function(monastery, opendb) {
 
     // Default fields
     expect(db.model('user2', { fields: {} }).fields).toEqual({
+      _id: {
+        insertOnly: true,
+        isId: true,
+        type: 'id',
+      },
       createdAt: {
         default: expect.any(Function),
         insertOnly: true,

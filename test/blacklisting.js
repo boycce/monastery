@@ -339,7 +339,7 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
-  test('insert update blacklisting (validate)', async () => {
+  test('insert blacklisting (validate)', async () => {
     // Setup
     let db = (await opendb(null)).db
     let user = db.model('user', {
@@ -365,15 +365,21 @@ module.exports = function(monastery, opendb) {
         }
       },
       insertBL: [
+        // '_id', // default
         'dog',
         'animals.cat',
         'pets.age',
         'hiddenPets',
         'hiddenList',
         'deep.deep2.deep3'
-      ]
+      ],
+      updateBL: [
+        // '_id' // default
+      ],
     })
+    let doc1Id = db.id()
     let doc1 = {
+      _id: doc1Id,
       list: [44, 54],
       dog: 'Bruce',
       pet: 'Freddy',
@@ -409,9 +415,10 @@ module.exports = function(monastery, opendb) {
       }
     })
 
-    // Custom blacklist (remove and add to the current schema blacklist)
+    // Custom insert blacklist (remove and add to the current schema blacklist)
     let user2 = await user.validate(doc1, {
       blacklist: [
+        '-_id',
         '-dog',
         '-animals.dog', // wrong property
         'pets.name',
@@ -421,6 +428,7 @@ module.exports = function(monastery, opendb) {
     })
     let customBlacklist
     expect(user2).toEqual((customBlacklist = {
+      _id: doc1Id,
       list: [44, 54],
       dog: 'Bruce',
       pet: 'Freddy',
@@ -440,7 +448,7 @@ module.exports = function(monastery, opendb) {
 
     // Blacklist string
     let user3 = await user.validate(doc1, {
-      blacklist: '-dog -animals.dog pets.name -hiddenList -deep'
+      blacklist: '-_id -dog -animals.dog pets.name -hiddenList -deep'
     })
     expect(user3).toEqual(customBlacklist)
 
@@ -467,6 +475,14 @@ module.exports = function(monastery, opendb) {
         }
       }
     })
+
+    // double check that _id.insertOnly is working
+    let user6 = await user.validate(doc1, { update: true, blacklist: false })
+    expect(user6).toEqual({
+      ...doc1,
+      _id: undefined,
+    })
+
     db.close()
   })
 
