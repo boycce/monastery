@@ -462,6 +462,24 @@ module.exports = function(monastery, opendb) {
          type: 'Point'
        },
     })
+    // Insert no 2dsphere point data
+    await expect(db.user3.insert({
+      data: {}
+    })).resolves.toEqual({
+       _id: expect.any(Object),
+    })
+    // Insert bad 2dsphere point data
+    let MongoError = require('mongodb').MongoError
+    let id = db.id()
+    await expect(db.user3.insert({
+      data: { _id: id, location: {} },
+      blacklist: ['-_id'],
+    })).rejects.toEqual(
+      new MongoError(
+        `Can't extract geo keys: { _id: ObjectId('${String(id)}'), location: { type: "Point" } }` +
+        '  Point must be an array or object'
+      )
+    )
 
     db.close()
   })
