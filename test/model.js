@@ -170,6 +170,134 @@ module.exports = function(monastery, opendb) {
     })
   })
 
+  test('model setup with messages', async () => {
+    // Setup
+    let db = (await opendb(false)).db
+    let user = db.model('user', {
+      fields: {
+        name: { type: 'string' },
+      },
+      messages: {
+        // these are sorted when trhe model's initialised
+        'cats.name': {},       
+
+        'dogs.name': {},       
+        'dogs.$.name': {},     
+        'dogs.1.name': {},     
+        'dogs.$': {},          
+        'dogs.1': {},          
+
+        'pigs.name': {},       
+        'pigs.$.name': {},     
+        'pigs.1.name': {},     
+        'pigs.2.name': {},     
+
+        'gulls.$.1.$': {},     
+        'gulls.1.$.1': {},     
+        'gulls.$': {},         
+        'gulls.$.$': {},       
+        'gulls.$.$.1': {},     
+        'gulls.$.1': {},       
+        'gulls.1.$': {},       
+        'gulls.1.1': {},       
+        'gulls.1.1.$': {},     
+        'gulls.name': {},      
+        'gulls.$.name': {},    
+      },
+    })
+    // Object with schema
+    // console.log(user.messages)
+    expect(Object.keys(user.messages)).toEqual([
+      'cats.name',
+      'dogs.name',
+      'dogs.1.name',
+      'dogs.1',
+      'pigs.name',
+      'pigs.1.name',
+      'pigs.2.name',
+      'gulls.1.1',
+      'gulls.name',
+      'gulls.1.1.$',
+      'gulls.1.$.1',
+      'gulls.1.$',
+      'dogs.$.name',
+      'dogs.$',
+      'pigs.$.name',
+      'gulls.$',
+      'gulls.$.1',
+      'gulls.$.name',
+      'gulls.$.1.$',
+      'gulls.$.$',
+      'gulls.$.$.1',
+    ])
+
+    expect(user.messages).toEqual({
+      // these are sorted in model initialisation
+      'cats.name': {
+        'regex': /^cats\.name$/,
+      },
+      'dogs.$': {
+        'regex': /^dogs\.[0-9]+$/,
+      },
+      'dogs.$.name': {
+        'regex': /^dogs\.[0-9]+\.name$/,
+      },
+      'dogs.1': {
+        'regex': /^dogs\.1$/,
+      },
+      'dogs.1.name': {
+        'regex': /^dogs\.1\.name$/,
+      },
+      'dogs.name': {
+        'regex': /^dogs\.name$/,
+      },
+      'gulls.$': {
+        'regex': /^gulls\.[0-9]+$/,
+      },
+      'gulls.$.$': {
+        'regex': /^gulls\.[0-9]+\.[0-9]+$/,
+      },
+      'gulls.$.$.1': {
+        'regex': /^gulls\.[0-9]+\.[0-9]+\.1$/,
+      },
+      'gulls.$.1': {
+        'regex': /^gulls\.[0-9]+\.1$/,
+      },
+      'gulls.$.1.$': {
+        'regex': /^gulls\.[0-9]+\.1\.[0-9]+$/,
+      },
+      'gulls.$.name': {
+        'regex': /^gulls\.[0-9]+\.name$/,
+      },
+      'gulls.1.$': {
+        'regex': /^gulls\.1\.[0-9]+$/,
+      },
+      'gulls.1.$.1': {
+        'regex': /^gulls\.1\.[0-9]+\.1$/,
+      },
+      'gulls.1.1': {
+        'regex': /^gulls\.1\.1$/,
+      },
+      'gulls.1.1.$': {
+        'regex': /^gulls\.1\.1\.[0-9]+$/,
+      },
+      'gulls.name': {
+        'regex': /^gulls\.name$/,
+      },
+      'pigs.$.name': {
+        'regex': /^pigs\.[0-9]+\.name$/,
+      },
+      'pigs.1.name': {
+        'regex': /^pigs\.1\.name$/,
+      },
+      'pigs.2.name': {
+        'regex': /^pigs\.2\.name$/,
+      },
+      'pigs.name': {
+        'regex': /^pigs\.name$/,
+      },
+    })
+  }),
 
   test('model reserved rules', async () => {
     // Setup

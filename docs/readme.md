@@ -105,6 +105,7 @@ Coming soon...
 - Remove leading forward slashes from custom image paths (AWS adds this as a seperate folder)
 - double check await db.model.remove({ query: idfromparam }) doesnt cause issues for null, undefined or '', but continue to allow {}
 - ~~can't insert/update model id (maybe we can allow this and add _id to default insert/update blacklists)~~
+- timstamps are blacklisted by default (instead of the `timestamps` opt), and can be switched off via blacklisting
 
 ## Versions
 
