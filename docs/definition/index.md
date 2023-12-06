@@ -283,12 +283,12 @@ You are able to define custom error messages for each field rule.
       }
     },
     // Assign custom error messages for arrays
+    // e.g. pets = [{ name: { type: 'string' }}]
     'pets': {
       minLength: `Please add at least one pet pet group.`
     },
     // You can assign custom error messages for all fields on embedded documents in an array
-    // e.g. pets = [{ name: { type: 'string' }}]
-    'pets.name': {
+    'pets.$.name': {
       required: `Your pet's name needs to be a string.`
     },
     // To target a specific array item
