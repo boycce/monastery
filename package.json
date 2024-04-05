@@ -26,25 +26,30 @@
     "patch": "standard-version --release-as patch && npm publish",
     "release": "standard-version && npm publish && git push --tags",
     "test": "npm run lint && jest",
-    "test-one-example": "jest -t images"
+    "test-one-example": "jest -t \"images addImages\" --watchAll"
   },
   "dependencies": {
-    "aws-sdk": "2.1062.0",
-    "debug": "4.1.1",
-    "file-type": "15.0.0",
+    "@aws-sdk/client-s3": "^3.549.0",
+    "@aws-sdk/s3-request-presigner": "^3.549.0",
+    "debug": "^4.3.4",
+    "file-type": "^16.5.4",
     "monk": "7.3.4",
     "nanoid": "3.2.0",
     "validator": "13.7.0"
   },
   "devDependencies": {
-    "body-parser": "1.19.0",
+    "body-parser": "^1.20.2",
     "eslint": "8.7.0",
-    "express": "4.17.1",
-    "express-fileupload": "1.2.0",
+    "express": "^4.19.2",
+    "express-fileupload": "^1.5.0",
     "jest": "27.4.7",
-    "nodemon": "2.0.15",
+    "nodemon": "^3.1.0",
     "standard-version": "9.3.2",
     "supertest": "4.0.2"
+  },
+  "engines": {
+    "node": ">=14",
+    "npm": ">=6"
   },
   "standard-version": {
     "infile": "changelog.md",

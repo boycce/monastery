@@ -1,5 +1,6 @@
 // requiring: nanoid, file-type, aws-sdk/clients/s3
-let util = require('../../lib/util')
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
+const util = require('../../lib/util')
 
 let plugin = module.exports = {
 
@@ -26,6 +27,7 @@ let plugin = module.exports = {
     this.awsBucket = options.awsBucket
     this.awsAccessKeyId = options.awsAccessKeyId
     this.awsSecretAccessKey = options.awsSecretAccessKey
+    this.awsRegion = options.awsRegion
     this.bucketDir = options.bucketDir || 'full' // depreciated > 1.36.2
     this.filesize = options.filesize
     this.formats = options.formats || ['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff']
@@ -42,10 +44,14 @@ let plugin = module.exports = {
     }
 
     // Create s3 'service' instance (defer require since it takes 120ms to load)
-    // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#constructor-property
+    // v2: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#constructor-property
+    // v3: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3/
+    // v3 examples: https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/javascript_s3_code_examples.html
     manager._getSignedUrl = this._getSignedUrl
-    this.s3 = () => {
-      return this._s3 || (this._s3 = new (require('aws-sdk/clients/s3'))({
+    this.getS3Client = () => {
+      const { S3 } = require('@aws-sdk/client-s3')
+      return this._s3Client || (this._s3Client = new S3({
+        region: this.awsRegion,
         credentials: {
           accessKeyId: this.awsAccessKeyId,
           secretAccessKey: this.awsSecretAccessKey
@@ -168,7 +174,7 @@ let plugin = module.exports = {
               plugin._addImageObjectsToData(filesArr.inputPath, data, image)
               resolve(s3Options)
             } else {
-              plugin.s3().upload(s3Options, (err, response) => {
+              plugin.getS3Client().upload(s3Options, (err, response) => {
                 if (err) return reject(err)
                 plugin._addImageObjectsToData(filesArr.inputPath, data, image)
                 resolve(s3Options)
@@ -203,7 +209,7 @@ let plugin = module.exports = {
      * Get signed urls for all image objects in data
      * @param {object} options - monastery operation options {model, query, files, ..}
      * @param {object} data
-     * @return promise(data)
+     * @return promise() - mutates data
      * @this model
      */
     // Not wanting signed urls for this operation?
@@ -215,8 +221,9 @@ let plugin = module.exports = {
         if (options.getSignedUrls
             || (util.isDefined(imageField.getSignedUrl) ? imageField.getSignedUrl : plugin.getSignedUrl)) {
           let images = plugin._findImagesInData(doc, imageField, 0, '').filter(o => o.image)
+          // todo: we could do this in parallel
           for (let image of images) {
-            image.image.signedUrl = plugin._getSignedUrl(image.image.path, 3600, imageField.awsBucket)
+            image.image.signedUrl = await plugin._getSignedUrl(image.image.path, 3600, imageField.awsBucket)
           }
         }
       }
@@ -365,7 +372,7 @@ let plugin = module.exports = {
     // the file doesnt get deleted, we only delete from plugin.awsBucket.
     if (!unused.length) return
     await new Promise((resolve, reject) => {
-      plugin.s3().deleteObjects({
+      plugin.getS3Client().deleteObjects({
         Bucket: plugin.awsBucket,
         Delete: { Objects: unused }
       }, (err, data) => {
@@ -571,18 +578,23 @@ let plugin = module.exports = {
     return list
   },
 
-  _getSignedUrl: (path, expires=3600, bucket) => {
+  _getSignedUrl: async (path, expires=3600, bucket) => {
     /**
      * @param {string} path - aws file path
      * @param {number} <expires> - seconds
      * @param {number} <bucket>
-     * @see https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getSignedUrl-property
+     * @return {promise} signedUrl
+     * @see v2: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getSignedUrl-property
+     * @see v3: https://github.com/aws/aws-sdk-js-v3/blob/main/UPGRADING.md#s3-presigned-url
      */
-    let signedUrl = plugin.s3().getSignedUrl('getObject', {
-      Bucket: bucket || plugin.awsBucket,
-      Expires: expires,
-      Key: path,
-    })
+    if (!plugin.awsRegion) {
+      throw 'Monastery requires config.awsRegion to be defined when using getSignedUrl\'s'
+    }
+    const { GetObjectCommand } = require('@aws-sdk/client-s3')
+    const params = { Bucket: bucket || plugin.awsBucket, Key: path }
+    const command = new GetObjectCommand(params)
+    let signedUrl = await getSignedUrl(plugin.getS3Client(), command, { expiresIn: expires })
+    // console.log(signedUrl)
     return signedUrl
   },
 

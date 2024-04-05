@@ -12,6 +12,7 @@ To use the default image plugin shipped with monastery, you need to use the opti
     imagePlugin: {
       awsAcl: 'public-read', // default
       awsBucket: 'your-bucket-name',
+      awsRegion: undefined, // required when using getSignedUrl (e.g. 's3-ap-southeast-2')
       awsAccessKeyId: 'your-key-here',
       awsSecretAccessKey: 'your-key-here',
       filesize: undefined, // default (max filesize in bytes)

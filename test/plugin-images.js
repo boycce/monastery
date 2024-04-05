@@ -803,6 +803,7 @@ module.exports = function(monastery, opendb) {
         awsBucket: 'fake',
         awsAccessKeyId: 'fake',
         awsSecretAccessKey: 'fake',
+        awsRegion: 's3-ap-southeast-2',
         getSignedUrl: true,
       },
     })).db
