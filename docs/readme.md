@@ -68,8 +68,8 @@ db.user.insert({
 ## Versions
 
 - Monk: `v7.3.4`
-- MongoDB NodeJS driver: `v3.7.4` ([compatibility](https://www.mongodb.com/docs/drivers/node/current/compatibility/#compatibility))
-- MongoDB: [`v5.0.0`](https://www.mongodb.com/docs/v5.0/reference/) [(`v6.0.0` partial support)](https://www.mongodb.com/docs/drivers/node/current/compatibility/#compatibility-table-legend)
+- MongoDB NodeJS driver: `v3.7.4` ([MongoDB compatibility](https://www.mongodb.com/docs/drivers/node/current/compatibility/#compatibility))
+- MongoDB: [`v5.0.0`](https://www.mongodb.com/docs/v5.0/reference/) [(`v6.0.0` partial support)](https://www.mongodb.com/docs/v6.0/reference/)
   
 ## Debugging
 
