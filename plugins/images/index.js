@@ -1,6 +1,6 @@
 // requiring: nanoid, file-type, aws-sdk/clients/s3
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
-const util = require('../../lib/util')
+const util = require('../../lib/util.js')
 
 let plugin = module.exports = {
 

@@ -1,6 +1,5 @@
 // Todo: split out basic 'type' tests
-
-let validate = require('../lib/model-validate')
+let validate = require('../lib/model-validate.js')
 
 module.exports = function(monastery, opendb) {
 

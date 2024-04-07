@@ -1,5 +1,3 @@
-// let util = require('../lib/util')
-
 module.exports = function(monastery, opendb) {
 
   test('basic operator calls', async () => {

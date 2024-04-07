@@ -14,7 +14,7 @@
 
 global.oid = require('mongodb').ObjectID
 
-let monastery = require('../lib')
+let monastery = require('../lib/index.js')
 let opendb = async function(uri, opts) {
   let db = monastery(
     uri === false? false : (uri || 'localhost/monastery'),
@@ -27,12 +27,12 @@ let opendb = async function(uri, opts) {
 }
 
 /* Run tests sequentially */
-require('./util')(monastery, opendb)
-require('./monk')(monastery, opendb)
-require('./model')(monastery, opendb)
-require('./crud')(monastery, opendb)
-require('./blacklisting')(monastery, opendb)
-require('./populate')(monastery, opendb)
-require('./validate')(monastery, opendb)
-require('./plugin-images')(monastery, opendb)
-require('./virtuals')(monastery, opendb)
+require('./util.js')(monastery, opendb)
+require('./monk.js')(monastery, opendb)
+require('./model.js')(monastery, opendb)
+require('./crud.js')(monastery, opendb)
+require('./blacklisting.js')(monastery, opendb)
+require('./populate.js')(monastery, opendb)
+require('./validate.js')(monastery, opendb)
+require('./plugin-images.js')(monastery, opendb)
+require('./virtuals.js')(monastery, opendb)

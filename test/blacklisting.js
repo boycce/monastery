@@ -1,6 +1,6 @@
-let bird = require('./mock/blacklisting').bird
-let user = require('./mock/blacklisting').user
-let util = require('../lib/util')
+let bird = require('./mock/blacklisting.js').bird
+let user = require('./mock/blacklisting.js').user
+let util = require('../lib/util.js')
 
 module.exports = function(monastery, opendb) {
 

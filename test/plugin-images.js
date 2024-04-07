@@ -1,4 +1,4 @@
-let util = require('../lib/util')
+let util = require('../lib/util.js')
 
 module.exports = function(monastery, opendb) {
 
