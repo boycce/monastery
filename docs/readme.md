@@ -89,7 +89,6 @@ Coming soon...
 - ~~Add FindOneAndUpdate~~
 - ~~Add beforeInsertUpdate / afterInsertUpdate~~
 - Bug: Setting an object literal on an ID field ('model') saves successfully
-- Population within array items
 - ~~Blacklist false removes all blacklisting~~
 - ~~Add project to insert/update/validate~~
 - ~~Whitelisting a parent will remove any previously blacklisted children~~
@@ -97,6 +96,8 @@ Coming soon...
 - Automatic embedded document ids/createdAt/updatedAt fields
 - ~~Ability to change ACL default on the manager~~
 - ~~Public db.arrayWithSchema method~~
+- ~~Added support for array population~~
+- Change population warnings into errors
 - Global after/before hooks
 - before hooks can receive a data array, remove this
 - docs: Make the implicit ID query conversion more apparent
@@ -106,6 +107,9 @@ Coming soon...
 - double check await db.model.remove({ query: idfromparam }) doesnt cause issues for null, undefined or '', but continue to allow {}
 - ~~can't insert/update model id (maybe we can allow this and add _id to default insert/update blacklists)~~
 - timstamps are blacklisted by default (instead of the `timestamps` opt), and can be switched off via blacklisting
+- Allow rules on image types, e.g. `required`
+- test importing of models
+- Docs: model.methods
 
 ## Versions
 

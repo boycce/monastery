@@ -82,6 +82,81 @@ module.exports = function(monastery, opendb) {
     db.close()
   })
 
+  test('model populate array', async () => {
+    // Setup
+    let db = (await opendb(null)).db
+    let bird = db.model('bird', { fields: {
+      name: { type: 'string' }
+    }})
+    let user = db.model('user', { fields: {
+      birds: [{ model: 'bird' }],
+      animal: { birds: [{ model: 'bird' }] },
+      animals: [{ bird: { model: 'bird' }, num: { type: 'number' } }],
+    }})
+    let bird1 = await bird.insert({ data: { name: 'ponyo' }})
+    let bird2 = await bird.insert({ data: { name: 'jack' }})
+    let bird3 = await bird.insert({ data: { name: 'sophie' }})
+    let user1 = await user.insert({ data: {
+      birds: [bird1._id, bird2._id],
+      animal: { birds: [bird1._id, bird2._id] },
+      animals: [{ bird: bird1._id, num: 1 }, { bird: bird3._id, num: 2 }],
+    }})
+
+    // Array
+    let find1 = await user.findOne({ query: user1._id, populate: ['birds'] })
+    expect(find1).toEqual({
+      _id: user1._id,
+      birds: [
+        { _id: bird1._id, name: 'ponyo' },
+        { _id: bird2._id, name: 'jack' },
+      ],
+      animal: {
+        birds: [bird1._id, bird2._id],
+      },
+      animals: [
+        { bird: bird1._id, num: 1 },
+        { bird: bird3._id, num: 2 },
+      ],
+    })
+
+    // Nested array
+    let find2 = await user.findOne({ query: user1._id, populate: ['animal.birds'] })
+    expect(find2).toEqual({
+      _id: user1._id,
+      birds: [bird1._id, bird2._id],
+      animal: {
+        birds: [
+          { _id: bird1._id, name: 'ponyo' },
+          { _id: bird2._id, name: 'jack' },
+        ],
+      },
+      animals: [
+        { bird: bird1._id, num: 1 },
+        { bird: bird3._id, num: 2 },
+      ],
+    })
+
+    // modelId within an array of subdocuments (won't populate, but show a debug error)
+    user.error = (e) => {/*console.log(e)*/} // hide debug error
+    let find3 = await user.findOne({ query: user1._id, populate: ['animals.bird'] })
+    expect(find3).toEqual({
+      _id: user1._id,
+      birds: [bird1._id, bird2._id],
+      animal: {
+        birds: [
+          bird1._id, 
+          bird2._id
+        ],
+      },
+      animals: [
+        { bird: bird1._id, num: 1 },
+        { bird: bird3._id, num: 2 },
+      ],
+    })
+
+    db.close()
+  })
+
   test('model populate type=any', async () => {
     let db = (await opendb(null)).db
     db.model('company', { fields: {

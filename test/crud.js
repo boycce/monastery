@@ -460,6 +460,7 @@ module.exports = function(monastery, opendb) {
         addresses: [{ city: { type: 'string' }, country: { type: 'string', default: 'Germany' } }],
         address: { country:  { type: 'string', default: 'Germany' }},
         pet:  { dog: { model: 'dog' }},
+        pets:  { dog: [{ model: 'dog' }]},
         dogs: [{ model: 'dog' }], // virtual association
       }
     })
@@ -489,18 +490,20 @@ module.exports = function(monastery, opendb) {
     // Note that addresses.1.country shouldn't be overridden
     // Insert documents (without defaults)
     let dog1 = await db.dog._insert({})
+    let dog2 = await db.dog._insert({})
     let user1 = await db.user._insert({
       addresses: [
         { city: 'Frankfurt' },
         { city: 'Christchurch', country: 'New Zealand' }
       ],
-      pet: { dog: dog1._id }
+      pet: { dog: dog1._id },
+      pets: { dog: [dog1._id, dog2._id]},
     })
     await db.dog._update(dog1._id, { $set: { user: user1._id }})
 
     let find1 = await db.user.findOne({
       query: user1._id,
-      populate: ['pet.dog', {
+      populate: ['pet.dog', 'pets.dog', {
         from: 'dog',
         localField: '_id',
         foreignField: 'user',
@@ -516,19 +519,64 @@ module.exports = function(monastery, opendb) {
       ],
       address: { country: 'Germany' },
       pet: { dog: { _id: dog1._id, name: 'Scruff', user: user1._id }},
+      pets: {
+        dog: [
+          { _id: dog1._id, name: 'Scruff', user: user1._id },
+          { _id: dog2._id, name: 'Scruff' },
+        ]
+      },
       dogs: [{ _id: dog1._id, name: 'Scruff', user: user1._id }]
     })
 
-    // Blacklisted default field population test
+    db.close()
+  })
+
+  test('find default field blacklisted', async () => {
+    let db = (await opendb(null)).db
+    db.model('user', {
+      fields: {
+        name: { type: 'string', default: 'Martin Luther' },
+        addresses: [{ city: { type: 'string' }, country: { type: 'string', default: 'Germany' } }],
+        address: { country:  { type: 'string', default: 'Germany' }},
+        pet:  { dog: { model: 'dog' }},
+        pets:  { dog: [{ model: 'dog' }]},
+        dogs: [{ model: 'dog' }], // virtual association
+      }
+    })
+    db.model('dog', {
+      fields: {
+        age: { type: 'number', default: 12 },
+        name: { type: 'string', default: 'Scruff' },
+        user: { model: 'user' }
+      },
+      findBL: ['age']
+    })
+    let dog1 = await db.dog._insert({})
+    let dog2 = await db.dog._insert({})
+    let user1 = await db.user._insert({
+      addresses: [
+        { city: 'Frankfurt' },
+        { city: 'Christchurch', country: 'New Zealand' }
+      ],
+      pet: { dog: dog1._id },
+      pets: { dog: [dog1._id, dog2._id]},
+    })
+    await db.dog._update(dog1._id, { $set: { user: user1._id }})
+
+    // Blacklisted direct/populated default fields (should be removed)
     let find2 = await db.user.findOne({
       query: user1._id,
-      populate: ['pet.dog', {
-        from: 'dog',
-        localField: '_id',
-        foreignField: 'user',
-        as: 'dogs'
-      }],
-      blacklist: ['address', 'addresses.country', 'dogs.name']
+      populate: [
+        'pet.dog', 
+        'pets.dog', 
+        {
+          from: 'dog',
+          localField: '_id',
+          foreignField: 'user',
+          as: 'dogs',
+        }
+      ],
+      blacklist: ['address', 'addresses.country', 'pets.dog.name', 'dogs.name'],
       // ^ great test (address should cancel addresses if not stopping at the .)
     })
     expect(find2).toEqual({
@@ -536,14 +584,20 @@ module.exports = function(monastery, opendb) {
       name: 'Martin Luther',
       addresses: [{ city: 'Frankfurt' }, { city: 'Christchurch' }],
       pet: { dog: { _id: dog1._id, name: 'Scruff', user: user1._id }},
-      dogs: [{ _id: dog1._id, user: user1._id }]
+      dogs: [{ _id: dog1._id, user: user1._id }],
+      pets: {
+        dog: [
+          { _id: dog1._id, user: user1._id, /*age, name*/ },
+          { _id: dog2._id, /*age, name*/ }, 
+        ]
+      },
     })
 
     db.close()
   })
 
   test('findOneAndUpdate general', async () => {
-    // todo: test all findOneAndUpdate options
+    // todo: test all findOneAndUpdate options (e.g. array population)
     // todo: test find & update hooks
     let db = (await opendb(null)).db
     let dog = db.model('dog', {
