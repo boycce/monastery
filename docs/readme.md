@@ -65,6 +65,12 @@ db.user.insert({
   // }]
 })
 ```
+## Versions
+
+- Monk: `v7.3.4`
+- MongoDB NodeJS driver: `v3.7.4` ([compatibility](https://www.mongodb.com/docs/drivers/node/current/compatibility/#compatibility))
+- MongoDB: [`v5.0.0`](https://www.mongodb.com/docs/v5.0/reference/) [(`v6.0.0` partial support)](https://www.mongodb.com/docs/drivers/node/current/compatibility/#compatibility-table-legend)
+  
 ## Debugging
 
 This package uses [debug](https://github.com/visionmedia/debug) which allows you to set different levels of output via the `DEBUG` environment variable. Due to known limations `monastery:warning` and `monastery:error` are forced on, you can however disable these via [manager settings](./manager).
@@ -101,7 +107,7 @@ Coming soon...
 - Global after/before hooks
 - before hooks can receive a data array, remove this
 - docs: Make the implicit ID query conversion more apparent
-- Split away from Monk (unless updated)
+- Split away from Monk so we can update the MongoDB NodeJS Driver version
 - Add a warning if an invalid model is referenced in jthe schema
 - Remove leading forward slashes from custom image paths (AWS adds this as a seperate folder)
 - double check await db.model.remove({ query: idfromparam }) doesnt cause issues for null, undefined or '', but continue to allow {}
@@ -110,12 +116,6 @@ Coming soon...
 - Allow rules on image types, e.g. `required`
 - test importing of models
 - Docs: model.methods
-
-## Versions
-
-- Monk: `v7.3.4`
-- MongoDB NodeJS driver: `v3.2.3` ([compatibility](https://www.mongodb.com/docs/drivers/node/current/compatibility/#compatibility))
-- MongoDB: [`v4.0.0`](https://www.mongodb.com/docs/v4.2/reference/)
 
 ## Special Thanks
 
