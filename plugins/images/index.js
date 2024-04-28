@@ -174,11 +174,22 @@ let plugin = module.exports = {
               plugin._addImageObjectsToData(filesArr.inputPath, data, image)
               resolve(s3Options)
             } else {
-              plugin.getS3Client().upload(s3Options, (err, response) => {
-                if (err) return reject(err)
-                plugin._addImageObjectsToData(filesArr.inputPath, data, image)
-                resolve(s3Options)
+              const { Upload } = require('@aws-sdk/lib-storage')
+              const upload = new Upload({
+                client: plugin.getS3Client(),
+                params: s3Options,
               })
+              // upload.on('httpUploadProgress', (progress) => {
+              //   console.log(progress)
+              // })
+              upload.done()
+                .then((res) => {
+                  plugin._addImageObjectsToData(filesArr.inputPath, data, image)
+                  resolve(s3Options)
+                })
+                .catch((err) => {
+                  reject(err)
+                })
             }
           })
         }))
