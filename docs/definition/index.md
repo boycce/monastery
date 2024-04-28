@@ -161,8 +161,7 @@ fieldType: {
   index: 'text'
 
   // You can also pass an object if you need to use mongodb's index options
-  // https://docs.mongodb.com/manual/reference/command/createIndexes/
-  // https://mongodb.github.io/node-mongodb-native/2.1/api/Collection.html#createIndexes
+  // https://mongodb.github.io/node-mongodb-native/5.9/classes/Collection.html#createIndex
   index: { type: 1, ...(any mongodb index option) },
 
 }

@@ -1,6 +1,6 @@
 {
   "name": "monastery",
-  "description": "⛪ A straight forward MongoDB ODM built around Monk",
+  "description": "⛪ A simple, straightforward MongoDB ODM",
   "author": "Ricky Boyce",
   "version": "2.2.2",
   "license": "MIT",
@@ -8,18 +8,21 @@
   "homepage": "https://boycce.github.io/monastery/",
   "main": "lib/index.js",
   "keywords": [
+    "database",
+    "javascript",
     "monastery",
-    "monk",
-    "mongodb",
+    "mongo driver",
     "mongo",
-    "driver",
-    "monk odm",
-    "mongo odm"
+    "mongodb",
+    "nodejs",
+    "odm",
+    "orm"
   ],
   "scripts": {
     "dev": "npm run lint & jest --watchAll --runInBand --verbose=false",
     "docs": "cd docs && bundle exec jekyll serve --livereload --livereload-port 4001",
     "lint": "eslint ./lib ./plugins ./test",
+    "mona": "nodemon resources/mona.js",
     "mong": "nodemon resources/mong.js",
     "major": "standard-version --release-as major && npm publish",
     "minor": "standard-version --release-as minor && npm publish",
@@ -33,8 +36,7 @@
     "@aws-sdk/s3-request-presigner": "3.549.0",
     "debug": "4.3.4",
     "file-type": "^16.5.4",
-    "monk": "7.3.4",
-    "mongodb": "^3.2.3",
+    "mongodb": "^5.9.2",
     "nanoid": "3.2.0",
     "validator": "13.7.0"
   },
@@ -49,8 +51,7 @@
     "supertest": "4.0.2"
   },
   "engines": {
-    "node": ">=14",
-    "npm": ">=6"
+    "node": ">=14"
   },
   "standard-version": {
     "infile": "changelog.md",

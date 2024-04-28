@@ -13,10 +13,10 @@ Setup model definitions from a folder location
 
 ### Returns
 
-A promise with an array of [model](../model) instances, the model instances will also be avaliable at:
+A promise with an array of [model](../model) instances, the model instances will also be available at:
 ```js
 db.{model-name}
-db.model.{model-name}
+db.models.{model-name}
 ```
 
 ### Example
@@ -36,5 +36,4 @@ export default { // Make sure the model definition is exported as the default
 
 ```js
 await db.models(__dirname + "models")
-db.user.insert()
 ```

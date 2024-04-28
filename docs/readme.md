@@ -2,16 +2,27 @@
 
 [![NPM](https://img.shields.io/npm/v/monastery.svg)](https://www.npmjs.com/package/monastery) [![Build Status](https://travis-ci.com/boycce/monastery.svg?branch=master)](https://app.travis-ci.com/github/boycce/monastery)
 
+> [!IMPORTANT]  
+> v3.0 has been released 🎉 refer to [breaking changes](#v3.0BreakingChanges) below when upgrading from v2.x.
+
 ## Features
 
-* User friendly API design, built around the awesome [Monk](https://automattic.github.io/monk/)
-* Simple CRUD operations with model population
-* Model validation deriving from your model definitions
-* Custom error messages can be defined in your model definition
-* Normalised error responses ready for client consumption
-* Automatic mongodb index setup
-* CRUD operations can accept bracket (multipart/form-data) and dot notation data formats, you can also mix these together
+* User friendly API design, *inspired by SailsJS*
+* Simple CRUD operations, with simple but fast model population
+* Model validation controlled by your model definitions
+* Normalized error responses objects ready for client consumption
+* Custom error messages can be defined in your model definitions
+* Blacklist sensitive fields once in your model definition, or per operation
+* Model methods can accept bracket (multipart/form-data) and dot notation data formats, you can also mix these together
+* Automatic Mongo index creation
 
+#### Why Monastery over Mongoose?
+
+* User friendly API designed for busy agencies, allowing you to quickly build projects without distractions
+* Model schema and configurations are all defined within a single object (model definition)
+* You can blacklist/exclude sensitive model fields in the model definition for each CRUD operation
+* Model population uses a single aggregation call instead of multiple queries for faster responses
+* Errors throw normalized error objects that contain the model and field name, error message etc, handy in the client
 
 ## Install
 
@@ -26,9 +37,8 @@ $ npm install --save monastery
 ```javascript
 import monastery from 'monastery'
 
-// Initialise a monastery manager
+// Initialize a monastery manager
 const db = monastery('localhost/mydb')
-// const db = monastery('user:pass@localhost:port/mydb')
 
 // Define a model
 db.model('user', {
@@ -41,18 +51,16 @@ db.model('user', {
 })
 
 // Insert some data
-db.user.insert({
-  data: {
-    name: 'Martin Luther',
-    pets: ['sparky', 'tiny'],
-    address: { city: 'Eisleben' },
-    points: [[1, 5], [3, 1]]
-  }
-
-}).then(data => {
-  // valid data..
-
-}).catch(errs => {
+try {
+  const newUser = await db.user.insert({
+    data: {
+      name: 'Martin Luther',
+      pets: ['sparky', 'tiny'],
+      address: { city: 'Eisleben' },
+      points: [[1, 5], [3, 1]]
+    }
+  })
+} catch (errs) {
   // [{
   //   detail: "Value needs to be at least 10 characters long.",
   //   status: "400",
@@ -63,31 +71,28 @@ db.user.insert({
   //     rule: "minLength"
   //   }
   // }]
-})
+}
 ```
-## Versions
+## Version Compatibility
 
-- Monk: `v7.3.4`
-- MongoDB NodeJS driver: `v3.7.4` ([MongoDB compatibility](https://www.mongodb.com/docs/drivers/node/current/compatibility/#compatibility))
-- MongoDB: [`v5.0.0`](https://www.mongodb.com/docs/v5.0/reference/) [(`v6.0.0` partial support)](https://www.mongodb.com/docs/v6.0/reference/)
-  
-## Debugging
+You can view MongoDB's [compatibility table here](https://www.mongodb.com/docs/drivers/node/current/compatibility/), and see all of MongoDB NodeJS Driver [releases here](https://mongodb.github.io/node-mongodb-native/)
 
-This package uses [debug](https://github.com/visionmedia/debug) which allows you to set different levels of output via the `DEBUG` environment variable. Due to known limations `monastery:warning` and `monastery:error` are forced on, you can however disable these via [manager settings](./manager).
+| Monastery            | Mongo NodeJS Driver | MongoDB Server    | Node                |
+| :------------------- | :-----------------: | :---------------: | ------------------: |
+| `3.x` | [`5.9.x`](https://mongodb.github.io/node-mongodb-native/5.9/) | `>=3.6  <=7.x` | `>=14.x <=latest` |
+| `2.x` | [`3.7.x`](https://mongodb.github.io/node-mongodb-native/3.7/api/) | `>=2.6  <=6.x` | `>=4.x  <=14.x` |
 
-```bash
-$ DEBUG=monastery:info # shows operation information
-```
 
-To run isolated tests with Jest:
+## v3.0 Breaking Changes
 
-```bash
-npm run dev -- -t 'Model indexes'
-```
-
-## Contributing
-
-Coming soon...
+  - Removed callback functions on all model methods, you can use the returned promise instead
+  - `model.update()` now returns the following _update property:
+    - `{ acknowledged: true, matchedCount: 1, modifiedCount: 1, upsertedCount: 0, upsertedId: null }`, instead of
+    - `{ n: 1, nModified: 1, ok: 1 }`
+  - `model.remove()` now returns `{ acknowledged: true, deletedCount: 1 }`, instead of `{ results: { n: 1, ok: 1} }`
+  - Models are now added to `db.models` instead of `db.model`, e.g. `db.models.user`
+  - MongoDB connection can be found here `db.db` changed from `db._db`
+  - `model._indexes()` now returns `collection._indexes()` not `collection._indexInformation()`
 
 ## Roadmap
 
@@ -103,19 +108,38 @@ Coming soon...
 - ~~Ability to change ACL default on the manager~~
 - ~~Public db.arrayWithSchema method~~
 - ~~Added support for array population~~
+- ~~MongoClient instances can now be reused when initializing the manager, e.g. `monastery(mongoClient)`, handy for migrate-mongo~~
 - Change population warnings into errors
 - Global after/before hooks
-- before hooks can receive a data array, remove this
-- docs: Make the implicit ID query conversion more apparent
-- Split away from Monk so we can update the MongoDB NodeJS Driver version
+- Before hooks can receive a data array, remove this
+- Docs: Make the implicit ID query conversion more apparent
+- ~~Split away from Monk so we can update the MongoDB NodeJS Driver version~~
 - Add a warning if an invalid model is referenced in jthe schema
 - Remove leading forward slashes from custom image paths (AWS adds this as a seperate folder)
-- double check await db.model.remove({ query: idfromparam }) doesnt cause issues for null, undefined or '', but continue to allow {}
-- ~~can't insert/update model id (maybe we can allow this and add _id to default insert/update blacklists)~~
+- Double check await db.model.remove({ query: idfromparam }) doesnt cause issues for null, undefined or '', but continue to allow {}
+- ~~Can't insert/update model id (maybe we can allow this and add _id to default insert/update blacklists)~~
 - timstamps are blacklisted by default (instead of the `timestamps` opt), and can be switched off via blacklisting
 - Allow rules on image types, e.g. `required`
-- test importing of models
+- Test importing of models
 - Docs: model.methods
+- ~~Convert hooks to promises~~
+- ~~added `model.count()` ~~
+
+## Debugging
+
+This package uses [debug](https://github.com/visionmedia/debug) which allows you to set different levels of output via the `DEBUG` environment variable. Due to known limations `monastery:warning` and `monastery:error` are forced on, you can however disable these via [manager settings](./manager).
+
+```bash
+$ DEBUG=monastery:info # shows operation information
+```
+
+## Contributing
+
+All pull requests are welcome. To run isolated tests with Jest:
+
+```bash
+npm run dev -- -t 'Model indexes'
+```
 
 ## Special Thanks
 
@@ -123,4 +147,13 @@ Coming soon...
 
 ## License
 
-Copyright 2020 Ricky Boyce. Code released under the MIT license.
+Copyright 2024 Ricky Boyce. Code released under the MIT license.
+
+
+
+
+
+
+///////////////////////////////
+/////3. add 'Collection' to monastery docs sidebar ( also add model.count)
+//// docs sapcing.... +4px

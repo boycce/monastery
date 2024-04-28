@@ -11,19 +11,17 @@ Remove document(s) in a collection and calls model hooks: `beforeRemove`,  `afte
 
 `options` *(object)*
 
-- `query` *(object\|id)*: [`MongoDB query document`](https://www.mongodb.com/docs/v4.4/tutorial/query-documents/), or id
+- `query` *(object\|id)*: [`MongoDB query document`](https://www.mongodb.com/docs/v5.0/tutorial/query-documents/), or id
 - [`sort`] *(string\|object\|array)*: same as the mongodb option, but  allows for string parsing e.g. 'name', 'name:1'
 - [`multi`] *(boolean)*: set to false remove only the first document that match the query criteria
-- [[`any mongodb option`](http://mongodb.github.io/node-mongodb-native/3.2/api/Collection.html#remove)] *(any)*
-
-[`callback`] *(function)*: pass instead of return a promise
+- [[`any mongodb option`](https://mongodb.github.io/node-mongodb-native/5.9/classes/Collection.html#deleteMany)] *(any)*
 
 ### Returns
 
-A promise if no callback is passed in.
+A promise
 
 ### Example
 
 ```js
-user.remove({ query: { name: "Martin Luther" }})
+await user.remove({ query: { name: "Martin Luther" }})
 ```

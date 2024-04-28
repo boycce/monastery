@@ -16,19 +16,17 @@ Validate and insert document(s) in a collection and calls model hooks: `beforeIn
 - [`project`] *(string\|array\|object)*: project these fields, ignores blacklisting
 - [`skipValidation`] (string\|array\|boolean): skip validation for these field name(s), or `true` for all fields
 - [`timestamps`] *(boolean)*: whether `createdAt` and `updatedAt` are automatically inserted, defaults to `manager.timestamps`
-- [[`any mongodb option`](http://mongodb.github.io/node-mongodb-native/3.2/api/Collection.html#insert)] *(any)*
-
-[`callback`] *(function)*: pass instead of return a promise
+- [[`any mongodb option`](https://mongodb.github.io/node-mongodb-native/5.9/classes/Collection.html#insertMany)] *(any)*
 
 ### Returns
 
-A promise if no callback is passed in.
+A promise
 
 ### Example
 
 ```js
-user.insert({ data: { name: 'Martin Luther' }})
-user.insert({ data: [{ name: 'Martin Luther' }, { name: 'Bruce Lee' }]})
+await user.insert({ data: { name: 'Martin Luther' }})
+await user.insert({ data: [{ name: 'Martin Luther' }, { name: 'Bruce Lee' }]})
 ```
 
 ### Blacklisting

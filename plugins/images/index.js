@@ -39,7 +39,7 @@ let plugin = module.exports = {
 
     if (!options.awsBucket || !options.awsAccessKeyId || !options.awsSecretAccessKey) {
       manager.error('Monastery imagePlugin: awsBucket, awsAccessKeyId, or awsSecretAccessKey is not defined')
-      delete manager.imagePlugin
+      delete manager.opts.imagePlugin
       return
     }
 
@@ -150,7 +150,7 @@ let plugin = module.exports = {
             let path = filesArr.imageField.path || plugin.path
             let image = {
               bucket: filesArr.imageField.awsBucket || plugin.awsBucket,
-              date: plugin.manager.useMilliseconds? Date.now() : Math.floor(Date.now() / 1000),
+              date: plugin.manager.opts.useMilliseconds? Date.now() : Math.floor(Date.now() / 1000),
               filename: file.name,
               filesize: file.size,
               metadata: filesArr.imageField.metadata || plugin.metadata,
