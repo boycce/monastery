@@ -11,7 +11,7 @@ test('validation basic errors', async () => {
     date: { type: 'date' },
     name: { type: 'string', required: true },
     colors: [{ type: 'string' }],
-    animals: { dog: { type: 'string' }}
+    animals: { dog: { type: 'string' }},
   }})
 
   // Required error (insert)
@@ -19,13 +19,13 @@ test('validation basic errors', async () => {
     status: '400',
     title: 'name',
     detail: 'This field is required.',
-    meta: { rule: 'required', model: 'user', field: 'name' }
+    meta: { rule: 'required', model: 'user', field: 'name' },
   })
   await expect(user.validate({ name : '' })).rejects.toContainEqual({
     status: '400',
     title: 'name',
     detail: 'This field is required.',
-    meta: { rule: 'required', model: 'user', field: 'name' }
+    meta: { rule: 'required', model: 'user', field: 'name' },
   })
 
   // No required error (update)
@@ -38,19 +38,19 @@ test('validation basic errors', async () => {
     status: '400',
     title: 'name',
     detail: 'This field is required.',
-    meta: { rule: 'required', model: 'user', field: 'name' }
+    meta: { rule: 'required', model: 'user', field: 'name' },
   })
   await expect(user.validate({ name: null })).rejects.toContainEqual({
     status: '400',
     title: 'name',
     detail: 'This field is required.',
-    meta: { rule: 'required', model: 'user', field: 'name' }
+    meta: { rule: 'required', model: 'user', field: 'name' },
   })
   await expect(user.validate({ name: true })).rejects.toContainEqual({
     status: '400',
     title: 'name',
     detail: 'Value was not a string.',
-    meta: { rule: 'isString', model: 'user', field: 'name' }
+    meta: { rule: 'isString', model: 'user', field: 'name' },
   })
 
 
@@ -66,13 +66,13 @@ test('validation basic errors', async () => {
     status: '400',
     title: 'amount',
     detail: 'Value was not a unix timestamp.',
-    meta: { rule: 'isDate', model: 'userdate', field: 'amount' }
+    meta: { rule: 'isDate', model: 'userdate', field: 'amount' },
   }])
   await expect(userdate.validate({ amount: false })).rejects.toEqual([{
     status: '400',
     title: 'amount',
     detail: 'Value was not a unix timestamp.',
-    meta: { rule: 'isDate', model: 'userdate', field: 'amount' }
+    meta: { rule: 'isDate', model: 'userdate', field: 'amount' },
   }])
   await expect(userdate.validate({ amount: undefined })).rejects.toEqual([{
     status: '400',
@@ -100,13 +100,13 @@ test('validation basic errors', async () => {
     status: '400',
     title: 'amount',
     detail: 'Value was not a number.',
-    meta: { rule: 'isNumber', model: 'usernum', field: 'amount' }
+    meta: { rule: 'isNumber', model: 'usernum', field: 'amount' },
   }])
   await expect(usernum.validate({ amount: false })).rejects.toEqual([{
     status: '400',
     title: 'amount',
     detail: 'Value was not a number.',
-    meta: { rule: 'isNumber', model: 'usernum', field: 'amount' }
+    meta: { rule: 'isNumber', model: 'usernum', field: 'amount' },
   }])
   await expect(usernum.validate({ amount: undefined })).rejects.toEqual([{
     status: '400',
@@ -126,7 +126,7 @@ test('validation basic errors', async () => {
     status: '400',
     title: 'colors',
     detail: 'Value was not an array.',
-    meta: { rule: 'isArray', model: 'user', field: 'colors' }
+    meta: { rule: 'isArray', model: 'user', field: 'colors' },
   })
 
   // Type error (array)
@@ -134,7 +134,7 @@ test('validation basic errors', async () => {
     status: '400',
     title: 'colors',
     detail: 'Value was not an array.',
-    meta: { rule: 'isArray', model: 'user', field: 'colors' }
+    meta: { rule: 'isArray', model: 'user', field: 'colors' },
   })
 
   // Type error (object)
@@ -142,7 +142,7 @@ test('validation basic errors', async () => {
     status: '400',
     title: 'animals',
     detail: 'Value was not an object.',
-    meta: { rule: 'isObject', model: 'user', field: 'animals' }
+    meta: { rule: 'isObject', model: 'user', field: 'animals' },
   })
 
   // Type error (object)
@@ -150,7 +150,7 @@ test('validation basic errors', async () => {
     status: '400',
     title: 'animals',
     detail: 'Value was not an object.',
-    meta: { rule: 'isObject', model: 'user', field: 'animals' }
+    meta: { rule: 'isObject', model: 'user', field: 'animals' },
   })
 })
 
@@ -160,9 +160,9 @@ test('validation subdocument errors', async () => {
       cat: { type: 'string', required: true }, // {} = required on insert
       dog: {
         name:  { type: 'string' },
-        color: { type: 'string', required: true } // {} = required on insert
-      }
-    }
+        color: { type: 'string', required: true }, // {} = required on insert
+      },
+    },
   }})
 
   // Insert: Required subdocument properties
@@ -172,13 +172,13 @@ test('validation subdocument errors', async () => {
         status: '400',
         title: 'animals.cat',
         detail: 'This field is required.',
-        meta: { rule: 'required', model: 'user', field: 'cat' }
+        meta: { rule: 'required', model: 'user', field: 'cat' },
       }),
       expect.objectContaining({
         status: '400',
         title: 'animals.dog.color',
         detail: 'This field is required.',
-        meta: { rule: 'required', model: 'user', field: 'color' }
+        meta: { rule: 'required', model: 'user', field: 'color' },
       }),
     ])
   )
@@ -190,13 +190,13 @@ test('validation subdocument errors', async () => {
         status: '400',
         title: 'animals.cat',
         detail: 'This field is required.',
-        meta: { rule: 'required', model: 'user', field: 'cat' }
+        meta: { rule: 'required', model: 'user', field: 'cat' },
       }),
       expect.objectContaining({
         status: '400',
         title: 'animals.dog.color',
         detail: 'This field is required.',
-        meta: { rule: 'required', model: 'user', field: 'color' }
+        meta: { rule: 'required', model: 'user', field: 'color' },
       }),
     ])
   )
@@ -208,20 +208,20 @@ test('validation subdocument errors', async () => {
         status: '400',
         title: 'animals.cat',
         detail: 'This field is required.',
-        meta: { rule: 'required', model: 'user', field: 'cat' }
+        meta: { rule: 'required', model: 'user', field: 'cat' },
       }),
       expect.objectContaining({
         status: '400',
         title: 'animals.dog',
         detail: 'Value was not an object.',
-        meta: { rule: 'isObject', model: 'user', field: 'dog' }
+        meta: { rule: 'isObject', model: 'user', field: 'dog' },
       }),
     ])
   )
 
   // Insert: Ignore required subdocument property with a defined parent
   await expect(user.validate({ animals: {} }, { validateUndefined: false })).resolves.toEqual({
-    animals: {}
+    animals: {},
   })
 
   // Update: Required subdocument property when a parent/grandparent is specified
@@ -231,13 +231,13 @@ test('validation subdocument errors', async () => {
         status: '400',
         title: 'animals.cat',
         detail: 'This field is required.',
-        meta: { rule: 'required', model: 'user', field: 'cat' }
+        meta: { rule: 'required', model: 'user', field: 'cat' },
       }),
       expect.objectContaining({
         status: '400',
         title: 'animals.dog.color',
         detail: 'This field is required.',
-        meta: { rule: 'required', model: 'user', field: 'color' }
+        meta: { rule: 'required', model: 'user', field: 'color' },
       }),
     ])
   )
@@ -249,13 +249,13 @@ test('validation subdocument errors', async () => {
         status: '400',
         title: 'animals.cat',
         detail: 'This field is required.',
-        meta: { rule: 'required', model: 'user', field: 'cat' }
+        meta: { rule: 'required', model: 'user', field: 'cat' },
       }),
       expect.objectContaining({
         status: '400',
         title: 'animals.dog.color',
         detail: 'This field is required.',
-        meta: { rule: 'required', model: 'user', field: 'color' }
+        meta: { rule: 'required', model: 'user', field: 'color' },
       }),
     ])
   )
@@ -266,7 +266,7 @@ test('validation subdocument errors', async () => {
 
   // Update: Ignore required subdocument property with a defined parent when validateUndefined = false
   await expect(user.validate({ animals: {} }, { update: true, validateUndefined: false })).resolves.toEqual({
-    animals: {}
+    animals: {},
   })
 
   // Update: Required defined subdocument property when validateUndefined = false
@@ -275,7 +275,7 @@ test('validation subdocument errors', async () => {
     status: '400',
     title: 'animals.cat',
     detail: 'This field is required.',
-    meta: { rule: 'required', model: 'user', field: 'cat' }
+    meta: { rule: 'required', model: 'user', field: 'cat' },
   })
 })
 
@@ -285,19 +285,19 @@ test('validation array errors', async () => {
       cats: [{ type: 'string' }],
       dogs: [{
         name:  { type: 'string' },
-        color: { type: 'string', required: true }
-      }]
-    }
+        color: { type: 'string', required: true },
+      }],
+    },
   }})
 
   // Type error within an array (string)
   await expect(user.validate({
-    animals: { cats: [true] }
+    animals: { cats: [true] },
   })).rejects.toContainEqual({
     status: '400',
     title: 'animals.cats.0',
     detail: 'Value was not a string.',
-    meta: { rule: 'isString', model: 'user', field: '0' }
+    meta: { rule: 'isString', model: 'user', field: '0' },
   })
 
   // Type error within an array subdocument (string)
@@ -305,13 +305,13 @@ test('validation array errors', async () => {
     status: '400',
     title: 'animals.dogs.0.color',
     detail: 'This field is required.',
-    meta: { rule: 'required', model: 'user', field: 'color' }
+    meta: { rule: 'required', model: 'user', field: 'color' },
   }
   await expect(user.validate({ animals: { dogs: [{ name: 'sparky', color: false }] }}))
     .rejects.toContainEqual({
       ...error,
       detail: 'Value was not a string.',
-      meta: { rule: 'isString', model: 'user', field: 'color' }
+      meta: { rule: 'isString', model: 'user', field: 'color' },
     })
 
   // Requried error within an array subdocument
@@ -349,8 +349,8 @@ test('validation array schema errors', async () => {
   let user = db.model('user', { fields: {
     animals: arrayWithSchema(
       [{ type: 'string' }],
-      { required: true, minLength: 2 },
-    )
+      { required: true, minLength: 2 }
+    ),
   }})
 
   // MinLength error
@@ -360,7 +360,7 @@ test('validation array schema errors', async () => {
     status: '400',
     title: 'animals',
     detail: 'This field is required.',
-    meta: { rule: 'required', model: 'user', field: 'animals' }
+    meta: { rule: 'required', model: 'user', field: 'animals' },
   })
 
   // MinLength error
@@ -370,7 +370,7 @@ test('validation array schema errors', async () => {
     status: '400',
     title: 'animals',
     detail: 'Value needs to contain a minimum of 2 items.',
-    meta: { rule: 'minLength', model: 'user', field: 'animals' }
+    meta: { rule: 'minLength', model: 'user', field: 'animals' },
   })
 })
 
@@ -420,16 +420,16 @@ test('validation default messages', async () => {
       dog: { name: { type: 'string', minLength: 4 }},
       dogNames: [{ type: 'string', minLength: 4 }],
       animals: [{
-        name: { type: 'string', minLength: 4 }
-      }]
-    }
+        name: { type: 'string', minLength: 4 },
+      }],
+    },
   })
 
   let mock = {
     status: '400',
     title: 'name',
     detail: 'Value needs to be at least 4 characters long.',
-    meta: { rule: 'minLength', model: 'user', field: 'name' }
+    meta: { rule: 'minLength', model: 'user', field: 'name' },
   }
 
   // basic error
@@ -440,26 +440,26 @@ test('validation default messages', async () => {
   // subdocument error
   await expect(user.validate({ dog: { name: 'ben' } })).rejects.toContainEqual({
     ...mock,
-    title: 'dog.name'
+    title: 'dog.name',
   })
 
   // array error
   await expect(user.validate({ dogNames: ['ben'] })).rejects.toContainEqual({
     ...mock,
     title: 'dogNames.0',
-    meta: { ...mock.meta, field: '0' }
+    meta: { ...mock.meta, field: '0' },
   })
 
   // subdocument in an array error
   await expect(user.validate({ animals: [{ name: 'ben' }] })).rejects.toContainEqual({
     ...mock,
-    title: 'animals.0.name'
+    title: 'animals.0.name',
   })
 
   // subdocument in an array error (different index)
   await expect(user.validate({ animals: [{ name: 'carla' }, { name: 'ben' }] })).rejects.toContainEqual({
     ...mock,
-    title: 'animals.1.name'
+    title: 'animals.1.name',
   })
 })
 
@@ -476,14 +476,14 @@ test('validation custom messages', async () => {
       'name': { minLength: 'Oops min length is 4' },
       'dog.name': { minLength: 'Oops min length is 4' },
       'dogNames.$': { minLength: 'Oops min length is 4' },
-    }
+    },
   })
 
   let mock = {
     status: '400',
     title: 'name',
     detail: 'Oops min length is 4',
-    meta: { rule: 'minLength', model: 'user', field: 'name' }
+    meta: { rule: 'minLength', model: 'user', field: 'name' },
   }
 
   // basic error
@@ -493,13 +493,13 @@ test('validation custom messages', async () => {
   // subdocument error
   await expect(user.validate({ dog: { name: 'ben' } })).rejects.toContainEqual({
     ...mock,
-    title: 'dog.name'
+    title: 'dog.name',
   })
   // array error
   await expect(user.validate({ dogNames: ['ben'] })).rejects.toContainEqual({
     ...mock,
     title: 'dogNames.0',
-    meta: { ...mock.meta, field: '0' }
+    meta: { ...mock.meta, field: '0' },
   })
 })
 
@@ -509,15 +509,15 @@ test('validation custom messages for arrays', async () => {
   let user = db.model('user', {
     fields: {
       dogNames: arrayWithSchema([
-        arrayWithSchema([{ type: 'string' }], { minLength: 1 })
+        arrayWithSchema([{ type: 'string' }], { minLength: 1 }),
       ], { minLength: 1 }),
       catNames: [{
-        name: { type: 'string', minLength: 4 }
+        name: { type: 'string', minLength: 4 },
       }],
       pigNames: [
         [{
           name: { type: 'string', minLength: 4 },
-        }]
+        }],
       ],
     },
     messages: {
@@ -534,7 +534,7 @@ test('validation custom messages for arrays', async () => {
       'pigNames.2.$.name': { minLength: 'min length error (2 $)' },
       'pigNames.0.2.name': { minLength: 'min length error (0 2)' },
       'pigNames.$.2.name': { minLength: 'min length error ($ 2)' },
-    }
+    },
   })
 
   // Empty array
@@ -542,7 +542,7 @@ test('validation custom messages for arrays', async () => {
     status: '400',
     title: 'dogNames',
     detail: 'add one dog name',
-    meta: { rule: 'minLength', model: 'user', field: 'dogNames' }
+    meta: { rule: 'minLength', model: 'user', field: 'dogNames' },
   })
   // Empty sub array
   await expect(user.validate({ dogNames: [['carla']] })).resolves.toEqual({ dogNames: [['carla']] })
@@ -550,7 +550,7 @@ test('validation custom messages for arrays', async () => {
     status: '400',
     title: 'dogNames.0',
     detail: 'add one sub dog name',
-    meta: { rule: 'minLength', model: 'user', field: '0' }
+    meta: { rule: 'minLength', model: 'user', field: '0' },
   })
 
 
@@ -559,7 +559,7 @@ test('validation custom messages for arrays', async () => {
     status: '400',
     title: 'catNames.0.name',
     detail: 'min length error (name)',
-    meta: { rule: 'minLength', model: 'user', field: 'name' }
+    meta: { rule: 'minLength', model: 'user', field: 'name' },
   })
   // array-subdocument-1-field error
   await expect(user.validate({ catNames: [{ name: 'carla' }, { name: 'ben' }] }))
@@ -567,7 +567,7 @@ test('validation custom messages for arrays', async () => {
     status: '400',
     title: 'catNames.1.name',
     detail: 'min length error (1)',
-    meta: { rule: 'minLength', model: 'user', field: 'name' }
+    meta: { rule: 'minLength', model: 'user', field: 'name' },
   })
   // array-subdocument-2-field error
   await expect(user.validate({ catNames: [{ name: 'carla' }, { name: 'carla' }, { name: 'ben' }] }))
@@ -575,7 +575,7 @@ test('validation custom messages for arrays', async () => {
     status: '400',
     title: 'catNames.2.name',
     detail: 'min length error (2)',
-    meta: { rule: 'minLength', model: 'user', field: 'name' }
+    meta: { rule: 'minLength', model: 'user', field: 'name' },
   })
 
 
@@ -585,7 +585,7 @@ test('validation custom messages for arrays', async () => {
     status: '400',
     title: 'pigNames.0.0.name',
     detail: 'min length error ($ $)',
-    meta: { rule: 'minLength', model: 'user', field: 'name' }
+    meta: { rule: 'minLength', model: 'user', field: 'name' },
   })
   // array-subdocument-1-field error
   await expect(user.validate({ pigNames: [[{ name: 'carla' }, { name: 'ben' }]] }))
@@ -593,14 +593,14 @@ test('validation custom messages for arrays', async () => {
     status: '400',
     title: 'pigNames.0.1.name',
     detail: 'min length error ($ 1)',
-    meta: { rule: 'minLength', model: 'user', field: 'name' }
+    meta: { rule: 'minLength', model: 'user', field: 'name' },
   })
   // array-subdocument-2-0-field error (lower fallback)
   await expect(user.validate({ pigNames: [[],[],[{ name: 'ben' }]] })).rejects.toContainEqual({
     status: '400',
     title: 'pigNames.2.0.name',
     detail: 'min length error (2 $)',
-    meta: { rule: 'minLength', model: 'user', field: 'name' }
+    meta: { rule: 'minLength', model: 'user', field: 'name' },
   })
   // array-subdocument-0-2-field error
   await expect(user.validate({ pigNames: [[{ name: 'carla' }, { name: 'carla' }, { name: 'ben' }]] }))
@@ -608,7 +608,7 @@ test('validation custom messages for arrays', async () => {
     status: '400',
     title: 'pigNames.0.2.name',
     detail: 'min length error (0 2)',
-    meta: { rule: 'minLength', model: 'user', field: 'name' }
+    meta: { rule: 'minLength', model: 'user', field: 'name' },
   })
   // array-subdocument-2-0-field error (fallback)
   await expect(user.validate({ pigNames: [[], [{ name: 'carla' },{ name: 'carla' },{ name: 'ben' }], []] }))
@@ -616,7 +616,7 @@ test('validation custom messages for arrays', async () => {
     status: '400',
     title: 'pigNames.1.2.name',
     detail: 'min length error ($ 2)',
-    meta: { rule: 'minLength', model: 'user', field: 'name' }
+    meta: { rule: 'minLength', model: 'user', field: 'name' },
   })
 })
 
@@ -625,14 +625,14 @@ test('validation custom rules', async () => {
     fields: {
       name: { type: 'string', bigName: 8 },
       animals: [{
-        name: { type: 'string', bigName: 8 }
+        name: { type: 'string', bigName: 8 },
       }],
     },
     rules: {
       bigName: function(value, ruleArg) {
         return value.length >= ruleArg
-      }
-    }
+      },
+    },
   })
   let user2 = db.model('user2', {
     fields: {
@@ -645,9 +645,9 @@ test('validation custom rules', async () => {
         validateUndefined: true,
         fn: function(value, ruleArg) {
           return value || this.name
-        }
-      }
-    }
+        },
+      },
+    },
   })
 
   // Basic field
@@ -656,41 +656,41 @@ test('validation custom rules', async () => {
     status: '400',
     title: 'name',
     detail: 'Invalid data property for rule "bigName".',
-    meta: { rule: 'bigName', model: 'user', field: 'name' }
+    meta: { rule: 'bigName', model: 'user', field: 'name' },
   })
 
   // subdocument in an array
   await expect(user.validate({ animals: [{ name: 'benjamin' }] })).resolves.toEqual({
-    animals: [{ name: 'benjamin' }]
+    animals: [{ name: 'benjamin' }],
   })
   await expect(user.validate({ animals: [{ name: 'ben' }] })).rejects.toContainEqual({
     status: '400',
     title: 'animals.0.name',
     detail: 'Invalid data property for rule "bigName".',
-    meta: { rule: 'bigName', model: 'user', field: 'name' }
+    meta: { rule: 'bigName', model: 'user', field: 'name' },
   })
 
   // Required rule based off another field (create)
   await expect(user2.validate({ name: 'benjamin', age: 12 })).resolves.toEqual({
     name: 'benjamin',
-    age: 12
+    age: 12,
   })
   await expect(user2.validate({ nickname: 'benny', age: 12 })).resolves.toEqual({
     nickname: 'benny',
-    age: 12
+    age: 12,
   })
   await expect(user2.validate({ })).rejects.toEqual([
     {
       'detail': 'Invalid data property for rule "requiredIfNoName".',
       'meta': { 'field': 'nickname', 'model': 'user2', 'rule': 'requiredIfNoName'},
       'status': '400',
-      'title': 'nickname'
+      'title': 'nickname',
     }, {
       'detail': 'This field is required.',
       'meta': { 'field': 'age', 'model': 'user2', 'rule': 'required'},
       'status': '400',
-      'title': 'age'
-    }
+      'title': 'age',
+    },
   ])
   await expect(user2.validate({  }, { validateUndefined: false })).resolves.toEqual({})
 
@@ -700,7 +700,7 @@ test('validation custom rules', async () => {
     'detail': 'Invalid data property for rule "requiredIfNoName".',
     'meta': { 'field': 'nickname', 'model': 'user2', 'rule': 'requiredIfNoName'},
     'status': '400',
-    'title': 'nickname'
+    'title': 'nickname',
   }])
 })
 
@@ -710,8 +710,8 @@ test('validated data', async () => {
     names: [{ type: 'string' }],
     animals: {
       dog: { type: 'string' },
-      dogs: [{ name: { type: 'string' } }]
-    }
+      dogs: [{ name: { type: 'string' } }],
+    },
   }
   fields.names.schema = { nullObject: true }
   fields.animals.schema = { nullObject: true }
@@ -767,13 +767,13 @@ test('validated data', async () => {
 
 test('schema options', async () => {
   let user = db.model('user', { fields: {
-    name: { type: 'string', 'insertOnly': true }
+    name: { type: 'string', 'insertOnly': true },
   }})
   let user2 = db.model('user2', { fields: {
-    name: { type: 'string', defaultOverride: true, default: 'Martin Luther' }
+    name: { type: 'string', defaultOverride: true, default: 'Martin Luther' },
   }})
   let user4 = db.model('user4', { fields: {
-    name: { model: true }
+    name: { model: true },
   }})
 
   // Ignore insertOnly fields when updating
@@ -795,7 +795,7 @@ test('schema options', async () => {
     status: '400',
     title: 'name',
     detail: 'Value was not a valid ObjectId.',
-    meta: { rule: 'isId', model: 'user4', field: 'name' }
+    meta: { rule: 'isId', model: 'user4', field: 'name' },
   })
 })
 
@@ -823,8 +823,8 @@ test('schema options default', async () => {
     meta: {
       model: 'user',
       field: 'name',
-      rule: 'minLength'
-    }
+      rule: 'minLength',
+    },
   })
 
   // isEmail
@@ -836,8 +836,8 @@ test('schema options default', async () => {
     meta: {
       model: 'user',
       field: 'email',
-      rule: 'isEmail'
-    }
+      rule: 'isEmail',
+    },
   })
 
   // Enum
@@ -850,8 +850,8 @@ test('schema options default', async () => {
     meta: {
       model: 'user',
       field: 'names',
-      rule: 'enum'
-    }
+      rule: 'enum',
+    },
   })
 
   // Number valid
@@ -865,7 +865,7 @@ test('schema options default', async () => {
     detail: 'This field is required.',
     status: '400',
     title: 'amount',
-    meta: { model: 'user', field: 'amount', rule: 'required' }
+    meta: { model: 'user', field: 'amount', rule: 'required' },
   }
   await expect(user2.validate({})).rejects.toContainEqual(mock1)
   await expect(user2.validate({ amount: '' })).rejects.toContainEqual(mock1)
@@ -877,7 +877,7 @@ test('schema options default', async () => {
     detail: 'Value was not a number.',
     status: '400',
     title: 'amount',
-    meta: { model: 'user', field: 'amount', rule: 'isNumber' }
+    meta: { model: 'user', field: 'amount', rule: 'isNumber' },
   }
   await expect(user.validate({ amount: false })).rejects.toContainEqual(mock2)
   await expect(user.validate({ amount: 'bad' })).rejects.toContainEqual(mock2)
@@ -898,7 +898,7 @@ test('schema options objects', async () => {
     'detail': 'This field is required.',
     'meta': {'detailLong': undefined, 'field': 'location', 'model': 'user', 'rule': 'required'},
     'status': '400',
-    'title': 'location'
+    'title': 'location',
   }]
   // required errors
   await expect(user.validate({ location: null })).rejects.toEqual(requiredError)
@@ -917,14 +917,14 @@ test('validate defaultObjects', async () => {
     names: [{ type: 'string' }],
     animals: {
       dog: { type: 'string' },
-      dogs: [{ name: { type: 'string' } }]
-    }
+      dogs: [{ name: { type: 'string' } }],
+    },
   }})
 
   // Array/subdocument defaults
   await expect(user.validate({})).resolves.toEqual({
     names: [],
-    animals: { dogs: [] }
+    animals: { dogs: [] },
   })
   db2.close()
 })
@@ -935,8 +935,8 @@ test('validate nullObjects', async () => {
     names: [{ type: 'string' }],
     animals: {
       dog: { type: 'string' },
-      dogs: [{ name: { type: 'string' } }]
-    }
+      dogs: [{ name: { type: 'string' } }],
+    },
   }})
 
   // Subdocument data (null/string)
@@ -944,41 +944,41 @@ test('validate nullObjects', async () => {
     'detail': 'Value was not an object.',
     'meta': {'detailLong': undefined, 'field': 'animals', 'model': 'user', 'rule': 'isObject'},
     'status': '400',
-    'title': 'animals'
+    'title': 'animals',
   }])
   await expect(user.validate({ animals: '', names: null })).resolves.toEqual({ 
-    animals: null, names: null 
+    animals: null, names: null, 
   })
   db2.close()
 })
 
 test('validation option skipValidation', async () => {
   let user = db.model('user', { fields: {
-    name: { type: 'string', required: true }
+    name: { type: 'string', required: true },
   }})
   let user2 = db.model('user2', { fields: {
     my: {
       name: {
-        is: { type: 'string', required: true }
-      }
-    }
+        is: { type: 'string', required: true },
+      },
+    },
   }})
   let user3 = db.model('user3', { fields: {
     people: [{
-      name: { type: 'string', required: true }
+      name: { type: 'string', required: true },
     }],
     people2: [{
       people3: [{
-        name: { type: 'string', required: true }
-      }]
-    }]
+        name: { type: 'string', required: true },
+      }],
+    }],
   }})
   let user4 = db.model('user4', { fields: {
     code: { type: 'string', required: true },
     address: {
       city: { type: 'string', required: true },
-      country: { type: 'string', required: true }
-    }
+      country: { type: 'string', required: true },
+    },
   }})
 
   // Skip validation on the required fields
@@ -1011,8 +1011,8 @@ test('validation option skipValidation', async () => {
     meta: {
       field: 'name',
       model: 'user3',
-      rule: 'required'
-    }
+      rule: 'required',
+    },
   })
 
   // Skip multiple fields
@@ -1020,7 +1020,7 @@ test('validation option skipValidation', async () => {
     { address: { city: 'christchurch', country: 'ewf' }},
     { skipValidation: ['code'] }
   )).resolves.toEqual({
-    address: { city: 'christchurch', country: 'ewf' }
+    address: { city: 'christchurch', country: 'ewf' },
   })
 
   // Non existing validation field entries
@@ -1031,8 +1031,8 @@ test('validation option skipValidation', async () => {
     meta: {
       model: 'user3',
       field: 'name',
-      rule: 'required'
-    }
+      rule: 'required',
+    },
   })
 })
 
@@ -1043,7 +1043,7 @@ test('validation option validateUndefined', async () => {
     name: { type: 'string', required: true },
   }})
   let usernum = db.model('usernum', { fields: {
-    amount: { type: 'number', required: true }
+    amount: { type: 'number', required: true },
   }})
   let userdeep = db.model('userdeep', { fields: {
     date: { type: 'number' },
@@ -1052,7 +1052,7 @@ test('validation option validateUndefined', async () => {
     },
     names: [{
       first: { type: 'string', required: true },
-    }]
+    }],
   }})
   let errorRequired = {
     status: '400',
@@ -1097,7 +1097,7 @@ test('validation hooks', async () => {
   let user = db.model('user', {
     fields: {
       first: { type: 'string'},
-      last: { type: 'string'}
+      last: { type: 'string'},
     },
     beforeValidate: [(data, next) => {
       if (!data.first) {
@@ -1118,7 +1118,7 @@ test('validation hooks', async () => {
   await expect(user.validate({ first: 'Martin' })).rejects.toThrow('beforeValidate error 2..')
   await expect(user.validate({ first: 'Martin', last: 'Luther' })).resolves.toEqual({
     first: 'Martin',
-    last: 'Luther'
+    last: 'Luther',
   })
 
   // Catch insert (a)synchronous errors thrown in function or through `next(err)`
@@ -1127,7 +1127,7 @@ test('validation hooks', async () => {
   await expect(user.insert({ data: { first: 'Martin', last: 'Luther' } })).resolves.toEqual({
     _id: expect.any(Object),
     first: 'Martin',
-    last: 'Luther'
+    last: 'Luther',
   })
 
   // Catch update (a)synchronous errors thrown in function or through `next(err)`
@@ -1138,6 +1138,6 @@ test('validation hooks', async () => {
   await expect(user.update({ query: userDoc._id, data: { first: 'Martin', last: 'Luther' } }))
     .resolves.toEqual({
       first: 'Martin',
-      last: 'Luther'
+      last: 'Luther',
     })
 })

@@ -16,32 +16,32 @@ test('images no initialisation', async () => {
   const db2 = monastery('127.0.0.1/monastery', { timestamps: false })
   db2.model('company', {
     fields: {
-      logo: { type: 'image' }
-    }
+      logo: { type: 'image' },
+    },
   })
   db2.model('user', {
     fields: {
-      company: { model: 'company' }
-    }
+      company: { model: 'company' },
+    },
   })
   let company = await db2.company.insert({ data: {
-    logo: { bucket: 'corex-dev', date: 1598481616 }
+    logo: { bucket: 'corex-dev', date: 1598481616 },
   }})
   let user = await db2.user.insert({ data: {
-    company: company._id
+    company: company._id,
   }})
   let foundCompany = await db2.company.find({
-    query: company._id
+    query: company._id,
   })
   let foundUser = await db2.user.find({
-    query: user._id, populate: ['company']
+    query: user._id, populate: ['company'],
   })
 
   // schema
   expect(db2.company.fields.logo).toEqual({
     image: true,
     isAny: true,
-    type: 'any'
+    type: 'any',
   })
 
   // found company
@@ -55,8 +55,8 @@ test('images no initialisation', async () => {
     _id: user._id,
     company: {
       _id: company._id,
-      logo: { bucket: 'corex-dev', date: 1598481616 }
-    }
+      logo: { bucket: 'corex-dev', date: 1598481616 },
+    },
   })
   db2.close()
 })
@@ -65,7 +65,7 @@ test('images initialisation', async () => {
   let user = db.model('user', { fields: {
     logo: { type: 'image' },
     logos: [{ type: 'image' }],
-    users: [{ logo: { type: 'image' } }]
+    users: [{ logo: { type: 'image' } }],
   }})
 
   // Initialisation success
@@ -80,9 +80,9 @@ test('images initialisation', async () => {
     path: { type: 'string', isString: true },
     schema: {
       type: 'object', isObject: true, image: true, nullObject: true, default: undefined,
-      isImageObject: true
+      isImageObject: true,
     },
-    uid: { type: 'string', isString: true }
+    uid: { type: 'string', isString: true },
   }
 
   // Logo schema
@@ -95,7 +95,7 @@ test('images addImages helper functions', async () => {
   db.model('user', { fields: {
     logo: { type: 'image' },
     logos: [{ type: 'image' }],
-    users: [{ logo: { type: 'image' } }]
+    users: [{ logo: { type: 'image' } }],
   }})
 
   // Adding
@@ -138,7 +138,7 @@ test('images addImages', async () => {
   let user = db.model('user', { fields: {
     logo: { type: 'image' },
     logos: [{ type: 'image' }],
-    users: [{ logo: { type: 'image' } }]
+    users: [{ logo: { type: 'image' } }],
   }})
 
   let supertest = require('supertest')
@@ -157,7 +157,7 @@ test('images addImages', async () => {
         expect.any(Array),
         expect.any(Array),
         expect.any(Array),
-        expect.any(Array)
+        expect.any(Array),
       ])
       // Valid imageField
       expect(validFiles[0].imageField).toEqual(expect.any(Object))
@@ -188,7 +188,7 @@ test('images addImages', async () => {
           filename: 'logo.png',
           filesize: expect.any(Number),
           path: expect.any(String),
-          uid: expect.any(String)
+          uid: expect.any(String),
         },
         logos: [ expect.any(Object) ],
         users: [
@@ -199,8 +199,8 @@ test('images addImages', async () => {
               filename: 'logo2.png',
               filesize: expect.any(Number),
               path: expect.any(String),
-              uid: expect.any(String)
-            }
+              uid: expect.any(String),
+            },
           },
           undefined, // !this will be converted to null on insert/update
           {
@@ -210,10 +210,10 @@ test('images addImages', async () => {
               filename: 'logo2.png',
               filesize: expect.any(Number),
               path: expect.any(String),
-              uid: expect.any(String)
-            }
-          }
-        ]
+              uid: expect.any(String),
+            },
+          },
+        ],
       })
       res.send()
     } catch (e) {
@@ -238,7 +238,7 @@ test('images removeImages', async () => {
     logo: { type: 'image' },
     logos: [{ type: 'image' }],
     users: [{ userlogo: { type: 'image' } }],
-    deep: { logo: { type: 'image' }}
+    deep: { logo: { type: 'image' }},
   }})
 
   let image = {
@@ -246,21 +246,21 @@ test('images removeImages', async () => {
     date: 1234,
     filename: 'test.png',
     filesize: 1234,
-    path: 'test/test123'
+    path: 'test/test123',
   }
   let user1 = await db.user._insert({
     logo: { ...image, uid: 'test1', path: 'dir/test1.png' },
     logos: [
       { ...image, uid: 'test2', path: 'dir/test2.png' },
-      { ...image, uid: 'test3', path: 'dir/test3.png' }
+      { ...image, uid: 'test3', path: 'dir/test3.png' },
     ],
     users: [
       { userlogo: { ...image, uid: 'test4', path: 'dir/test4.png' }},
       null,
       { userlogo: { ...image, uid: 'test4', path: 'dir/test4.png' }},
-      { userlogo: { ...image, uid: 'test4', path: 'dir/test4.png' }}
+      { userlogo: { ...image, uid: 'test4', path: 'dir/test4.png' }},
     ],
-    deep: {}
+    deep: {},
   })
 
   let supertest = require('supertest')
@@ -285,7 +285,7 @@ test('images removeImages', async () => {
         { Key: 'dir/test4.png' },
         { Key: 'small/test4.jpg' },
         { Key: 'medium/test4.jpg' },
-        { Key: 'large/test4.jpg' }
+        { Key: 'large/test4.jpg' },
       ])
       res.send()
     } catch (e) {
@@ -312,7 +312,7 @@ test('images removeImages', async () => {
 test('images removeImages with no data', async () => {
   // NOTE: Redundent, leaving for now (test was needed to fix a project issue)
   let user = db.model('user', { fields: {
-    logo: { type: 'image' }
+    logo: { type: 'image' },
   }})
 
   // let image = {
@@ -323,7 +323,7 @@ test('images removeImages with no data', async () => {
   //   path: 'test/test123'
   // }
   let user1 = await db.user._insert({
-    logo: null
+    logo: null,
   })
 
   let supertest = require('supertest')
@@ -356,7 +356,7 @@ test('images addImages bad file objects', async () => {
   db.model('user', { fields: {
     logo: { type: 'image' },
     logos: [{ type: 'image' }],
-    users: [{ logo: { type: 'image' } }]
+    users: [{ logo: { type: 'image' } }],
   }})
 
   let imageObjectMock = {
@@ -365,7 +365,7 @@ test('images addImages bad file objects', async () => {
     filename: 'temp.png',
     filesize: 1234,
     path: 'temp',
-    uid: 'temp'
+    uid: 'temp',
   }
   let detailLongMock = 'Image fields need to either be null, undefined, file, or an object containing the '
     + 'following fields \'{ bucket, date, filename, filesize, path, uid }\''
@@ -396,7 +396,7 @@ test('images addImages bad file objects', async () => {
         { logo: { bucket: '' }},//bad
         { logo: imageObjectMock },//ok
         { logo: null },//ok
-      ]
+      ],
     })
     .expect(500)
     .then(res => {
@@ -406,18 +406,18 @@ test('images addImages bad file objects', async () => {
           detail: 'Invalid image value',
           meta: { rule: 'isImageObject', model: 'user', field: '2', detailLong: detailLongMock },
           status: '400',
-          title: 'logos.2'
+          title: 'logos.2',
         }, {
           detail: 'Invalid image value',
           meta: { rule: 'isImageObject', model: 'user', field: 'logo', detailLong: detailLongMock },
           status: '400',
-          title: 'users.0.logo'
+          title: 'users.0.logo',
         }, {
           detail: 'Invalid image value',
           meta: { rule: 'isImageObject', model: 'user', field: 'logo', detailLong: detailLongMock },
           status: '400',
-          title: 'users.1.logo'
-        }
+          title: 'users.1.logo',
+        },
       ])
     })
 })
@@ -433,7 +433,7 @@ test('images reorder', async () => {
     filename: 'lion1.png',
     filesize: 1234,
     path: 'test/lion1.png',
-    uid: 'lion1'
+    uid: 'lion1',
   }
 
   let user1 = await db.user._insert({
@@ -478,7 +478,7 @@ test('images reorder and added image', async () => {
     filename: 'lion1.png',
     filesize: 1234,
     path: 'test/lion1.png',
-    uid: 'lion1'
+    uid: 'lion1',
   }
 
   let user1 = await db.user._insert({
@@ -520,15 +520,15 @@ test('images reorder and added image', async () => {
           filename: 'lion2.jpg',
           filesize: expect.any(Number),
           path: expect.any(String),
-          uid: expect.any(String)
+          uid: expect.any(String),
         }, {
           bucket: 'test', // still the same image-object reference (nothing new)
           date: expect.any(Number),
           filename: 'lion1.png',
           filesize: expect.any(Number),
           path: expect.any(String),
-          uid: expect.any(String)
-        },],
+          uid: expect.any(String),
+        }],
       })
 
       res.send()
@@ -559,7 +559,7 @@ test('images option defaults', async () => {
   let user = db.model('user', {
     fields: {
       logo: { type: 'image' },
-    }
+    },
   })
 
   let supertest = require('supertest')
@@ -586,8 +586,8 @@ test('images option defaults', async () => {
       filename: 'lion1.png',
       filesize: 1234,
       path: 'test/lion1.png',
-      uid: '1234'
-    })
+      uid: '1234',
+    }),
   })
   await expect(db.user.findOne({ query: userInserted._id })).resolves.toEqual({
     _id: expect.any(Object),
@@ -601,7 +601,7 @@ test('images option defaults', async () => {
       let response = await imagePluginFile.addImages(
         { model: user, files: req.files, query: { _id: 1234 }},
         req.body || {},
-        true,
+        true
       )
       // Updated data object
       expect(response[0]).toEqual({
@@ -680,19 +680,19 @@ test('images options formats & filesizes', async () => {
       await expect(imagePluginFile._findValidImages(req.files, user)).resolves.toEqual(expect.any(Array))
       await expect(imagePluginFile._findValidImages(imageSvgBad, user)).rejects.toEqual({
         title: 'imageSvgBad',
-        detail: 'The file format \'svg\' for \'bad.svg\' is not supported'
+        detail: 'The file format \'svg\' for \'bad.svg\' is not supported',
       })
       await expect(imagePluginFile._findValidImages(imageSize1, user)).rejects.toEqual({
         title: 'imageSize1',
-        detail: 'The file size for \'lion1.png\' is bigger than 0.1MB.'
+        detail: 'The file size for \'lion1.png\' is bigger than 0.1MB.',
       })
       await expect(imagePluginFile._findValidImages(imageSize2, user)).rejects.toEqual({
         title: 'imageSize2',
-        detail: 'The file size for \'lion2.jpg\' is bigger than 0.3MB.'
+        detail: 'The file size for \'lion2.jpg\' is bigger than 0.3MB.',
       })
       await expect(imagePluginFile._findValidImages(imageSize3, user)).rejects.toEqual({
         title: 'imageSize3',
-        detail: 'The file size for \'house.jpg\' is too big.'
+        detail: 'The file size for \'house.jpg\' is too big.',
       })
       res.send()
     } catch (e) {
@@ -741,11 +741,11 @@ test('images option getSignedUrls', async () => {
     filename: 'lion1.png',
     filesize: 1234,
     path: 'test/lion1.png',
-    uid: 'lion1'
+    uid: 'lion1',
   }
   let imageWithSignedUrl = {
     ...image,
-    signedUrl: expect.stringMatching(/^https/)
+    signedUrl: expect.stringMatching(/^https/),
   }
 
   let userInserted = await db3.user._insert({
@@ -802,7 +802,7 @@ test('images options awsAcl, awsBucket, metadata, params, path', async () => {
         params: { ContentLanguage: 'NZ'},
         path: (uid, basename, ext, file) => `images2/${basename}`,
       },
-    }
+    },
   })
 
   let supertest = require('supertest')
@@ -819,7 +819,7 @@ test('images options awsAcl, awsBucket, metadata, params, path', async () => {
       let response = await imagePluginFile.addImages(
         { model: user, files: req.files, query: { _id: 1234 }},
         req.body || {},
-        true,
+        true
       )
       // Updated data object
       expect(response[0]).toEqual({
@@ -894,7 +894,7 @@ test('images option depreciations', async () => {
   let user = db3.model('user', {
     fields: {
       logo: { type: 'image', filename: 'oldLogo' },
-    }
+    },
   })
 
   let supertest = require('supertest')
@@ -910,7 +910,7 @@ test('images option depreciations', async () => {
       let response = await imagePluginFile.addImages(
         { model: user, files: req.files, query: { _id: 1234 }},
         req.body || {},
-        true,
+        true
       )
       // Updated data object
       expect(response[0]).toEqual({

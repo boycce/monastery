@@ -19,12 +19,12 @@ test('util > formdata', async () => {
     deep: {
       companyLogo: 'a',
       companyLogos: ['b'],
-      companyLogos2: [{ logo: 'c' }, { logo: '' }]
+      companyLogos2: [{ logo: 'c' }, { logo: '' }],
     },
     users: [
       { 'first': 'Martin', 'last': 'Luther' },
       { 'first': 'Bruce', 'last': 'Lee' },
-    ]
+    ],
   })
   expect(util.parseFormData({ 'users[][\'name\']': 'Martin' })).rejects
     .toEqual('Array items in bracket notation need array indexes "users[][\'name\']", e.g. users[0][name]')

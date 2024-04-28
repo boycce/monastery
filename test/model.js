@@ -27,7 +27,7 @@ test('model setup', async () => {
     colors: { red: { type: 'string' } },
     points: [[{ type: 'number' }]],
     points2: [[{ x: { type: 'number' } }]],
-    logo: { type: 'image' }
+    logo: { type: 'image' },
   }})
 
   // no fields defined
@@ -70,7 +70,7 @@ test('model setup', async () => {
   // Subdocument field and schema
   expect(user.fields.colors).toEqual({
     red: { isString: true, type: 'string' },
-    schema: { isObject: true, type: 'object' }
+    schema: { isObject: true, type: 'object' },
   })
 
   // Array array field (no array properties)
@@ -86,7 +86,7 @@ test('model setup', async () => {
   expect(JSON.stringify(user.fields.points2)).toEqual(JSON.stringify(
     [[{
       x: { type: 'number', isNumber: true },
-      schema: { type: 'object', isObject: true }
+      schema: { type: 'object', isObject: true },
     }]]
   ))
 })
@@ -104,14 +104,14 @@ test('model setup with default fields', async () => {
       insertOnly: true,
       isInteger: true,
       timestampField: true,
-      type: 'integer'
+      type: 'integer',
     },
     updatedAt: {
       default: expect.any(Function),
       isInteger: true,
       timestampField: true,
-      type: 'integer'
-    }
+      type: 'integer',
+    },
   })
 })
 
@@ -122,20 +122,20 @@ test('model setup with default objects', async () => {
     pets: [{ type: 'string' }],
     colors: { red: { type: 'string' } },
     points: [[{ type: 'number' }]],
-    points2: [[{ x: { type: 'number' } }]]
+    points2: [[{ x: { type: 'number' } }]],
   }})
 
   // Array schema
   expect(user.fields.pets.schema).toEqual({
     type: 'array',
     isArray: true,
-    default: expect.any(Function)
+    default: expect.any(Function),
   })
 
   // Subdocument field and schema
   expect(user.fields.colors).toEqual({
     red: { isString: true, type: 'string' },
-    schema: { isObject: true, type: 'object', default: expect.any(Function) }
+    schema: { isObject: true, type: 'object', default: expect.any(Function) },
   })
   db2.close()
 })
@@ -148,9 +148,9 @@ test('model setup with schema', async () => {
       pet: { ...objectSchemaTypeRef, schema: { virtual: true }}, 
       pets: db.arrayWithSchema(
         [objectSchemaTypeRef],
-        { virtual: true },
+        { virtual: true }
       ),
-    }
+    },
   })
   // Object with schema
   expect(user.fields.pet).toEqual({
@@ -319,14 +319,14 @@ test('model reserved rules', async () => {
       name: {
         type: 'string',
         params: {}, // reserved keyword (image plugin)
-        paramsUnreserved: {}
+        paramsUnreserved: {},
       },
     },
     rules: {
       params: (value) => {
         return false // shouldn'r run
-      }
-    }
+      },
+    },
   })
   await expect(user.validate({ name: 'Martin' })).resolves.toEqual({
     name: 'Martin',
@@ -375,7 +375,7 @@ test('model indexes', async () => {
     weights: { name: 1 },
     default_language: 'english',
     language_override: 'language',
-    textIndexVersion: 3
+    textIndexVersion: 3,
   })
 
   // Unique & text index
@@ -384,7 +384,7 @@ test('model indexes', async () => {
     fields: {
       email: { type: 'string', index: 'unique' },
       name: { type: 'string', index: 'text' },
-    }
+    },
   })
 
   let userIndexModelIndexes = await db.db.collection('userIndex').indexes()
@@ -406,13 +406,13 @@ test('model indexes', async () => {
     weights: { name: 1 },
     default_language: 'english',
     language_override: 'language',
-    textIndexVersion: 3
+    textIndexVersion: 3,
   })
 
   // No text index change error, i.e. new Error('Index with name: text already exists with different options')
   await expect(userIndexModel._setupIndexes({
     name: { type: 'string', index: 'text' },
-    name2: { type: 'string', index: 'text' }
+    name2: { type: 'string', index: 'text' },
   })).resolves.toEqual([{
     'key': { 'name': 'text', 'name2': 'text' },
     'name': 'text',
@@ -420,7 +420,7 @@ test('model indexes', async () => {
 
   // Text index on a different model
   await expect(userIndexRawModel._setupIndexes({
-    name2: { type: 'string', index: 'text' }
+    name2: { type: 'string', index: 'text' },
   })).resolves.toEqual([{
     'key': {'name2': 'text'},
     'name': 'text',
@@ -442,11 +442,11 @@ test('model unique indexes', async () => {
         index: {
           type: 'unique',
           partialFilterExpression: {
-            email: { $type: 'string' }
-          }
-        }
+            email: { $type: 'string' },
+          },
+        },
       },
-    }
+    },
   })
 
   let indexes2 = await db.db.collection('userUniqueIndex').indexes()
@@ -461,7 +461,7 @@ test('model unique indexes', async () => {
     key: { email: 1 }, 
     name: 'email_1',
     partialFilterExpression: { 
-      email: { '$type': 'string' }
+      email: { '$type': 'string' },
     },
   })
 
@@ -499,7 +499,7 @@ test('model subdocument indexes', async () => {
   }
   // Run
   let userModel = await db.model('userIndexSubdoc', {
-    fields: {}
+    fields: {},
   })
   await expect(userModel._setupIndexes(
     {
@@ -517,7 +517,7 @@ test('model subdocument indexes', async () => {
         },
       },
     }, {
-      dryRun: true
+      dryRun: true,
     }
   )).resolves.toEqual([{
     'key': { 'animals.name': 1 },
@@ -541,7 +541,7 @@ test('model array indexes', async () => {
   }
   // Run
   let userModel = await db.model('userIndexArray', {
-    fields: {}
+    fields: {},
   })
   await expect(userModel._setupIndexes(
     {
@@ -556,7 +556,7 @@ test('model array indexes', async () => {
         }],
       }],
     }, {
-      dryRun: true
+      dryRun: true,
     }
   )).resolves.toEqual([{
     'key': { 'animals.name': 1 },
@@ -584,14 +584,14 @@ test('model 2dsphere indexes', async () => {
       location: {
         index: '2dsphere',
         type: { type: 'string', default: 'Point' },
-        coordinates: [{ type: 'number' }] // lat, lng
+        coordinates: [{ type: 'number' }], // lat, lng
       },
       location2: {
         index: { type: '2dsphere' }, // opts...
         type: { type: 'string', default: 'Point' },
-        coordinates: [{ type: 'number' }] // lat, lng
-      }
-    }
+        coordinates: [{ type: 'number' }], // lat, lng
+      },
+    },
   })
 
   // Schema check
@@ -603,8 +603,8 @@ test('model 2dsphere indexes', async () => {
       index: '2dsphere',
       isObject: true,
       nullObject: undefined,
-      type: 'object'
-    }
+      type: 'object',
+    },
   })
   expect(db.user99.fields.location2).toEqual({
     type: { type: 'string', default: 'Point', isString: true },
@@ -614,27 +614,27 @@ test('model 2dsphere indexes', async () => {
       index: { type: '2dsphere' },
       isObject: true,
       nullObject: undefined,
-      type: 'object'
-    }
+      type: 'object',
+    },
   })
 
   // Insert 2dsphere point data
   await expect(db.user99.insert({
     data: {
-      location: { coordinates: [172.5880385, -43.3311608] }
-    }
+      location: { coordinates: [172.5880385, -43.3311608] },
+    },
   })).resolves.toEqual({
     _id: expect.any(Object),
     createdAt: expect.any(Number),
     location: {
       coordinates: [172.5880385, -43.3311608],
-      type: 'Point'
+      type: 'Point',
     },
     updatedAt: expect.any(Number),
   })
   // Insert no 2dsphere point data
   await expect(db.user99.insert({
-    data: {}
+    data: {},
   })).resolves.toEqual({
     _id: expect.any(Object),
     createdAt: expect.any(Number),
