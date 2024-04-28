@@ -13,7 +13,7 @@ Same argument signatures as [`model.find`](./find) and [`model.update`](./update
 
 ### Returns
 
-A promise if no callback is passed in.
+A promise
 
 ### Example
 

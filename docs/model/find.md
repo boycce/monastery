@@ -5,25 +5,23 @@ parent: Model
 
 # `model.find`
 
-Find document(s) in a collection and call the model hook: `afterFind`
+Find document(s) in a collection, and call the model hook: `afterFind`
 
 ### Arguments
 
 `options` *(object)*
 
-- `query` *(object\|id)*: [`MongoDB query document`](https://www.mongodb.com/docs/v4.4/tutorial/query-documents/), or id
+- `query` *(object\|id)*: [`MongoDB query document`](https://www.mongodb.com/docs/v5.0/tutorial/query-documents/), or id
 - [[`blacklist`](#blacklisting)] *(array\|string\|false)*: augment `definition.findBL`. `false` will remove all blacklisting
 - [`getSignedUrls`] *(boolean)*: get signed urls for all image objects
 - [[`populate`](#populate)] *(array)*
 - [`project`] *(string\|array\|object)*: return only these fields, ignores blacklisting
 - [`sort`] *(string\|array\|object)*: same as the mongodb option, but allows string parsing e.g. 'name', 'name:1'
-- [[`any mongodb option`](http://mongodb.github.io/node-mongodb-native/3.2/api/Collection.html#find)] *(any)*
-
-[`callback`] *(function)*: pass instead of return a promise
+- [[`any mongodb option`](https://mongodb.github.io/node-mongodb-native/5.9/classes/Collection.html#find)] *(any)*
 
 ### Returns
 
-A promise if no callback is passed in.
+A promise
 
 ### Example
 
@@ -81,9 +79,7 @@ user.find({ query: {...}, populate: ['myBooks.book'] })
 
 ### Custom Populate Query
 
-If you would like more control you can either use monk's native
-[aggregate](https://automattic.github.io/monk/docs/collection/aggregate.html) function via
-`user._aggregate`, or simply pass a MongoDB lookup object to populate. When passing a lookup object, the
+If you would like more control you can either use Mongo's `aggregate` method via [`model._aggregate`](./...rawMethods), or simply pass a MongoDB lookup object to populate. When passing a lookup object, the
 populated field still needs to be defined in `definition.fields` if you want to call any related hooks,
 and prune any blacklisted fields. See the examples below,
 

@@ -11,25 +11,23 @@ Update document(s) in a collection and calls model hooks: `beforeUpdate`,  `afte
 
 `options` *(object)*
 
-- `query` *(object\|id)*: [`MongoDB query document`](https://www.mongodb.com/docs/v4.4/tutorial/query-documents/), or id
+- `query` *(object\|id)*: [`MongoDB query document`](https://www.mongodb.com/docs/v5.0/tutorial/query-documents/), or id
 - [`data`](#data) *(object)* - data that's validated against the model fields (always wrapped in `{ $set: .. }`)
 - [[`blacklist`](#blacklisting)]*(array\|string\|false)*: augment `definition.updateBL`. `false` will remove all blacklisting
 - [`project`] *(string\|array\|object)*: project these fields, ignores blacklisting
 - [`skipValidation`] (string\|array\|boolean): skip validation for these field name(s), or `true` for all fields
 - [`sort`] *(string\|object\|array)*: same as the mongodb option, but  allows for string parsing e.g. 'name', 'name:1'
 - [`timestamps`] *(boolean)*: whether `updatedAt` is automatically updated, defaults to the `manager.timestamps` value
-- [[`any mongodb option`](http://mongodb.github.io/node-mongodb-native/3.2/api/Collection.html#update)] *(any)*
-
-[`callback`] *(function)*: pass instead of return a promise
+- [[`any mongodb option`](https://mongodb.github.io/node-mongodb-native/5.9/classes/Collection.html#updateMany)] *(any)*
 
 ### Returns
 
-A promise if no callback is passed in.
+A promise
 
 ### Example
 
 ```js
-user.update({ query: { name: 'foo' }, data: { name: 'bar' }})
+await user.update({ query: { name: 'foo' }, data: { name: 'bar' }})
 ```
 
 ### Data

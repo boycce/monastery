@@ -19,7 +19,7 @@ A [model](../model) instance, the model instance will also be avaliable at:
 
 ```js
 db.user
-db.model.user
+db.models.user
 ```
 
 ### Example
