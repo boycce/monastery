@@ -1,13 +1,14 @@
 ---
-title: ...raw methods
+title: ...collection methods
 parent: Model
+nav_order: 9
 ---
 
-# Raw Methods
+# Collection Methods
 
 These MongoDB collection methods are made available if you need to test or run any method without hooks or Monastery argument/return processing.
 
-These methods can be accessed via the `model._*`.
+These methods can be accessed via `model._*`.
 
 ## Returns
 
@@ -15,25 +16,25 @@ All methods return a promise.
 
 ## Methods
 
-  * model.[_aggregate](#model._aggregate)
-  * model.[_bulkWrite](#model._bulkWrite)
-  * model.[_count](#model._count)
-  * model.[_createIndex](#model._createIndex)
-  * model.[_createIndexes](#model._createIndexes)
-  * model.[_distinct](#model._distinct)
-  * model.[_drop](#model._drop)
-  * model.[_dropIndex](#model._dropIndex)
-  * model.[_dropIndexes](#model._dropIndexes)
-  * model.[_find](#model._find)
-  * model.[_findOne](#model._findOne)
-  * model.[_findOneAndDelete](#model._findOneAndDelete)
-  * model.[_findOneAndUpdate](#model._findOneAndUpdate)
-  * model.[_indexes](#model._indexes)
-  * model.[_indexInformation](#model._indexInformation)
-  * model.[_insert](#model._insert)
-  * model.[_remove](#model._remove)
-  * model.[_stats](#model._stats)
-  * model.[_update](#model._update)
+  * model.[_aggregate](#model_aggregate)
+  * model.[_bulkWrite](#model_bulkwrite)
+  * model.[_count](#model_count)
+  * model.[_createIndex](#model_createindex)
+  * model.[_createIndexes](#model_createindexes)
+  * model.[_distinct](#model_distinct)
+  * model.[_drop](#model_drop)
+  * model.[_dropIndex](#model_dropindex)
+  * model.[_dropIndexes](#model_dropindexes)
+  * model.[_find](#model_find)
+  * model.[_findOne](#model_findone)
+  * model.[_findOneAndDelete](#model_findoneanddelete)
+  * model.[_findOneAndUpdate](#model_findoneandupdate)
+  * model.[_indexes](#model_indexes)
+  * model.[_indexInformation](#model_indexinformation)
+  * model.[_insert](#model_insert)
+  * model.[_remove](#model_remove)
+  * model.[_stats](#model_stats)
+  * model.[_update](#model_update)
 
 ### [`model._aggregate`](https://mongodb.github.io/node-mongodb-native/5.9/classes/Collection.html#aggregate)
 
@@ -74,7 +75,7 @@ All methods return a promise.
 
   Returns the count of documents that would match a find() query. The method uses collection.countDocuments() in the mongo driver. Arguments:
 
-  1. `[Filter]` *(string|objectId|object)*
+  1. `[Filter]` *(string\|objectId\|object)*
   2. `[Options]` *(object)*
 
   ```js
@@ -93,7 +94,7 @@ All methods return a promise.
 
   Creates an index on the db and collection collection. Arguments:
 
-  1. `IndexSpec` *(string|array|object)* - The field name or index specification to create an index for
+  1. `IndexSpec` *(string\|array\|object)* - The field name or index specification to create an index for
   2. `[Options]` *(object)*
 
   ```js
@@ -133,7 +134,7 @@ All methods return a promise.
   Returns a list of distinct values for the given key across a collection. Arguments:
 
   1. `Key` *(string)*
-  2. `[Filter]` *(string|objectId|object)*
+  2. `[Filter]` *(string\|objectId\|object)*
   3. `[Options]` *(object)*
 
   ```js
@@ -172,7 +173,7 @@ All methods return a promise.
 
   Finds documents in the collection. Arguments:
 
-  1. `[Filter]` *(string|objectId|object)*
+  1. `[Filter]` *(string\|objectId\|object)*
   2. `[Options]` *(object)*
 
   ```js
@@ -192,7 +193,7 @@ All methods return a promise.
 
   Fetches the first document that matches the filter. Arguments:
 
-  1. `[Filter]` *(string|objectId|object)*
+  1. `[Filter]` *(string\|objectId\|object)*
   2. `[Options]` *(object)*
 
   ```js
@@ -204,7 +205,7 @@ All methods return a promise.
 
   Find a document and delete it in one atomic operation. Requires a write lock for the duration of the operation. Arguments: 
 
-  1. `[Filter]` *(string|objectId|object)*
+  1. `[Filter]` *(string\|objectId\|object)*
   2. `[Options]` *(object)*
 
   ```js
@@ -215,7 +216,7 @@ All methods return a promise.
 
   Find a document and update it in one atomic operation. Requires a write lock for the duration of the operation. Arguments: 
 
-  1. `Filter` *(string|objectId|object)*
+  1. `Filter` *(string\|objectId\|object)*
   2. `Update` *(object)*
   3. `[Options]` *(object)*
 
@@ -247,7 +248,7 @@ All methods return a promise.
 
   Inserts one or more documents into the collection. Arguments:
 
-  1. `Doc` *(object|array)* - one or many documents
+  1. `Doc` *(object\|array)* - one or many documents
   2. `[Options]` *(object)*
 
   ```js
@@ -259,7 +260,7 @@ All methods return a promise.
 
   Removes one or more document(s) from the collection. Arguments:
 
-  1. `Filter` *(string|objectId|object)*
+  1. `Filter` *(string\|objectId\|object)*
   2. `[Options]` *(object)*
 
   ```js
@@ -280,7 +281,7 @@ All methods return a promise.
 
   Updates one or more document(s) from the collection. Arguments:
 
-  1. `Filter` *(string|objectId|object)*
+  1. `Filter` *(string\|objectId\|object)*
   1. `Update` *(object)*
   2. `[Options]` *(object)*
 

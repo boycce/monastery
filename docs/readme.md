@@ -2,8 +2,7 @@
 
 [![NPM](https://img.shields.io/npm/v/monastery.svg)](https://www.npmjs.com/package/monastery) [![Build Status](https://travis-ci.com/boycce/monastery.svg?branch=master)](https://app.travis-ci.com/github/boycce/monastery)
 
-> [!IMPORTANT]  
-> v3.0 has been released 🎉 refer to [breaking changes](#v3.0BreakingChanges) below when upgrading from v2.x.
+> v3.0 has been released 🎉 refer to [breaking changes](#v3-breaking-changes) below when upgrading from v2.x.
 
 ## Features
 
@@ -13,7 +12,7 @@
 * Normalized error responses objects ready for client consumption
 * Custom error messages can be defined in your model definitions
 * Blacklist sensitive fields once in your model definition, or per operation
-* Model methods can accept bracket (multipart/form-data) and dot notation data formats, you can also mix these together
+* Model methods can accept data in bracket (multipart/form) and dot notation, you can also mix these together
 * Automatic Mongo index creation
 
 #### Why Monastery over Mongoose?
@@ -22,7 +21,7 @@
 * Model schema and configurations are all defined within a single object (model definition)
 * You can blacklist/exclude sensitive model fields in the model definition for each CRUD operation
 * Model population uses a single aggregation call instead of multiple queries for faster responses
-* Errors throw normalized error objects that contain the model and field name, error message etc, handy in the client
+* Errors throw normalized error objects that contain the model, field, error message etc, handy in the client
 
 ## Install
 
@@ -83,16 +82,14 @@ You can view MongoDB's [compatibility table here](https://www.mongodb.com/docs/d
 | `2.x` | [`3.7.x`](https://mongodb.github.io/node-mongodb-native/3.7/api/) | `>=2.6  <=6.x` | `>=4.x  <=14.x` |
 
 
-## v3.0 Breaking Changes
+## v3 Breaking Changes
 
   - Removed callback functions on all model methods, you can use the returned promise instead
-  - `model.update()` now returns the following _update property:
-    - `{ acknowledged: true, matchedCount: 1, modifiedCount: 1, upsertedCount: 0, upsertedId: null }`, instead of
-    - `{ n: 1, nModified: 1, ok: 1 }`
-  - `model.remove()` now returns `{ acknowledged: true, deletedCount: 1 }`, instead of `{ results: { n: 1, ok: 1} }`
-  - Models are now added to `db.models` instead of `db.model`, e.g. `db.models.user`
-  - MongoDB connection can be found here `db.db` changed from `db._db`
-  - `model._indexes()` now returns `collection._indexes()` not `collection._indexInformation()`
+  - model.update() now returns the following _update property: `{ acknowledged: true, matchedCount: 1, modifiedCount: 1, upsertedCount: 0, upsertedId: null }` instead of `{ n: 1, nModified: 1, ok: 1 }`
+  - model.remove() now returns `{ acknowledged: true, deletedCount: 1 }`, instead of `{ results: {n:1, ok:1} }`
+  - Models are now added to db.models instead of db.model, e.g. db.models.user
+  - MongoDB connection can be found here db.db changed from db._db
+  - model._indexes() now returns collection._indexes() not collection._indexInformation()
 
 ## Roadmap
 
@@ -121,9 +118,9 @@ You can view MongoDB's [compatibility table here](https://www.mongodb.com/docs/d
 - timstamps are blacklisted by default (instead of the `timestamps` opt), and can be switched off via blacklisting
 - Allow rules on image types, e.g. `required`
 - Test importing of models
-- Docs: model.methods
+- ~~Docs: model.methods~~
 - ~~Convert hooks to promises~~
-- ~~added `model.count()` ~~
+- ~~added `model.count()`~~
 
 ## Debugging
 
@@ -148,12 +145,3 @@ npm run dev -- -t 'Model indexes'
 ## License
 
 Copyright 2024 Ricky Boyce. Code released under the MIT license.
-
-
-
-
-
-
-///////////////////////////////
-/////3. add 'Collection' to monastery docs sidebar ( also add model.count)
-//// docs sapcing.... +4px
