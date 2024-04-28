@@ -6,23 +6,23 @@ afterAll(async () => { db.close() })
 
 test('model populate', async () => {
   let bird = db.model('bird', { fields: {
-    name: { type: 'string' }
+    name: { type: 'string' },
   }})
   let user = db.model('user', { fields: {
     name: { type: 'string' },
     myBird: { model: 'bird' },
-    pets: { myBird: { model: 'bird' } }
+    pets: { myBird: { model: 'bird' } },
   }})
   let bird1 = await bird.insert({ data: { name: 'ponyo' }})
   let user1 = await user.insert({ data: {
     name: 'Martin Luther',
     myBird: bird1._id,
-    pets: { myBird: bird1._id }
+    pets: { myBird: bird1._id },
   }})
   let user2 = await user.insert({ data: {
     name: 'Martin Luther2',
     myBird: bird1._id,
-    pets: { myBird: bird1._id }
+    pets: { myBird: bird1._id },
   }})
 
   // Basic populate
@@ -32,11 +32,11 @@ test('model populate', async () => {
     name: 'Martin Luther',
     myBird: {
       _id: bird1._id,
-      name: 'ponyo'
+      name: 'ponyo',
     },
     pets: {
-      myBird: bird1._id
-    }
+      myBird: bird1._id,
+    },
   })
 
   // Deep populate
@@ -48,15 +48,15 @@ test('model populate', async () => {
     pets: {
       myBird: {
         _id: bird1._id,
-        name: 'ponyo'
+        name: 'ponyo',
       },
-    }
+    },
   })
 
   // Populate mulitple documents
   let find3 = await user.find({
     query: { _id: { $in: [user1._id, user2._id] }},
-    populate: ['myBird']
+    populate: ['myBird'],
   })
 
   expect(find3).toEqual([{
@@ -64,27 +64,27 @@ test('model populate', async () => {
     name: 'Martin Luther',
     myBird: {
       _id: bird1._id,
-      name: 'ponyo'
+      name: 'ponyo',
     },
     pets: {
-      myBird: bird1._id
-    }
+      myBird: bird1._id,
+    },
   },{
     _id: user2._id,
     name: 'Martin Luther2',
     myBird: {
       _id: bird1._id,
-      name: 'ponyo'
+      name: 'ponyo',
     },
     pets: {
-      myBird: bird1._id
-    }
+      myBird: bird1._id,
+    },
   }])
 })
 
 test('model populate array', async () => {
   let bird = db.model('bird', { fields: {
-    name: { type: 'string' }
+    name: { type: 'string' },
   }})
   let user = db.model('user', { fields: {
     birds: [{ model: 'bird' }],
@@ -143,7 +143,7 @@ test('model populate array', async () => {
     animal: {
       birds: [
         bird1._id, 
-        bird2._id
+        bird2._id,
       ],
     },
     animals: [
@@ -155,7 +155,7 @@ test('model populate array', async () => {
 
 test('model populate type=any', async () => {
   db.model('company', { fields: {
-    address: { type: 'any' }
+    address: { type: 'any' },
   }})
   db.model('user', {
     fields: {
@@ -163,25 +163,25 @@ test('model populate type=any', async () => {
       cards: { type: 'any' },
       cards2: {
         white: { type: 'number' },
-        yellow:  { type: 'number' }
+        yellow:  { type: 'number' },
       },
       cards3: {
         white: { type: 'number' },
-      }
+      },
     },
-    findBL: ['cards2.white', 'cards3.white']
+    findBL: ['cards2.white', 'cards3.white'],
   })
   let company = await db.company.insert({ data: {
     address: {
       number: 1234,
-      city: 'Auckland'
-    }
+      city: 'Auckland',
+    },
   }})
   let user = await db.user.insert({ data: {
     company: company._id,
     cards: { black: 1234 },
     cards2: { white: 1234, yellow: 1234 },
-    cards3: { white: 1234 }
+    cards3: { white: 1234 },
   }})
 
   let foundUser = await db.user.find({ query: user._id, populate: ['company'] })
@@ -191,12 +191,12 @@ test('model populate type=any', async () => {
       _id: company._id,
       address: {
         number: 1234,
-        city: 'Auckland'
-      }
+        city: 'Auckland',
+      },
     },
     cards: { black: 1234 },
     cards2: { yellow: 1234 },
-    cards3: {}
+    cards3: {},
   })
 })
 
@@ -204,22 +204,22 @@ test('model populate or blacklisting via $lookup', async () => {
   let user = db.model('user', {
     fields: {
       birds: [{ model: 'bird' }],
-      anyModel: [{ type: 'any' }]
+      anyModel: [{ type: 'any' }],
     },
     findBL: [
       'birds.name',
-      'anyModel.name'
-    ]
+      'anyModel.name',
+    ],
   })
   let bird = db.model('bird', {
     fields: {
       name: { type: 'string' },
       color: { type: 'string' },
-      owner: { model: 'user' }
+      owner: { model: 'user' },
     },
     findBL: [
-      'color'
-    ]
+      'color',
+    ],
   })
 
   let user1 = await user.insert({ data: {} })
@@ -235,9 +235,9 @@ test('model populate or blacklisting via $lookup', async () => {
       'from': 'bird',
       'let': { id: '$_id' },
       'pipeline': [
-        { $match: { $expr: { $eq: ['$owner', '$$id'] }}}
-      ]
-    }]
+        { $match: { $expr: { $eq: ['$owner', '$$id'] }}},
+      ],
+    }],
   })
 
   expect(find1).toEqual({
@@ -245,12 +245,12 @@ test('model populate or blacklisting via $lookup', async () => {
     birds: [
       {
         _id: bird1._id,
-        owner: user1._id
+        owner: user1._id,
       }, {
         _id: bird2._id,
-        owner: user1._id
-      }
-    ]
+        owner: user1._id,
+      },
+    ],
   })
 
   // $lookup on type:any
@@ -261,9 +261,9 @@ test('model populate or blacklisting via $lookup', async () => {
       'from': 'bird',
       'let': { id: '$_id' },
       'pipeline': [
-        { $match: { $expr: { $eq: ['$owner', '$$id'] }}}
-      ]
-    }]
+        { $match: { $expr: { $eq: ['$owner', '$$id'] }}},
+      ],
+    }],
   })
   expect(find2).toEqual({
     _id: user1._id,
@@ -271,12 +271,12 @@ test('model populate or blacklisting via $lookup', async () => {
       {
         _id: bird1._id,
         color: 'red',
-        owner: user1._id
+        owner: user1._id,
       }, {
         _id: bird2._id,
         color: 'blue',
-        owner: user1._id
-      }
-    ]
+        owner: user1._id,
+      },
+    ],
   })
 })

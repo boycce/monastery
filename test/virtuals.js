@@ -11,14 +11,14 @@ test('virtuals', async () => {
       age: { type: 'number', virtual: true, default: 55 },
       birdsOwner: { model: 'user' },
       name: { type: 'string' },
-    }
+    },
   })
   let user = db.model('user', {
     fields: {
       myBird: { model: 'bird', virtual: true },
       myBirds: [{ model: 'bird', virtual: true }],
       name: { type: 'string' },
-    }
+    },
   })
   expect(user.fields.name.virtual).toEqual(undefined)
   expect(user.fields.myBirds[0].virtual).toEqual(true)
@@ -30,14 +30,14 @@ test('virtuals', async () => {
       myBird: db.id(), // shouldnt be added
       myBirds: [db.id()], // shouldnt be added
       name: 'Bruce',
-    }
+    },
   })
   let bird1 = await bird.insert({
     data: {
       age: 12, // shouldnt be inserted
       birdsOwner: user1._id,
       name: 'Ponyo',
-    }
+    },
   })
   let updatedBird1 = await bird.update({
     query: bird1._id,
@@ -45,7 +45,7 @@ test('virtuals', async () => {
       age: 12, // shouldnt be added
       birdsOwner: user1._id,
       name: 'Ponyo2',
-    }
+    },
   })
   let validatedBird1 = await bird.validate({
     age: 12, // shouldnt be included
@@ -54,20 +54,20 @@ test('virtuals', async () => {
   })
   expect(user1).toEqual({
     _id: user1._id,
-    name: 'Bruce'
+    name: 'Bruce',
   })
   expect(bird1).toEqual({
     _id: bird1._id,
     birdsOwner: user1._id,
-    name: 'Ponyo'
+    name: 'Ponyo',
   })
   expect(updatedBird1).toEqual({
     birdsOwner: user1._id,
-    name: 'Ponyo2'
+    name: 'Ponyo2',
   })
   expect(validatedBird1).toEqual({
     birdsOwner: user1._id,
-    name: 'Ponyo'
+    name: 'Ponyo',
   })
 
   // Test find
@@ -80,11 +80,11 @@ test('virtuals', async () => {
       pipeline: [{
         $match: {
           $expr: {
-            $eq: ['$birdsOwner', '$$id']
-          }
-        }
-      }]
-    }]
+            $eq: ['$birdsOwner', '$$id'],
+          },
+        },
+      }],
+    }],
   })
   expect(find1).toEqual({
     _id: user1._id,
@@ -92,9 +92,9 @@ test('virtuals', async () => {
       _id: bird1._id,
       age: 55,
       birdsOwner:  user1._id,
-      name: 'Ponyo2'
+      name: 'Ponyo2',
     }],
-    name: 'Bruce'
+    name: 'Bruce',
   })
 
   // Test find is processing models for incorrect data structures
@@ -108,10 +108,10 @@ test('virtuals', async () => {
       pipeline: [{
         $match: {
           $expr: {
-            $eq: ['$birdsOwner', '$$id']
-          }
-        }
-      }]
+            $eq: ['$birdsOwner', '$$id'],
+          },
+        },
+      }],
     }, {
       // should be an array but the query returns an object
       as: 'myBirds',
@@ -120,14 +120,14 @@ test('virtuals', async () => {
       pipeline: [{
         $match: {
           $expr: {
-            $eq: ['$birdsOwner', '$$id']
-          }
-        }
-      }]
+            $eq: ['$birdsOwner', '$$id'],
+          },
+        },
+      }],
     }],
     addFields: {
-      myBirds: { $arrayElemAt: ['$myBirds', 0] }
-    }
+      myBirds: { $arrayElemAt: ['$myBirds', 0] },
+    },
   })
   expect(find2).toEqual({
     _id: user1._id,
@@ -135,15 +135,15 @@ test('virtuals', async () => {
       _id: bird1._id,
       age: 55, // means the model was processed
       birdsOwner: user1._id,
-      name: 'Ponyo2'
+      name: 'Ponyo2',
     }],
     myBirds: {
       _id: bird1._id,
       age: 55, // means the model was processed
       birdsOwner:  user1._id,
-      name: 'Ponyo2'
+      name: 'Ponyo2',
     },
-    name: 'Bruce'
+    name: 'Bruce',
   })
 })
 
@@ -156,19 +156,19 @@ test('insert update virtuals (validate)', async () => {
       pets: [{ name: { type: 'string'}, age: { type: 'number'} }],
       animals: {
         cat: { type: 'string' },
-        dog: { type: 'string' }
+        dog: { type: 'string' },
       },
       hiddenPets: [{
-        name: { type: 'string'}
+        name: { type: 'string'},
       }],
       hiddenList: [{ type: 'number'}],
       deep: {
         deep2: {
           deep3: {
-            deep4: { type: 'string' }
-          }
-        }
-      }
+            deep4: { type: 'string' },
+          },
+        },
+      },
     },
     insertBL: [
       'dog',
@@ -176,8 +176,8 @@ test('insert update virtuals (validate)', async () => {
       'pets.age',
       'hiddenPets',
       'hiddenList',
-      'deep.deep2.deep3'
-    ]
+      'deep.deep2.deep3',
+    ],
   })
   let doc1 = {
     list: [44, 54],
@@ -186,19 +186,19 @@ test('insert update virtuals (validate)', async () => {
     pets: [{ name: 'Pluto', age: 5 }, { name: 'Milo', age: 4 }],
     animals: {
       cat: 'Ginger',
-      dog: 'Max'
+      dog: 'Max',
     },
     hiddenPets: [{
-      name: 'secretPet'
+      name: 'secretPet',
     }],
     hiddenList: [12, 23],
     deep: {
       deep2: {
         deep3: {
-          deep4: 'hideme'
-        }
-      }
-    }
+          deep4: 'hideme',
+        },
+      },
+    },
   }
 
   // Default insert validation
@@ -208,11 +208,11 @@ test('insert update virtuals (validate)', async () => {
     pet: 'Freddy',
     pets: [{ name: 'Pluto' }, { name: 'Milo' }],
     animals: {
-      dog: 'Max'
+      dog: 'Max',
     },
     deep: {
-      deep2: {}
-    }
+      deep2: {},
+    },
   })
 
   // Custom blacklist (remove and add to the current schema blacklist)
@@ -222,7 +222,7 @@ test('insert update virtuals (validate)', async () => {
       '-animals.dog', // wrong property
       'pets.name',
       '-hiddenList',
-      '-deep' // blacklist a parent
+      '-deep', // blacklist a parent
     ],
   })
   expect(user2).toEqual({
@@ -231,15 +231,15 @@ test('insert update virtuals (validate)', async () => {
     pet: 'Freddy',
     pets: [ {}, {} ],
     animals: {
-      dog: 'Max'
+      dog: 'Max',
     },
     hiddenList: [12, 23],
     deep: {
       deep2: {
         deep3: {
-          deep4: 'hideme'
-        }
-      }
-    }
+          deep4: 'hideme',
+        },
+      },
+    },
   })
 })

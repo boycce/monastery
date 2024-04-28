@@ -200,7 +200,7 @@ test('find > should work with streaming option', async () => {
     stream: (doc) => {
       expect(doc.stream).toBe(2)
       found++
-    }
+    },
   })
   expect(found).toBe(4)
 })
@@ -214,7 +214,7 @@ test('find > should allow stream cursor destroy', async () => {
       expect(doc.cursor).not.toBeNull()
       found++
       if (found === 2) close()
-    }
+    },
   })
   await new Promise((resolve) => setTimeout(resolve, 100))
   expect(found).toBe(2)
@@ -231,7 +231,7 @@ test('find > should allow stream cursor destroy even when paused', async () => {
       found++
       if (found === 2) return close()
       resume()
-    }
+    },
   })
   await new Promise((resolve) => setTimeout(resolve, 100))
   expect(found).toBe(2)
@@ -251,7 +251,7 @@ test('find > stream pause and continue', async () => {
         index++
         resume()
       }, 100)
-    }
+    },
   })
   expect(index).toBe(4)
   const duration = Date.now() - start
@@ -353,7 +353,7 @@ test('update > returned updated object', async () => {
     matchedCount: 0,
     modifiedCount: 0,
     upsertedCount: 1,
-    upsertedId: expect.any(ObjectId) // asymmetric helper
+    upsertedId: expect.any(ObjectId), // asymmetric helper
   })
 })
 

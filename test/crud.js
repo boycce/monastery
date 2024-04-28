@@ -12,7 +12,7 @@ test('insert basics', async () => {
     names: [{ type: 'string' }],
     animals: {
       dog: { type: 'string' },
-      dogs: [{ name: { type: 'string' } }]
+      dogs: [{ name: { type: 'string' } }],
     },
   }})
 
@@ -59,9 +59,9 @@ test('insert option defaultObjects', async () => {
       names: [{ type: 'string' }],
       animals: {
         dog: { type: 'string' },
-        dogs: [{ name: { type: 'string' } }]
+        dogs: [{ name: { type: 'string' } }],
       },
-    }
+    },
   }
   let user1 = db.model('user', schema)
   let user2 = db2.model('user', schema)
@@ -87,7 +87,7 @@ test('insert option timestamps', async () => {
   let schema = { 
     fields: {
       name: { type: 'string' },
-    }
+    },
   }
   let user1 = db.model('user', schema)
   let user2 = db2.model('user', schema)
@@ -111,13 +111,13 @@ test('insert option timestamps', async () => {
 test('insert id casting', async () => {
   db.model('company', { 
     fields: {
-      name: { type: 'string' }
-    }
+      name: { type: 'string' },
+    },
   })
   let user = db.model('user', { fields: {
     randomId: { type: 'id' },
     company: { model: 'company' },
-    companies: [{ model: 'company' }]
+    companies: [{ model: 'company' }],
   }})
 
   let id = '5edf17ff7e2d5020913f98cc'
@@ -127,7 +127,7 @@ test('insert id casting', async () => {
     _id: inserted._id,
     randomId: db.id(id),
     company: db.id(id),
-    companies: [db.id(id)]
+    companies: [db.id(id)],
   })
 })
 
@@ -208,13 +208,13 @@ test('find default field population', async () => {
       pet:  { dog: { model: 'dog' }},
       pets:  { dog: [{ model: 'dog' }]},
       dogs: [{ model: 'dog' }], // virtual association
-    }
+    },
   })
   db.model('dog', {
     fields: {
       name: { type: 'string', default: 'Scruff' },
-      user: { model: 'user' }
-    }
+      user: { model: 'user' },
+    },
   })
 
   // Default field doesn't override null
@@ -240,7 +240,7 @@ test('find default field population', async () => {
   let user1 = await db.user._insert({
     addresses: [
       { city: 'Frankfurt' },
-      { city: 'Christchurch', country: 'New Zealand' }
+      { city: 'Christchurch', country: 'New Zealand' },
     ],
     pet: { dog: dog1._id },
     pets: { dog: [dog1._id, dog2._id]},
@@ -253,15 +253,15 @@ test('find default field population', async () => {
       from: 'dog',
       localField: '_id',
       foreignField: 'user',
-      as: 'dogs'
-    }]
+      as: 'dogs',
+    }],
   })
   expect(find1).toEqual({
     _id: user1._id,
     name: 'Martin Luther',
     addresses: [
       { city: 'Frankfurt', country: 'Germany' },
-      { city: 'Christchurch', country: 'New Zealand' }
+      { city: 'Christchurch', country: 'New Zealand' },
     ],
     address: { country: 'Germany' },
     pet: { dog: { _id: dog1._id, name: 'Scruff', user: user1._id }},
@@ -269,9 +269,9 @@ test('find default field population', async () => {
       dog: [
         { _id: dog1._id, name: 'Scruff', user: user1._id },
         { _id: dog2._id, name: 'Scruff' },
-      ]
+      ],
     },
-    dogs: [{ _id: dog1._id, name: 'Scruff', user: user1._id }]
+    dogs: [{ _id: dog1._id, name: 'Scruff', user: user1._id }],
   })
 })
 
@@ -284,22 +284,22 @@ test('find default field blacklisted', async () => {
       pet:  { dog: { model: 'dog' }},
       pets:  { dog: [{ model: 'dog' }]},
       dogs: [{ model: 'dog' }], // virtual association
-    }
+    },
   })
   db.model('dog', {
     fields: {
       age: { type: 'number', default: 12 },
       name: { type: 'string', default: 'Scruff' },
-      user: { model: 'user' }
+      user: { model: 'user' },
     },
-    findBL: ['age']
+    findBL: ['age'],
   })
   let dog1 = await db.dog._insert({})
   let dog2 = await db.dog._insert({})
   let user1 = await db.user._insert({
     addresses: [
       { city: 'Frankfurt' },
-      { city: 'Christchurch', country: 'New Zealand' }
+      { city: 'Christchurch', country: 'New Zealand' },
     ],
     pet: { dog: dog1._id },
     pets: { dog: [dog1._id, dog2._id]},
@@ -317,7 +317,7 @@ test('find default field blacklisted', async () => {
         localField: '_id',
         foreignField: 'user',
         as: 'dogs',
-      }
+      },
     ],
     blacklist: ['address', 'addresses.country', 'pets.dog.name', 'dogs.name'],
     // ^ great test (address should cancel addresses if not stopping at the .)
@@ -332,7 +332,7 @@ test('find default field blacklisted', async () => {
       dog: [
         { _id: dog1._id, user: user1._id }, //, age, name
         { _id: dog2._id }, //, age, name
-      ]
+      ],
     },
   })
 })
@@ -348,7 +348,7 @@ test('update general', async () => {
   let inserted = await user.insert({ data: { name: 'Martin Luther' }})
   expect(inserted).toEqual({
     _id: expect.any(Object),
-    name: 'Martin Luther'
+    name: 'Martin Luther',
   })
 
   // Insert multiple
@@ -356,11 +356,11 @@ test('update general', async () => {
   expect(inserted2).toEqual([
     {
       _id: expect.any(Object),
-      name: 'Martin Luther1'
+      name: 'Martin Luther1',
     }, {
       _id: expect.any(Object),
-      name: 'Martin Luther2'
-    }
+      name: 'Martin Luther2',
+    },
   ])
 
   // Update
@@ -378,19 +378,19 @@ test('update general', async () => {
   await user.update({
     query: { _id: { $in: [inserted2[0]._id, inserted2[1]._id] }},
     data: { name: 'Martin Luther3' },
-    multi: true
+    multi: true,
   })
   let findUpdated2 = await user.find({
-    query: { _id: { $in: [inserted2[0]._id, inserted2[1]._id] }}
+    query: { _id: { $in: [inserted2[0]._id, inserted2[1]._id] }},
   })
   expect(findUpdated2).toEqual([
     {
       _id: expect.any(Object),
-      name: 'Martin Luther3'
+      name: 'Martin Luther3',
     }, {
       _id: expect.any(Object),
-      name: 'Martin Luther3'
-    }
+      name: 'Martin Luther3',
+    },
   ])
 
   // Upsert
@@ -406,49 +406,49 @@ test('update defaults', async () => {
   const db2 = monastery('127.0.0.1/monastery', { useMilliseconds: true })
   let user = db2.model('user', {
     fields: {
-      name: { type: 'string' }
-    }
+      name: { type: 'string' },
+    },
   })
   let inserted = await user.insert({
-    data: {}
+    data: {},
   })
   expect(inserted).toEqual({
     _id: inserted._id,
     createdAt: expect.any(Number),
-    updatedAt: expect.any(Number)
+    updatedAt: expect.any(Number),
   })
   // Default field
   // await util.wait(1000)
   let updated = await user.update({
     query: inserted._id,
-    data: { name: 'Bruce' }
+    data: { name: 'Bruce' },
   })
   expect(updated).toEqual({
     name: 'Bruce',
-    updatedAt: expect.any(Number)
+    updatedAt: expect.any(Number),
   })
   expect(updated.updatedAt && updated.updatedAt != inserted.updatedAt).toEqual(true)
 
   // Empty data (still contains updatedAt)
   let updated2 = await user.update({
     query: inserted._id,
-    data: {}
+    data: {},
   })
   expect(updated2).toEqual({
-    updatedAt: expect.any(Number)
+    updatedAt: expect.any(Number),
   })
 
   // Empty data (with no timestamps)
   await expect(user.update({
     query: inserted._id,
     data: {},
-    timestamps: false
+    timestamps: false,
   })).rejects.toThrow('No valid data passed to user.update({ data: .. })')
 
   // UpdatedAt override (wont work)
   let updated4 = await user.update({
     query: inserted._id,
-    data: { updatedAt: 1 }
+    data: { updatedAt: 1 },
   })
   expect(updated4.updatedAt > 1).toEqual(true)
 
@@ -456,7 +456,7 @@ test('update defaults', async () => {
   let updated5 = await user.update({
     query: inserted._id,
     data: { updatedAt: 1 },
-    timestamps: false
+    timestamps: false,
   })
   expect(updated5.updatedAt).toEqual(1)
   db2.close()
@@ -468,11 +468,11 @@ test('update operators', async () => {
       name: { type: 'string', minLength: 5 },
       age: { type: 'number' },
     },
-    beforeValidate: [(data, next) => { beforeValidateHookCalled = true; next() }]
+    beforeValidate: [(data, next) => { beforeValidateHookCalled = true; next() }],
   })
 
   let inserted = await user.insert({
-    data: { name: 'Bruce', age: 12 }
+    data: { name: 'Bruce', age: 12 },
   })
 
   // No data object, but has another update operators
@@ -521,22 +521,22 @@ test('update mixing formData', async() => {
         text: 'filler',
         createdAt: 1653601752472,
         updatedByName: 'Paul',
-        importance: 'low'
-      }]
-    }
+        importance: 'low',
+      }],
+    },
   })
   let specialInstructions = [
     {
       text: 'POD added by driver',
       createdAt: 1653603212886,
       updatedByName: 'Paul Driver 3',
-      importance: 'low'
+      importance: 'low',
     }, {
       text: 'filler',
       createdAt: 1653601752472,
       updatedByName: 'Paul',
-      importance: 'low'
-    }
+      importance: 'low',
+    },
   ]
   // Key order maintained (not always guaranteed in browsers)
   await consignment.update({
@@ -547,7 +547,7 @@ test('update mixing formData', async() => {
       'specialInstructions[0][updatedByName]': 'Paul',
       'specialInstructions[0][importance]': 'low',
       specialInstructions: specialInstructions.map(o => ({ ...o })),
-    }
+    },
   })
   await expect(consignment.findOne({ query: inserted._id })).resolves.toEqual({
     _id: expect.any(Object),
@@ -563,7 +563,7 @@ test('update mixing formData', async() => {
       'specialInstructions[0][createdAt]': 1653601752472,
       'specialInstructions[0][updatedByName]': 'Paul',
       'specialInstructions[0][importance]': 'low',
-    }
+    },
   })
   await expect(consignment.findOne({ query: inserted._id })).resolves.toEqual({
     _id: expect.any(Object),
@@ -577,13 +577,13 @@ test('findOneAndUpdate general', async () => {
   let dog = db.model('dog', {
     fields: {
       name: { type: 'string', default: 'Scruff' },
-    }
+    },
   })
   let user = db.model('user', {
     fields: {
       name: { type: 'string', default: 'Martin' },
       dog: { model: 'dog' },
-    }
+    },
   })
 
   // Returns omitted field after update, i.e. dog
@@ -605,7 +605,7 @@ test('findOneAndUpdate general', async () => {
     name: 'Martin2',
     dog: {
       _id: dog1._id,
-      name: 'Scruff'
+      name: 'Scruff',
     },
   })
 
@@ -638,7 +638,7 @@ test('remove defaults', async () => {
     { name: 'Martin' }, 
     { name: 'Martin' }, 
     { name: 'Martin' }, 
-    { name: 'Martin' }
+    { name: 'Martin' },
   ]})
   expect(inserted).toEqual([
     { _id: expect.any(Object), name: 'Martin' }, 
@@ -675,7 +675,7 @@ test('count defaults', async () => {
     { name: 'Martin' }, 
     { name: 'Martin' }, 
     { name: 'Martin2' }, 
-    { name: 'Martin2' }
+    { name: 'Martin2' },
   ]})
 
   // Count one by id
@@ -691,7 +691,7 @@ test('hooks', async () => {
   let user = db.model('user', {
     fields: {
       first: { type: 'string'},
-      last: { type: 'string'}
+      last: { type: 'string'},
     },
     beforeInsert: [(data, next) => {
       if (!data.first) {
@@ -730,7 +730,7 @@ test('hooks', async () => {
   await expect(user.insert({ data: { first: 'Martin', last: 'Luther' } })).resolves.toEqual({
     _id: expect.any(Object),
     first: 'Martin',
-    last: 'Luther'
+    last: 'Luther',
   })
 
   // Catch update (a)synchronous errors thrown in function or through `next(err)`
@@ -740,7 +740,7 @@ test('hooks', async () => {
     .rejects.toThrow('beforeUpdate error 2..')
   await expect(user.update({ query: userDoc._id, data: { first: 'Martin', last: 'Luther' } })).resolves.toEqual({
     first: 'Martin',
-    last: 'Luther'
+    last: 'Luther',
   })
 
   // Catch remove synchronous errors through `next(err)`
@@ -750,7 +750,7 @@ test('hooks', async () => {
   await expect(user.find({ query: userDoc._id })).resolves.toEqual({
     _id: expect.any(Object),
     first: 'Martin',
-    last: 'Luther'
+    last: 'Luther',
   })
 
   // beforeUpdate/beforeInsert should have access to the original non-validated data
@@ -770,7 +770,7 @@ test('hooks', async () => {
   let userDoc2 = await user2._insert({ first: 'M' })
   await expect(user2.insert({ data: { first: 'M' } })).resolves.toEqual({ _id: expect.any(Object), first: 'M' })
   await expect(user2.insert({ data: { first: 'M', bad: true } })).rejects.toThrow('error1')
-  await expect(user2.update({ query: userDoc2._id, data: { first: 'MM',  } })).resolves.toEqual({ first: 'MM' })
+  await expect(user2.update({ query: userDoc2._id, data: { first: 'MM'  } })).resolves.toEqual({ first: 'MM' })
   await expect(user2.update({ query: userDoc2._id, data: { first: 'M', bad: true } })).rejects.toThrow('error2')
 })
 
@@ -826,17 +826,17 @@ test('hooks > async', async () => {
           data.age = 32
           next()
         }, 100)
-      } 
+      }, 
     ],
   })
   let user1Doc = await user.insert({ 
-    data: { first: 'Martin1' }
+    data: { first: 'Martin1' },
   })
   let user2Doc = await user.insert({ 
-    data: { first: 'Martin2' }
+    data: { first: 'Martin2' },
   })
   let user3Doc = await user.insert({ 
-    data: { first: 'Martin3' }
+    data: { first: 'Martin3' },
   })
 
   // First async hook is delayed

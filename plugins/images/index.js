@@ -54,8 +54,8 @@ let plugin = module.exports = {
         region: this.awsRegion,
         credentials: {
           accessKeyId: this.awsAccessKeyId,
-          secretAccessKey: this.awsSecretAccessKey
-        }
+          secretAccessKey: this.awsSecretAccessKey,
+        },
       }))
     }
 
@@ -193,7 +193,7 @@ let plugin = module.exports = {
       return model._update(
         idquery,
         { '$set': prunedData },
-        { 'multi': options.multi || options.create },
+        { 'multi': options.multi || options.create }
       )
 
     // If errors, remove inserted documents to prevent double ups when the user resaves.
@@ -361,7 +361,7 @@ let plugin = module.exports = {
         { Key: pre.image.path },
         { Key: `small/${key}.jpg` },
         { Key: `medium/${key}.jpg` },
-        { Key: `large/${key}.jpg` },
+        { Key: `large/${key}.jpg` }
       )
       plugin.manager.info(
         `Removing '${pre.image.filename}' from '${pre.image.bucket}/${pre.image.path}'`
@@ -374,7 +374,7 @@ let plugin = module.exports = {
     await new Promise((resolve, reject) => {
       plugin.getS3Client().deleteObjects({
         Bucket: plugin.awsBucket,
-        Delete: { Objects: unused }
+        Delete: { Objects: unused },
       }, (err, data) => {
         if (err) reject(err)
         resolve()
@@ -448,19 +448,19 @@ let plugin = module.exports = {
 
             if (file.truncated) reject({
               title: filesArr.inputPath + (i? `.${i}` : ''),
-              detail: `The file size for '${file.nameClipped}' is too big.`
+              detail: `The file size for '${file.nameClipped}' is too big.`,
             })
             else if (filesize && filesize < file.size) reject({ // file.size == bytes
               title: filesArr.inputPath + (i? `.${i}` : ''),
-              detail: `The file size for '${file.nameClipped}' is bigger than ${(filesize/1000/1000).toFixed(1)}MB.`
+              detail: `The file size for '${file.nameClipped}' is bigger than ${(filesize/1000/1000).toFixed(1)}MB.`,
             })
             else if (file.ext == 'unknown') reject({
               title: filesArr.inputPath + (i? `.${i}` : ''),
-              detail: `Please add a file extension to your file '${file.nameClipped}'`
+              detail: `Please add a file extension to your file '${file.nameClipped}'`,
             })
             else if (!allowAny && !util.inArray(formats, file.ext)) reject({
               title: filesArr.inputPath + (i? `.${i}` : ''),
-              detail: `The file format '${file.ext}' for '${file.nameClipped}' is not supported`
+              detail: `The file format '${file.ext}' for '${file.nameClipped}' is not supported`,
             })
             else resolve()
           })

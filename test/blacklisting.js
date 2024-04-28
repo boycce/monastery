@@ -16,7 +16,7 @@ test('find blacklisting basic', async () => {
 
   // initial blacklist
   let find1 = await db.user.findOne({
-    query: user1._id
+    query: user1._id,
   })
   expect(find1).toEqual({
     _id: user1._id,
@@ -26,13 +26,13 @@ test('find blacklisting basic', async () => {
     pets: [{ name: 'Pluto' }, { name: 'Milo' }],
     animals: { dog: 'Max' },
     deep: { deep2: {} },
-    deepModel: { myBird: bird1._id }
+    deepModel: { myBird: bird1._id },
   })
 
   // augmented blacklist
   let find2 = await db.user.findOne({
     query: user1._id,
-    blacklist: ['pet', 'pet', 'deep', 'deepModel', '-dog', '-animals.cat']
+    blacklist: ['pet', 'pet', 'deep', 'deepModel', '-dog', '-animals.cat'],
   })
   let customBlacklist
   expect(find2).toEqual((customBlacklist = {
@@ -41,13 +41,13 @@ test('find blacklisting basic', async () => {
     dog: 'Bruce',
     list: [44, 54],
     pets: [{ name: 'Pluto' }, { name: 'Milo' }],
-    animals: { dog: 'Max', cat: 'Ginger' }
+    animals: { dog: 'Max', cat: 'Ginger' },
   }))
 
   // blacklist string
   let find3 = await db.user.findOne({
     query: user1._id,
-    blacklist: 'pet pet deep deepModel -dog -animals.cat'
+    blacklist: 'pet pet deep deepModel -dog -animals.cat',
   })
   expect(find3).toEqual(customBlacklist)
 
@@ -74,7 +74,7 @@ test('find blacklisting population', async () => {
   let bird1Base = {
     _id: bird1._id,
     color: 'red',
-    sub: { color: 'red' }
+    sub: { color: 'red' },
   }
 
   // 'bird1.name',                                 // bird1.name & bird1.wing blacklisted
@@ -131,7 +131,7 @@ test('find blacklisting getProjection', async () => {
         size: { type: 'number' },
       },
     },
-    findBL: ['age', 'wing']
+    findBL: ['age', 'wing'],
   })
   db.model('user', {
     fields: {
@@ -202,47 +202,47 @@ test('find project basic', async () => {
       },
       animals: [{
         name: { type: 'string' },
-        color: { type: 'string', default: 'red' }
-      }]
-    }
+        color: { type: 'string', default: 'red' },
+      }],
+    },
   })
   let user1 = await user.insert({ data: {
     name: 'Bruce',
     animal: {
-      name: 'max'
+      name: 'max',
     },
     animals: [
       { name: 'ponyo' },
-      { name: 'freddy' }
-    ]
+      { name: 'freddy' },
+    ],
   }})
 
   // pass: test inclusion of projections via native mongodb project option
   let find1 = await user.findOne({
     query: user1._id,
-    project: ['animal.name', 'animals.name']
+    project: ['animal.name', 'animals.name'],
   })
   expect(find1).toEqual({
     _id: user1._id,
     animal: { name: 'max' },
     animals: [
       { name: 'ponyo' },
-      { name: 'freddy' }
-    ]
+      { name: 'freddy' },
+    ],
   })
 
   // pass: test exclusion of projections via native mongodb project option
   let find2 = await user.findOne({
     query: user1._id,
-    project: ['-animal.name', '-animals.color', '-name', '-color']
+    project: ['-animal.name', '-animals.color', '-name', '-color'],
   })
   expect(find2).toEqual({
     _id: user1._id,
     animal: { color: 'red' },
     animals: [
       { name: 'ponyo' },
-      { name: 'freddy' }
-    ]
+      { name: 'freddy' },
+    ],
   })
 })
 
@@ -255,7 +255,7 @@ test('find project population', async () => {
       color: { type: 'string', default: 'red' },
       sub: {
         color: { type: 'string', default: 'red' },
-      }
+      },
     },
     findBL: ['age'],
   })
@@ -271,7 +271,7 @@ test('find project population', async () => {
       'bird.name',                             // bird.name & bird.age blacklisted
       '-bird2', 'bird2.name',                  // bird2.name blacklisted
       'bird3.name', '-bird3', 'bird3.height',  // bird3.height blacklisted
-    ]
+    ],
   })
   let bird1 = await bird.insert({ data: {
     name: 'ponyo',
@@ -329,19 +329,19 @@ test('insert blacklisting (validate)', async () => {
       pets: [{ name: { type: 'string'}, age: { type: 'number'} }],
       animals: {
         cat: { type: 'string' },
-        dog: { type: 'string' }
+        dog: { type: 'string' },
       },
       hiddenPets: [{
-        name: { type: 'string'}
+        name: { type: 'string'},
       }],
       hiddenList: [{ type: 'number'}],
       deep: {
         deep2: {
           deep3: {
-            deep4: { type: 'string' }
-          }
-        }
-      }
+            deep4: { type: 'string' },
+          },
+        },
+      },
     },
     insertBL: [
       // '_id', // default
@@ -350,7 +350,7 @@ test('insert blacklisting (validate)', async () => {
       'pets.age',
       'hiddenPets',
       'hiddenList',
-      'deep.deep2.deep3'
+      'deep.deep2.deep3',
     ],
     updateBL: [
       // '_id' // default
@@ -365,19 +365,19 @@ test('insert blacklisting (validate)', async () => {
     pets: [{ name: 'Pluto', age: 5 }, { name: 'Milo', age: 4 }],
     animals: {
       cat: 'Ginger',
-      dog: 'Max'
+      dog: 'Max',
     },
     hiddenPets: [{
-      name: 'secretPet'
+      name: 'secretPet',
     }],
     hiddenList: [12, 23],
     deep: {
       deep2: {
         deep3: {
-          deep4: 'hideme'
-        }
-      }
-    }
+          deep4: 'hideme',
+        },
+      },
+    },
   }
 
   // Default insert validation
@@ -387,11 +387,11 @@ test('insert blacklisting (validate)', async () => {
     pet: 'Freddy',
     pets: [{ name: 'Pluto' }, { name: 'Milo' }],
     animals: {
-      dog: 'Max'
+      dog: 'Max',
     },
     deep: {
-      deep2: {}
-    }
+      deep2: {},
+    },
   })
 
   // Custom insert blacklist (remove and add to the current schema blacklist)
@@ -402,7 +402,7 @@ test('insert blacklisting (validate)', async () => {
       '-animals.dog', // wrong property
       'pets.name',
       '-hiddenList',
-      '-deep' // blacklist a parent
+      '-deep', // blacklist a parent
     ],
   })
   let customBlacklist
@@ -413,21 +413,21 @@ test('insert blacklisting (validate)', async () => {
     pet: 'Freddy',
     pets: [ {}, {} ],
     animals: {
-      dog: 'Max'
+      dog: 'Max',
     },
     hiddenList: [12, 23],
     deep: {
       deep2: {
         deep3: {
-          deep4: 'hideme'
-        }
-      }
-    }
+          deep4: 'hideme',
+        },
+      },
+    },
   }))
 
   // Blacklist string
   let user3 = await user.validate(doc1, {
-    blacklist: '-_id -dog -animals.dog pets.name -hiddenList -deep'
+    blacklist: '-_id -dog -animals.dog pets.name -hiddenList -deep',
   })
   expect(user3).toEqual(customBlacklist)
 
@@ -440,7 +440,7 @@ test('insert blacklisting (validate)', async () => {
     project: [
       'dog',
       'pets.name',
-      'deep'
+      'deep',
     ],
   })
   expect(user5).toEqual({
@@ -449,10 +449,10 @@ test('insert blacklisting (validate)', async () => {
     deep: {
       deep2: {
         deep3: {
-          deep4: 'hideme'
-        }
-      }
-    }
+          deep4: 'hideme',
+        },
+      },
+    },
   })
 
   // double check that _id.insertOnly is working
@@ -505,7 +505,7 @@ test('findOneAndUpdate blacklisting populate', async () => {
     data: { dog: 'Bruce2', pet: 'Freddy2' }, // pet shouldn't update
     blacklist: [
       'pet', 'deep', 'deepModel', '-dog', '-animals.cat',
-      'bird.name', '-bird', 'bird.height' // <- populated model
+      'bird.name', '-bird', 'bird.height', // <- populated model
     ],
     populate: ['bird'],
   })

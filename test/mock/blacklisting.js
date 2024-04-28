@@ -13,7 +13,7 @@ module.exports.bird = {
           sizes: {
             one: { type: 'number' },
             two: { type: 'number' },
-          }
+          },
         },
       },
       findBL: ['wing'],
@@ -39,35 +39,35 @@ module.exports.user = {
         pet: { type: 'string' },
         pets: [{
           name: { type: 'string'},
-          age: { type: 'number'}
+          age: { type: 'number'},
         }],
         animals: {
           cat: { type: 'string' },
-          dog: { type: 'string' }
+          dog: { type: 'string' },
         },
         hiddenPets: [{
-          name: { type: 'string'}
+          name: { type: 'string'},
         }],
         hiddenList: [{ type: 'number'}],
         deep: {
           deep2: {
             deep3: {
-              deep4: { type: 'string' }
-            }
-          }
+              deep4: { type: 'string' },
+            },
+          },
         },
         deeper: {
           deeper2: {
             deeper3: {
-              deeper4: { type: 'string' }
-            }
-          }
+              deeper4: { type: 'string' },
+            },
+          },
         },
         deepModel: {
-          myBird: { model: 'bird' }
+          myBird: { model: 'bird' },
         },
         hiddenDeepModel: {
-          myBird: { model: 'bird' }
+          myBird: { model: 'bird' },
         },
       },
       findBL: [
@@ -91,32 +91,32 @@ module.exports.user = {
       pets: [{ name: 'Pluto', age: 5 }, { name: 'Milo', age: 4 }],
       animals: {
         cat: 'Ginger',
-        dog: 'Max'
+        dog: 'Max',
       },
       hiddenPets: [{
-        name: 'secretPet'
+        name: 'secretPet',
       }],
       hiddenList: [12, 23],
       deep: {
         deep2: {
           deep3: {
-            deep4: 'hideme'
-          }
-        }
+            deep4: 'hideme',
+          },
+        },
       },
       deeper: {
         deeper2: {
           deeper3: {
-            deeper4: 'hideme'
-          }
-        }
+            deeper4: 'hideme',
+          },
+        },
       },
       deepModel: {
-        myBird: bird1._id
+        myBird: bird1._id,
       },
       hiddenDeepModel: {
-        myBird: bird1._id
-      }
+        myBird: bird1._id,
+      },
     }
   },
 }
