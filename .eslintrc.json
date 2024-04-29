@@ -9,6 +9,7 @@
   ],
   "globals": {
     // jest globals
+    "jest": true,
     "test": true,
     "expect": true,
     "afterAll": true,
