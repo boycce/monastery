@@ -857,3 +857,114 @@ test('hooks > async', async () => {
   await expect(user.find({ query: user3Doc._id }))
     .rejects.toThrow('An async error occurred with Martin3')
 })
+
+test('hooks > async and next conflict', async () => {
+  let user1 = db.model('user', {
+    fields: { age: { type: 'number'} },
+    afterFind: [
+      async (data, next) => {
+        const promise = await new Promise((resolve, reject) => {
+          if (data.age === 0) {
+            setTimeout(() => {
+              data.age = data.age + 1
+              resolve(data)
+            }, 100)
+          } else {
+            resolve(data)
+          }
+        })
+        next() // should console an error after waiting for the promise to finish
+        return promise
+      },
+      async (data, next) => {
+        data.age = data.age + 1
+      },
+    ],
+  })
+  let user2 = db.model('user2', {
+    fields: { age: { type: 'number'} },
+    afterFind: [
+      async (data, next) => {
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            data.age = data.age + 1
+            resolve(data)
+          }, 100)
+        })
+        next() // should console an error after waiting for the promise to finish, without returning a promise
+      },
+      async (data, next) => {
+        data.age = data.age + 1
+      },
+    ],
+  })
+  let user3 = db.model('user3', {
+    fields: { age: { type: 'number'} },
+    afterFind: [
+      async (data, next) => {
+        data.age = data.age + 1
+        next() // should console an error for empty promise
+      },
+      async (data, next) => {
+        data.age = data.age + 1
+      },
+    ],
+  })
+  let user4 = db.model('user4', {
+    fields: { age: { type: 'number'} },
+    afterFind: [
+      async (data, next) => {
+        return await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            data.age = data.age + 1
+            next() // should console an error
+            resolve(data)
+          }, 100)
+        })
+      },
+      async (data, next) => {
+        data.age = data.age + 1
+      },
+    ],
+  })
+
+  let user5 = db.model('user5', {
+    fields: { age: { type: 'number'} },
+    afterFind: [
+      async (data, next) => {
+        const promise = Promise.reject(new Error('An async error occurred with Martin3'))
+        next(new Error('An async error occurred with Martin3'))
+        return promise
+      },
+      async (data, next) => {
+        data.age = data.age + 1 // shouldn't be reached
+      },
+    ],
+  })
+
+
+  let user1Doc = await user1.insert({ data: { age: 0 } })
+  let user2Doc = await user2.insert({ data: { age: 0 } })
+  let user3Doc = await user3.insert({ data: { age: 0 } })
+  let user4Doc = await user4.insert({ data: { age: 0 } })
+  let user5Doc = await user5.insert({ data: { age: 0 } })
+
+  const logSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+
+  // Only increment twice
+  await expect(user1.find({ query: user1Doc._id })).resolves.toEqual({ _id: expect.any(Object), age: 2 })
+  expect(logSpy).toHaveBeenCalledWith('Monastery afterFind error: you cannot return a promise AND call next()')
+
+  await expect(user2.find({ query: user2Doc._id })).resolves.toEqual({ _id: expect.any(Object), age: 2 })
+  expect(logSpy).toHaveBeenCalledWith('Monastery afterFind error: you cannot return a promise AND call next()')
+
+  await expect(user3.find({ query: user3Doc._id })).resolves.toEqual({ _id: expect.any(Object), age: 2 })
+  expect(logSpy).toHaveBeenCalledWith('Monastery afterFind error: you cannot return a promise AND call next()')
+
+  await expect(user4.find({ query: user4Doc._id })).resolves.toEqual({ _id: expect.any(Object), age: 2 })
+  expect(logSpy).toHaveBeenCalledWith('Monastery afterFind error: you cannot return a promise AND call next()')
+
+  await expect(user5.find({ query: user5Doc._id })).rejects.toThrow('An async error occurred with Martin3')
+  expect(logSpy).toHaveBeenCalledWith('Monastery afterFind error: you cannot return a promise AND call next()')
+
+})

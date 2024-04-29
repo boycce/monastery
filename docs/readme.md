@@ -87,9 +87,12 @@ You can view MongoDB's [compatibility table here](https://www.mongodb.com/docs/d
   - Removed callback functions on all model methods, you can use the returned promise instead
   - model.update() now returns the following _update property: `{ acknowledged: true, matchedCount: 1, modifiedCount: 1, upsertedCount: 0, upsertedId: null }` instead of `{ n: 1, nModified: 1, ok: 1 }`
   - model.remove() now returns `{ acknowledged: true, deletedCount: 1 }`, instead of `{ results: {n:1, ok:1} }`
-  - Models are now added to db.models instead of db.model, e.g. db.models.user
-  - MongoDB connection can be found here db.db changed from db._db
   - model._indexes() now returns collection._indexes() not collection._indexInformation()
+  - db.model.* moved to db.models.*
+  - db._client moved to db.client
+  - db._db moved to db.db
+  - db.catch/then() moved to db.onError/db.onOpen()
+  - next() is now redundant when returning promises from hooks, e.g. `afterFind: [async (data) => {...}]`
 
 ## Roadmap
 
