@@ -10,6 +10,8 @@
  *   - expect().toEqual:  strict deep match
  *   - expect().toMatchObject:  received object can have random properties (try not to use since its not strict)
  *   - expect.objectContaining:
+ *   - try/catch blocks: don't use - it doesn't work with resolves/rejects
+ *   - promise testing: await expect(PromiseHere).resolves.toEqual
  */
 
 /* Run tests sequentially */
@@ -19,7 +21,6 @@ require('./collection.js')
 require('./model.js')
 require('./crud.js')
 require('./blacklisting.js')
-
 require('./populate.js')
 require('./validate.js')
 require('./plugin-images.js')

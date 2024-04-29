@@ -30,24 +30,22 @@ A manager instance.
 
 ```js
 import monastery from 'monastery'
+
 const db = monastery('localhost/mydb', options)
-```
-
-```js
-import monastery from 'monastery'
-const db = monastery('localhost/mydb,192.168.1.1') // replica set
-```
-
-```js
- // You can wait for the connection (which is not required before calling methods)
-import monastery from 'monastery'
+// replica set
+const db = monastery('localhost/mydb,192.168.1.1')
+// you can wait for the connection (which is not required before calling methods)
 const db = await monastery('localhost/mydb,192.168.1.1', { promise: true })
 ```
 
+You can also listen for errors or successful connection using these hooks
 ```js
-// You can listen for connection errors using our `catch` hook
-import monastery from 'monastery'
-const db = monastery('localhost/mydb,192.168.1.1').catch(err => {})
+db.onOpen((manager) => {
+  // manager.client is connected...
+})
+db.onError((err) => {
+  // connection error
+})
 ```
 
 ### Properties
@@ -57,11 +55,12 @@ const db = monastery('localhost/mydb,192.168.1.1').catch(err => {})
 
 ### Methods
 
-- `manager.catch(Function)`: Catches connection errors
 - `manager.id(<String|ObjectId>)`: Create or convert a valid MongoDB ObjectId string into an ObjectId
 - `manager.isId(String|ObjectId)`: Checks if the passed variable is a valid MongoDB ObjectId or ObjectId string
 - `manager.model()`: [see model](./model.html)
 - `manager.models()`: [see models](./models.html)
+- `manager.onError(Function)`: Catches connection errors
+- `manager.onOpen(Function)`: Triggers on successful connection
 
 ### Dates
 
