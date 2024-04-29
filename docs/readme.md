@@ -90,6 +90,7 @@ You can view MongoDB's [compatibility table here](https://www.mongodb.com/docs/d
   - Models are now added to db.models instead of db.model, e.g. db.models.user
   - MongoDB connection can be found here db.db changed from db._db
   - model._indexes() now returns collection._indexes() not collection._indexInformation()
+  - db.catch/then() renamed to db.onError/db.onOpen()
 
 ## Roadmap
 
