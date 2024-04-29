@@ -18,18 +18,34 @@ test('manager > uri error', async () => {
 
 test('manager > onError', async () => {
   // Bad port (thrown by MongoDB)
-  let error
   const db = monastery('localhost:1234/monastery', { serverSelectionTimeoutMS: 500 })
-  await db.onError((res) => { error = res.message })
+  let error, isAPromise
+  await db.onError((res) => { error = res.message }).then(() => { isAPromise = true })
   expect(error).toEqual('connect ECONNREFUSED 127.0.0.1:1234')
+  expect(isAPromise).toEqual(true)
   db.close()
 })
 
 test('manager > onOpen', async () => {
-  let manager
   const db = monastery('localhost/monastery', { serverSelectionTimeoutMS: 500 })
-  await db.onOpen((res) => { manager = res })
-  expect(manager.open).toEqual(expect.any(Function))
+
+  let manager1
+  await db.onOpen((res) => { manager1 = res })
+  expect(manager1.open).toEqual(expect.any(Function))
+
+  // Wait until after the client has been connected
+  await new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve()
+    }, 1000)
+  })
+
+  // This should still run after the client has been connected
+  let manager2
+  let isAPromise
+  await db.onOpen((res) => { manager2 = res }).then(() => { isAPromise = true })
+  expect(manager2.open).toEqual(expect.any(Function))
+  expect(isAPromise).toEqual(true)
   db.close()
 })
 
