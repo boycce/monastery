@@ -89,6 +89,7 @@ You can view MongoDB's [compatibility table here](https://www.mongodb.com/docs/d
   - model.remove() now returns `{ acknowledged: true, deletedCount: 1 }`, instead of `{ results: {n:1, ok:1} }`
   - model._indexes() now returns collection._indexes() not collection._indexInformation()
   - db.model.* moved to db.models.*
+  - db.models(path, waitForIndex) changed to db.models(path, { waitForIndex })
   - db._client moved to db.client
   - db._db moved to db.db
   - db.catch/then() moved to db.onError/db.onOpen()
