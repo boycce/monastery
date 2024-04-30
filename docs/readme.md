@@ -94,6 +94,11 @@ You can view MongoDB's [compatibility table here](https://www.mongodb.com/docs/d
   - db.catch/then() moved to db.onError/db.onOpen()
   - next() is now redundant when returning promises from hooks, e.g. `afterFind: [async (data) => {...}]`
 
+## v2 Breaking Changes
+
+  - changed model.messages, array paths now must include '.$'
+  - updated AWS to client v3 (requires ES6 features, NodeJs >=14)
+
 ## Roadmap
 
 - Add Aggregate
