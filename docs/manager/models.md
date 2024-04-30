@@ -11,6 +11,10 @@ Setup model definitions from a folder location
 
 `path` *(string)*: path to model definitions, the filenames are used as the corresponding model name. Make sure the model definition is exported as the default
 
+[`options`] *(object)*:
+  - [`commonJs=false`] *(boolean)*: for old commonjs projects, you will need to set this to `true` which uses `require` instead of `import` (removed in `3.0.0`)
+  - [`waitForIndexes=false`] *(boolean)*: returns a proimse that waits for the Mongo collection indexes to be setup
+
 ### Returns
 
 A promise with an array of [model](../model) instances, the model instances will also be available at:
