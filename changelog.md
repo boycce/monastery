@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.8](https://github.com/boycce/monastery/compare/2.2.7...2.2.8) (2024-05-01)
+
 ### [2.2.7](https://github.com/boycce/monastery/compare/2.2.6...2.2.7) (2024-05-01)
 
 ### [2.2.6](https://github.com/boycce/monastery/compare/2.2.5...2.2.6) (2024-04-30)
