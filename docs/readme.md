@@ -133,10 +133,12 @@ You can view MongoDB's [compatibility table here](https://www.mongodb.com/docs/d
 
 ## Debugging
 
-This package uses [debug](https://github.com/visionmedia/debug) which allows you to set different levels of output via the `DEBUG` environment variable. Due to known limations `monastery:warning` and `monastery:error` are forced on, you can however disable these via [manager settings](./manager).
+This package uses [debug](https://github.com/visionmedia/debug) which allows you to set the level of output via the `DEBUG` environment variable. Using `DEBUG` will override the manager's `logLevel` option, e.g. `monastery('...', { logLevel: 3 })`.
 
 ```bash
-$ DEBUG=monastery:info # shows operation information
+$ DEBUG=monastery:error # level 1, shows errors
+$ DEBUG=monastery:warn  # level 2, shows warnings and depreciation notices
+$ DEBUG=monastery:info  # level 3, shows operation information
 ```
 
 ## Contributing

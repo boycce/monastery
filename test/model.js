@@ -7,16 +7,18 @@ beforeAll(async () => { db = monastery('127.0.0.1/monastery') })
 afterAll(async () => { db.close() })
 
 test('model > model on manager', async () => {
-  db.model('user', { fields: {} })
-  let modelNamedConflict = db.model('open', { fields: {} })
+  const db2 = monastery('127.0.0.1', { logLevel: 0 })
+  db2.model('user', { fields: {} })
+  let modelNamedConflict = db2.model('open', { fields: {} })
 
   // Model added to manager[model]
-  expect(db.user).toEqual(expect.any(Object))
-  expect(db.models.user).toEqual(expect.any(Object))
+  expect(db2.user).toEqual(expect.any(Object))
+  expect(db2.models.user).toEqual(expect.any(Object))
 
   // Model with a name conflict is only added to manager.models[name]
-  expect(db.open).toEqual(expect.any(Function))
-  expect(db.models.open).toEqual(modelNamedConflict)
+  expect(db2.open).toEqual(expect.any(Function))
+  expect(db2.models.open).toEqual(modelNamedConflict)
+  db2.close()
 })
 
 test('model setup', async () => {
@@ -313,8 +315,8 @@ test('model setup with messages', async () => {
 
 test('model reserved rules', async () => {
   // Setup
-  // let db = (await opendb(false, { hideErrors: true })).db // hide debug error
-  let user = db.model('user-model', {
+  const db2 = monastery('127.0.0.1/monastery', { logLevel: 0 })
+  let user = db2.model('user-model', {
     fields: {
       name: {
         type: 'string',
@@ -324,7 +326,7 @@ test('model reserved rules', async () => {
     },
     rules: {
       params: (value) => {
-        return false // shouldn'r run
+        return false // shouldn't run
       },
     },
   })
@@ -333,6 +335,7 @@ test('model reserved rules', async () => {
     createdAt: expect.any(Number),
     updatedAt: expect.any(Number),
   })
+  db2.close()
 })
 
 test('model indexes', async () => {

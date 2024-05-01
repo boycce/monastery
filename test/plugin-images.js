@@ -881,7 +881,7 @@ test('images options awsAcl, awsBucket, metadata, params, path', async () => {
 test('images option depreciations', async () => {
   // testing (filename bucketDir)
   const db3 = monastery('127.0.0.1/monastery', {
-    hideWarnings: true,
+    logLevel: 1,
     timestamps: false, 
     imagePlugin: { 
       awsBucket: 'fake',
