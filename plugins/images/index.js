@@ -38,16 +38,16 @@ let plugin = module.exports = {
     this.path = options.path || function (uid, basename, ext, file) { return `full/${uid}.${ext}` }
 
     if (!options.awsBucket || !options.awsAccessKeyId || !options.awsSecretAccessKey) {
-      manager.error('Monastery imagePlugin: awsBucket, awsAccessKeyId, or awsSecretAccessKey is not defined')
-      delete manager.imagePlugin
-      return
+      throw new Error('Monastery imagePlugin: awsRegion, awsBucket, awsAccessKeyId, or awsSecretAccessKey is not defined')
+    }
+    if (!options.awsRegion) {
+      throw new Error('Monastery imagePlugin: v3 requires awsRegion to be defined for signing urls, e.g. "ap-southeast-2"')
     }
 
     // Create s3 'service' instance (defer require since it takes 120ms to load)
     // v2: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#constructor-property
     // v3: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3/
     // v3 examples: https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/javascript_s3_code_examples.html
-    manager._getSignedUrl = this._getSignedUrl
     this.getS3Client = () => {
       const { S3 } = require('@aws-sdk/client-s3')
       return this._s3Client || (this._s3Client = new S3({
@@ -598,8 +598,10 @@ let plugin = module.exports = {
      * @see v2: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getSignedUrl-property
      * @see v3: https://github.com/aws/aws-sdk-js-v3/blob/main/UPGRADING.md#s3-presigned-url
      */
-    if (!plugin.awsRegion) {
-      throw 'Monastery requires config.awsRegion to be defined when using getSignedUrl\'s'
+    if (!plugin.getS3Client) {
+      throw new Error(
+        'To use db._getSignedUrl(), the imagePlugin manager option must be defined, e.g. `monastery(..., { imagePlugin })`'
+      )
     }
     const { GetObjectCommand } = require('@aws-sdk/client-s3')
     const params = { Bucket: bucket || plugin.awsBucket, Key: path }
