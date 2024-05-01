@@ -2,13 +2,14 @@
 const util = require('../lib/util.js')
 const imagePluginFile = require('../plugins/images/index.js')
 const monastery = require('../lib/index.js')
+const imagePluginFakeOpts = { awsBucket: 'fake', awsRegion: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
 
 let db
 afterAll(async () => { db.close() })
 beforeAll(async () => { 
   db = monastery('127.0.0.1/monastery', {
     timestamps: false, 
-    imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' },
+    imagePlugin: imagePluginFakeOpts,
   }) 
 })
 
@@ -69,7 +70,7 @@ test('images initialisation', async () => {
   }})
 
   // Initialisation success
-  expect(db.opts.imagePlugin).toEqual({ awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' })
+  expect(db.opts.imagePlugin).toEqual(imagePluginFakeOpts)
 
   let expected = {
     bucket: { type: 'string', isString: true },
@@ -641,9 +642,7 @@ test('images options formats & filesizes', async () => {
   const db3 = monastery('127.0.0.1/monastery', {
     timestamps: false, 
     imagePlugin: { 
-      awsBucket: 'fake', 
-      awsAccessKeyId: 'fake', 
-      awsSecretAccessKey: 'fake',
+      ...imagePluginFakeOpts,
       formats: ['jpg', 'jpeg', 'png', 'ico'],
       filesize: 1000 * 270, 
     },
@@ -722,9 +721,7 @@ test('images option getSignedUrls', async () => {
   const db3 = monastery('127.0.0.1/monastery', {
     timestamps: false, 
     imagePlugin: { 
-      awsBucket: 'fake', 
-      awsAccessKeyId: 'fake', 
-      awsSecretAccessKey: 'fake',
+      ...imagePluginFakeOpts,
       awsRegion: 's3-ap-southeast-2',
       getSignedUrl: true,
     },
@@ -781,10 +778,8 @@ test('images options awsAcl, awsBucket, metadata, params, path', async () => {
   const db3 = monastery('127.0.0.1/monastery', {
     timestamps: false, 
     imagePlugin: { 
+      ...imagePluginFakeOpts,
       awsAcl: 'private',
-      awsBucket: 'fake',
-      awsAccessKeyId: 'fake',
-      awsSecretAccessKey: 'fake',
       metadata: { small: '*x300' , medium: '*x800', large: '*x1200' },
       params: { ContentLanguage: 'DE'},
       path: (uid, basename, ext, file) => `images/${basename}`,
@@ -884,9 +879,7 @@ test('images option depreciations', async () => {
     logLevel: 1,
     timestamps: false, 
     imagePlugin: { 
-      awsBucket: 'fake',
-      awsAccessKeyId: 'fake',
-      awsSecretAccessKey: 'fake',
+      ...imagePluginFakeOpts,
       bucketDir: 'old',
     },
   })
