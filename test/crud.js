@@ -859,7 +859,8 @@ test('hooks > async', async () => {
 })
 
 test('hooks > async and next conflict', async () => {
-  let user1 = db.model('user', {
+  const db2 = monastery('127.0.0.1/monastery', { timestamps: false })
+  let user1 = db2.model('user', {
     fields: { age: { type: 'number'} },
     afterFind: [
       async (data, next) => {
@@ -881,7 +882,7 @@ test('hooks > async and next conflict', async () => {
       },
     ],
   })
-  let user2 = db.model('user2', {
+  let user2 = db2.model('user2', {
     fields: { age: { type: 'number'} },
     afterFind: [
       async (data, next) => {
@@ -898,7 +899,7 @@ test('hooks > async and next conflict', async () => {
       },
     ],
   })
-  let user3 = db.model('user3', {
+  let user3 = db2.model('user3', {
     fields: { age: { type: 'number'} },
     afterFind: [
       async (data, next) => {
@@ -910,7 +911,7 @@ test('hooks > async and next conflict', async () => {
       },
     ],
   })
-  let user4 = db.model('user4', {
+  let user4 = db2.model('user4', {
     fields: { age: { type: 'number'} },
     afterFind: [
       async (data, next) => {
@@ -928,7 +929,7 @@ test('hooks > async and next conflict', async () => {
     ],
   })
 
-  let user5 = db.model('user5', {
+  let user5 = db2.model('user5', {
     fields: { age: { type: 'number'} },
     afterFind: [
       async (data, next) => {
@@ -949,7 +950,7 @@ test('hooks > async and next conflict', async () => {
   let user4Doc = await user4.insert({ data: { age: 0 } })
   let user5Doc = await user5.insert({ data: { age: 0 } })
 
-  const logSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+  const logSpy = jest.spyOn(db2, 'error').mockImplementation(() => {})
 
   // Only increment twice
   await expect(user1.find({ query: user1Doc._id })).resolves.toEqual({ _id: expect.any(Object), age: 2 })
@@ -967,4 +968,5 @@ test('hooks > async and next conflict', async () => {
   await expect(user5.find({ query: user5Doc._id })).rejects.toThrow('An async error occurred with Martin3')
   expect(logSpy).toHaveBeenCalledWith('Monastery afterFind error: you cannot return a promise AND call next()')
 
+  db2.close()
 })
