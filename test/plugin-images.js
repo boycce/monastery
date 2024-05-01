@@ -573,7 +573,7 @@ test('images option defaults', async () => {
   expect(imagePluginFile.awsAcl).toEqual('public-read')
   expect(imagePluginFile.filesize).toEqual(undefined)
   expect(imagePluginFile.formats).toEqual(['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff'])
-  expect(imagePluginFile.getSignedUrl).toEqual(undefined)
+  expect(imagePluginFile.getSignedUrlOption).toEqual(undefined)
   expect(imagePluginFile.metadata).toEqual(undefined)
   expect(imagePluginFile.path).toEqual(expect.any(Function))
   expect(imagePluginFile.params).toEqual({})
@@ -722,7 +722,7 @@ test('images option getSignedUrls', async () => {
     timestamps: false, 
     imagePlugin: { 
       ...imagePluginFakeOpts,
-      awsRegion: 's3-ap-southeast-2',
+      awsRegion: 'ap-southeast-2',
       getSignedUrl: true,
     },
   })

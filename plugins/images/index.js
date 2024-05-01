@@ -31,7 +31,7 @@ let plugin = module.exports = {
     this.bucketDir = options.bucketDir || 'full' // depreciated > 1.36.2
     this.filesize = options.filesize
     this.formats = options.formats || ['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff']
-    this.getSignedUrl = options.getSignedUrl
+    this.getSignedUrlOption = options.getSignedUrl
     this.manager = manager
     this.metadata = options.metadata ? util.deepCopy(options.metadata) : undefined,
     this.params = options.params ? util.deepCopy(options.params) : {},
@@ -41,17 +41,18 @@ let plugin = module.exports = {
       throw new Error('Monastery imagePlugin: awsRegion, awsBucket, awsAccessKeyId, or awsSecretAccessKey is not defined')
     }
     if (!options.awsRegion) {
-      throw new Error('Monastery imagePlugin: v3 requires awsRegion to be defined for signing urls, e.g. "ap-southeast-2"')
+      throw new Error('Monastery imagePlugin: v3 requires awsRegion to be defined for signing urls, e.g. \'ap-southeast-2\'')
     }
 
     // Create s3 'service' instance (defer require since it takes 120ms to load)
     // v2: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#constructor-property
     // v3: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3/
     // v3 examples: https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/javascript_s3_code_examples.html
-    this.getS3Client = () => {
+    this.getS3Client = (useRegion) => {
       const { S3 } = require('@aws-sdk/client-s3')
-      return this._s3Client || (this._s3Client = new S3({
-        region: this.awsRegion,
+      const key  = useRegion ? '_s3ClientRegional' : '_s3Client'
+      return this[key] || (this[key] = new S3({
+        region: useRegion ? this.awsRegion : undefined,
         credentials: {
           accessKeyId: this.awsAccessKeyId,
           secretAccessKey: this.awsSecretAccessKey,
@@ -230,11 +231,11 @@ let plugin = module.exports = {
     for (let doc of util.toArray(data)) {
       for (let imageField of this.imageFields) {
         if (options.getSignedUrls
-            || (util.isDefined(imageField.getSignedUrl) ? imageField.getSignedUrl : plugin.getSignedUrl)) {
+            || (util.isDefined(imageField.getSignedUrl) ? imageField.getSignedUrl : plugin.getSignedUrlOption)) {
           let images = plugin._findImagesInData(doc, imageField, 0, '').filter(o => o.image)
           // todo: we could do this in parallel
           for (let image of images) {
-            image.image.signedUrl = await plugin._getSignedUrl(image.image.path, 3600, imageField.awsBucket)
+            image.image.signedUrl = await plugin.getSignedUrl(image.image.path, 3600, imageField.awsBucket)
           }
         }
       }
@@ -589,24 +590,24 @@ let plugin = module.exports = {
     return list
   },
 
-  _getSignedUrl: async (path, expires=3600, bucket) => {
+  getSignedUrl: async (path, expires=3600, bucket) => {
     /**
      * @param {string} path - aws file path
      * @param {number} <expires> - seconds
-     * @param {number} <bucket>
+     * @param {string} <bucket>
      * @return {promise} signedUrl
      * @see v2: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getSignedUrl-property
      * @see v3: https://github.com/aws/aws-sdk-js-v3/blob/main/UPGRADING.md#s3-presigned-url
      */
     if (!plugin.getS3Client) {
       throw new Error(
-        'To use db._getSignedUrl(), the imagePlugin manager option must be defined, e.g. `monastery(..., { imagePlugin })`'
+        'To use db.getSignedUrl(), the imagePlugin manager option must be defined, e.g. `monastery(..., { imagePlugin })`'
       )
     }
     const { GetObjectCommand } = require('@aws-sdk/client-s3')
     const params = { Bucket: bucket || plugin.awsBucket, Key: path }
     const command = new GetObjectCommand(params)
-    let signedUrl = await getSignedUrl(plugin.getS3Client(), command, { expiresIn: expires })
+    let signedUrl = await getSignedUrl(plugin.getS3Client(true), command, { expiresIn: expires })
     // console.log(signedUrl)
     return signedUrl
   },
