@@ -54,6 +54,7 @@ monastery('localhost/mydb,192.168.1.1').then((db) => {
 - `manager.isId(String|ObjectId)`: Checks if the passed variable is a valid MongoDB ObjectId or ObjectId string
 - `manager.model()`: [see model](./model.html)
 - `manager.models()`: [see models](./models.html)
+- `manager.getSignedUrl(path, expires, bucket)`: You can sign AWS S3 paths using this image plugin helper
 
 ### Dates
 

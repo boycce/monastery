@@ -642,7 +642,7 @@ module.exports = function(monastery, opendb) {
     expect(plugin.awsAcl).toEqual('public-read')
     expect(plugin.filesize).toEqual(undefined)
     expect(plugin.formats).toEqual(['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff'])
-    expect(plugin.getSignedUrl).toEqual(undefined)
+    expect(plugin.getSignedUrlOption).toEqual(undefined)
     expect(plugin.metadata).toEqual(undefined)
     expect(plugin.path).toEqual(expect.any(Function))
     expect(plugin.params).toEqual({})
@@ -796,7 +796,7 @@ module.exports = function(monastery, opendb) {
       serverSelectionTimeoutMS: 2000,
       imagePlugin: {
         ...imagePluginFakeOpts,
-        awsRegion: 's3-ap-southeast-2',
+        awsRegion: 'ap-southeast-2',
         getSignedUrl: true,
       },
     })).db
