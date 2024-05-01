@@ -1,4 +1,5 @@
 let util = require('../lib/util.js')
+const imagePluginFakeOpts = { awsBucket: 'fake', awsRegion: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
 
 module.exports = function(monastery, opendb) {
 
@@ -58,7 +59,7 @@ module.exports = function(monastery, opendb) {
     let db = (await opendb(null, {
       timestamps: false,
       serverSelectionTimeoutMS: 2000,
-      imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
+      imagePlugin: imagePluginFakeOpts
     })).db
 
     let user = db.model('user', { fields: {
@@ -68,7 +69,7 @@ module.exports = function(monastery, opendb) {
     }})
 
     // Initialisation success
-    expect(db.imagePlugin).toEqual({ awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' })
+    expect(db.imagePlugin).toEqual(imagePluginFakeOpts)
 
     let expected = {
       bucket: { type: 'string', isString: true },
@@ -96,7 +97,7 @@ module.exports = function(monastery, opendb) {
     let db = (await opendb(null, {
       timestamps: false,
       serverSelectionTimeoutMS: 2000,
-      imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
+      imagePlugin: imagePluginFakeOpts
     })).db
     let plugin = db.imagePluginFile
     db.model('user', { fields: {
@@ -147,7 +148,7 @@ module.exports = function(monastery, opendb) {
     let db = (await opendb(null, {
       timestamps: false,
       serverSelectionTimeoutMS: 2000,
-      imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
+      imagePlugin: imagePluginFakeOpts
     })).db
 
     let user = db.model('user', { fields: {
@@ -255,7 +256,7 @@ module.exports = function(monastery, opendb) {
     let db = (await opendb(null, {
       timestamps: false,
       serverSelectionTimeoutMS: 2000,
-      imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
+      imagePlugin: imagePluginFakeOpts
     })).db
 
     let user = db.model('user', { fields: {
@@ -341,7 +342,7 @@ module.exports = function(monastery, opendb) {
     let db = (await opendb(null, {
       timestamps: false,
       serverSelectionTimeoutMS: 2000,
-      imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
+      imagePlugin: imagePluginFakeOpts
     })).db
 
     let user = db.model('user', { fields: {
@@ -392,7 +393,7 @@ module.exports = function(monastery, opendb) {
     let db = (await opendb(null, {
       timestamps: false,
       serverSelectionTimeoutMS: 2000,
-      imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
+      imagePlugin: imagePluginFakeOpts
     })).db
 
     db.model('user', { fields: {
@@ -470,7 +471,7 @@ module.exports = function(monastery, opendb) {
     let db = (await opendb(null, {
       timestamps: false,
       serverSelectionTimeoutMS: 2000,
-      imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
+      imagePlugin: imagePluginFakeOpts
     })).db
 
     let user = db.model('user', { fields: {
@@ -524,7 +525,7 @@ module.exports = function(monastery, opendb) {
     let db = (await opendb(null, {
       timestamps: false,
       serverSelectionTimeoutMS: 2000,
-      imagePlugin: { awsBucket: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
+      imagePlugin: imagePluginFakeOpts
     })).db
 
     let user = db.model('user', { fields: {
@@ -621,11 +622,7 @@ module.exports = function(monastery, opendb) {
     let db = (await opendb(null, {
       timestamps: false,
       serverSelectionTimeoutMS: 2000,
-      imagePlugin: {
-        awsBucket: 'fake',
-        awsAccessKeyId: 'fake',
-        awsSecretAccessKey: 'fake',
-      }
+      imagePlugin: imagePluginFakeOpts
     })).db
 
     let user = db.model('user', {
@@ -717,9 +714,7 @@ module.exports = function(monastery, opendb) {
       timestamps: false,
       serverSelectionTimeoutMS: 2000,
       imagePlugin: {
-        awsBucket: 'fake',
-        awsAccessKeyId: 'fake',
-        awsSecretAccessKey: 'fake',
+        ...imagePluginFakeOpts,
         formats: ['jpg', 'jpeg', 'png', 'ico'],
         filesize: 1000 * 270,
       }
@@ -800,9 +795,7 @@ module.exports = function(monastery, opendb) {
       timestamps: false,
       serverSelectionTimeoutMS: 2000,
       imagePlugin: {
-        awsBucket: 'fake',
-        awsAccessKeyId: 'fake',
-        awsSecretAccessKey: 'fake',
+        ...imagePluginFakeOpts,
         awsRegion: 's3-ap-southeast-2',
         getSignedUrl: true,
       },
@@ -861,10 +854,8 @@ module.exports = function(monastery, opendb) {
       timestamps: false,
       serverSelectionTimeoutMS: 2000,
       imagePlugin: {
+        ...imagePluginFakeOpts,
         awsAcl: 'private',
-        awsBucket: 'fake',
-        awsAccessKeyId: 'fake',
-        awsSecretAccessKey: 'fake',
         metadata: { small: '*x300' , medium: '*x800', large: '*x1200' },
         params: { ContentLanguage: 'DE'},
         path: (uid, basename, ext, file) => `images/${basename}`,
@@ -966,9 +957,7 @@ module.exports = function(monastery, opendb) {
       timestamps: false,
       serverSelectionTimeoutMS: 2000,
       imagePlugin: {
-        awsBucket: 'fake',
-        awsAccessKeyId: 'fake',
-        awsSecretAccessKey: 'fake',
+        ...imagePluginFakeOpts,
         bucketDir: 'old',
       }
     })).db
