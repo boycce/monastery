@@ -33,7 +33,7 @@
     "@aws-sdk/lib-storage": "3.549.0",
     "@aws-sdk/s3-request-presigner": "3.549.0",
     "debug": "4.3.4",
-    "file-type": "^16.5.4",
+    "file-type": "16.5.4",
     "mongodb": "^3.2.3",
     "monk": "7.3.4",
     "nanoid": "3.2.0",
@@ -50,8 +50,7 @@
     "supertest": "4.0.2"
   },
   "engines": {
-    "node": ">=14",
-    "npm": ">=6"
+    "node": ">=14"
   },
   "standard-version": {
     "infile": "changelog.md",

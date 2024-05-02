@@ -50,9 +50,10 @@ let plugin = module.exports = {
     // v3 examples: https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/javascript_s3_code_examples.html
     this.getS3Client = (useRegion) => {
       const { S3 } = require('@aws-sdk/client-s3')
-      const key  = useRegion ? '_s3ClientRegional' : '_s3Client'
+      const key  = '_s3Client'// useRegion ? '_s3ClientRegional' : '_s3Client'
       return this[key] || (this[key] = new S3({
-        region: useRegion ? this.awsRegion : undefined,
+        // ...(region: useRegion ? this.awsRegion : undefined,
+        region: this.awsRegion, // if region is missing it throws an error, but only in production...
         credentials: {
           accessKeyId: this.awsAccessKeyId,
           secretAccessKey: this.awsSecretAccessKey
