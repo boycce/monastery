@@ -36,8 +36,8 @@
     "@aws-sdk/lib-storage": "3.549.0",
     "@aws-sdk/s3-request-presigner": "3.549.0",
     "debug": "4.3.4",
-    "file-type": "^16.5.4",
-    "mongodb": "^5.9.2",
+    "file-type": "16.5.4",
+    "mongodb": "5.9.2",
     "nanoid": "3.2.0",
     "validator": "13.7.0"
   },
