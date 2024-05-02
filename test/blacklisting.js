@@ -218,18 +218,26 @@ test('find project basic', async () => {
   }})
 
   // pass: test inclusion of projections via native mongodb project option
-  let find1 = await user.findOne({
+  let find11 = await user.findOne({
     query: user1._id,
-    project: ['animal.name', 'animals.name'],
+    project: {'animal.name': 1, 'animals.name': 1},
   })
-  expect(find1).toEqual({
+  const find11Expected = {
     _id: user1._id,
     animal: { name: 'max' },
     animals: [
       { name: 'ponyo' },
       { name: 'freddy' },
     ],
+  }
+  expect(find11).toEqual(find11Expected)
+
+  // pass: test inclusion of projections via native mongodb project option
+  let find1 = await user.findOne({
+    query: user1._id,
+    project: ['animal.name', 'animals.name'],
   })
+  expect(find1).toEqual(find11Expected)
 
   // pass: test exclusion of projections via native mongodb project option
   let find2 = await user.findOne({
