@@ -83,14 +83,18 @@ test('model populate', async () => {
 })
 
 test('model populate array', async () => {
-  let bird = db.model('bird', { fields: {
-    name: { type: 'string' },
-  }})
-  let user = db.model('user', { fields: {
-    birds: [{ model: 'bird' }],
-    animal: { birds: [{ model: 'bird' }] },
-    animals: [{ bird: { model: 'bird' }, num: { type: 'number' } }],
-  }})
+  let bird = db.model('bird_pop', { 
+    fields: {
+      name: { type: 'string' },
+    },
+  })
+  let user = db.model('user_pop', { 
+    fields: {
+      birds: [{ model: 'bird_pop' }],
+      animal: { birds: [{ model: 'bird_pop' }] },
+      animals: [{ bird: { model: 'bird_pop' }, num: { type: 'number' } }],
+    },
+  })
   let bird1 = await bird.insert({ data: { name: 'ponyo' }})
   let bird2 = await bird.insert({ data: { name: 'jack' }})
   let bird3 = await bird.insert({ data: { name: 'sophie' }})
