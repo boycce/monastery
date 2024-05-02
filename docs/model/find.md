@@ -58,30 +58,27 @@ The value of the model reference should be an ID, e.g. `myBook = id`
 ```js
 {
   fields: {
-    myBook: {
-      model: 'book'
-    }
+    myBook: { model: 'book' },
+    myBooks: [{ model: 'books' }], // you can even populate arrays
   }
 }
 ```
 
-You are then able to easily populate returned results via a find operation.
+You are then able to easily populate the returned results in the find method:
 
 ```js
-user.find({ query: {...}, populate: ['myBook'] })
+user.find({ query: {...}, populate: ['myBook', 'myBooks', ...] })
 ```
 
-You can also populate within embedded document fields. Although at this time arrays are not supported,
-you would need to use the [example below](#populate-multiple-documents-into-virtual-fields).
+You can also populate within embedded document fields.
 ```js
 user.find({ query: {...}, populate: ['myBooks.book'] })
 ```
 
 ### Custom Populate Query
 
-If you would like more control you can either use Mongo's `aggregate` method via [`model._aggregate`](./...rawMethods), or simply pass a MongoDB lookup object to populate. When passing a lookup object, the
-populated field still needs to be defined in `definition.fields` if you want to call any related hooks,
-and prune any blacklisted fields. See the examples below,
+If you would like more control you can either use Mongo's `aggregate` method via [`model._aggregate`](./rawMethods), or simply pass a MongoDB lookup object to `populate`. When passing a lookup object, the
+populated field still needs to be defined in `definition.fields` if you want Monastery to process any related hooks, field blacklisting and default values. See the example belows,
 
 #### Populate a single document
 
@@ -93,37 +90,42 @@ user.find({
   populate: [{
     as: 'myBook',
     from: 'book',
+    foreignField: '_id',
     localField: 'myBook',
-    foreignField: '_id'
   }]
 })
 ```
 
 #### Populate multiple documents into virtual fields
 
-Below populates all books into `user.myBooks` with a `bookOwnerId` equal to the `user._id`. Since `myBooks`
-isn't stored on the user, you will need define it as virtual field
+Below populates all books into `user.myBooks` with a `bookOwnerId` equal to the `user._id`. Since `myBooks` isn't stored on the user, you will need define it as virtual field.
 
 ```js
-{
+db.model('user', {
   fields: {
-    myBooks: [{
-      model: 'book',
-      virtual: true
-    }],
+    name: { type: 'string' },
+    myBooks: [{ model: 'book', virtual: true }],
   },
-}
+})
+db.model('book', {
+  fields: {
+    bookTitle: { type: 'string' },
+    bookOwnerId: { model: 'user' },
+  },
+})
+
+// books and user inserted here...
 
 user.find({
   query: {...},
   populate: [{
     as: 'myBooks',
     from: 'book',
-    let: { id: '$_id' },
+    let: { userId: '$_id' },
     pipeline: [{
       $match: {
         $expr: {
-          $eq: ['$bookOwnerId', '$$id']
+          $eq: ['$bookOwnerId', '$$userId']
         }
       }
     }]
