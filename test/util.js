@@ -26,8 +26,9 @@ test('util > formdata', async () => {
       { 'first': 'Bruce', 'last': 'Lee' },
     ],
   })
-  expect(util.parseFormData({ 'users[][\'name\']': 'Martin' })).rejects
-    .toEqual('Array items in bracket notation need array indexes "users[][\'name\']", e.g. users[0][name]')
+  expect(() => util.parseFormData({ 'users[][\'name\']': 'Martin' })).toThrow(
+    'Monastery: Array items in bracket notation need array indexes "users[][\'name\']", e.g. users[0][name]'
+  )
 })
 
 test('util > isId', async () => {
