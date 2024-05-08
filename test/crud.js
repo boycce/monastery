@@ -687,7 +687,7 @@ test('count defaults', async () => {
     .resolves.toEqual(2)
 })
 
-test('hooks', async () => {
+test('hooks > basic', async () => {
   let user = db.model('user', {
     fields: {
       first: { type: 'string'},
@@ -772,6 +772,123 @@ test('hooks', async () => {
   await expect(user2.insert({ data: { first: 'M', bad: true } })).rejects.toThrow('error1')
   await expect(user2.update({ query: userDoc2._id, data: { first: 'MM'  } })).resolves.toEqual({ first: 'MM' })
   await expect(user2.update({ query: userDoc2._id, data: { first: 'M', bad: true } })).rejects.toThrow('error2')
+})
+
+test('hooks > chained values', async () => {
+  let bookCount = 0
+  const afterInsertAsync = [
+    async (data) => {
+      return // ignored
+    },
+    async (data) => {
+      data.first = 'Martin11'
+    },
+    async (data) => {
+      expect(data.first).toEqual('Martin11')
+      return { ...data, first: 'Martin' }
+    },
+    async (data) => {
+      expect(data.first).toEqual('Martin')
+      return  // ignored
+    },
+  ]
+  const afterFindAsync = [
+    async (data) => {
+      return // ignored
+    },
+    async (data) => {
+      bookCount++
+      if (data.bookNumber) data.bookNumber += (1 + bookCount)
+      else data.first = 'Martin2'
+    },
+    async (data) => {
+      if (data.bookNumber) {
+        expect(data).toEqual({ _id: expect.any(Object), bookNumber: 11 + bookCount })
+        return { _id: 1, bookNumber: 11 + bookCount }
+      } else {
+        expect(data).toEqual({ _id: expect.any(Object), first: 'Martin2', books: data.books })
+        return { _id: 2, books: data.books }
+      }
+    },
+    async (data) => {
+      if (data._id == 1) expect(data).toEqual({ _id: 1, bookNumber: 11 + bookCount })
+      else expect(data).toEqual({ _id: 2, books: data.books })
+      return  // ignored
+    },
+  ]
+  const afterFindCallback = [
+    (data, next) => {
+      next() // ignored
+    },
+    (data, next) => {
+      bookCount++
+      if (data.bookNumber) data.bookNumber += (1 + bookCount)
+      else data.first = 'Martin2'
+      next()
+    },
+    (data, next) => {
+      if (data.bookNumber) {
+        expect(data).toEqual({ _id: expect.any(Object), bookNumber: 11 + bookCount })
+        next(null, { _id: 1, bookNumber: 11 + bookCount })
+      } else {
+        expect(data).toEqual({ _id: expect.any(Object), first: 'Martin2', books: data.books })
+        next(null, { _id: 2, books: data.books })
+      }
+    },
+    (data, next) => {
+      if (data._id == 1) expect(data).toEqual({ _id: 1, bookNumber: 11 + bookCount })
+      else expect(data).toEqual({ _id: 2, books: data.books })
+      next()  // ignored
+    },
+  ]
+
+  // Async
+  db.model('book', {
+    fields: { bookNumber: { type: 'number'} },
+    afterFind: afterFindAsync,
+  })
+  db.model('user', {
+    fields: { first: { type: 'string'}, books: [{ model: 'book' }] },
+    afterInsert: afterInsertAsync,
+    afterFind: afterFindAsync,
+  })
+  let bookDoc = await db.book.insert({ data: { bookNumber: 10 }})
+  let bookDoc2 = await db.book.insert({ data: { bookNumber: 10 }})
+  let userDoc = await db.user.insert({ data: { first: 'Martin0', books: [bookDoc._id, bookDoc2._id]}})
+
+  // AfterInsert async
+  expect(userDoc).toEqual({
+    _id: expect.any(Object),
+    first: 'Martin',
+    books: [bookDoc._id, bookDoc2._id],
+  })
+
+  // AfterFind async
+  await expect(db.user.find({ query: userDoc._id, populate: ['books'] })).resolves.toEqual({ 
+    _id: 2,
+    books: [
+      { _id: 1, bookNumber: 12 },
+      { _id: 1, bookNumber: 13 },
+    ],
+  })
+
+  // AfterFind callback/next
+  db.model('book', {
+    fields: { bookNumber: { type: 'number'} },
+    afterFind: afterFindCallback,
+  })
+  db.model('user', {
+    fields: { first: { type: 'string'}, books: [{ model: 'book' }] },
+    afterFind: afterFindCallback,
+  })
+  await expect(db.user.find({ query: userDoc._id, populate: ['books'] })).resolves.toEqual({ 
+    _id: 2,
+    books: [
+      { _id: 1, bookNumber: 15 },
+      { _id: 1, bookNumber: 16 },
+    ],
+  })
+
 })
 
 test('hooks > async', async () => {
@@ -954,19 +1071,19 @@ test('hooks > async and next conflict', async () => {
 
   // Only increment twice
   await expect(user1.find({ query: user1Doc._id })).resolves.toEqual({ _id: expect.any(Object), age: 2 })
-  expect(logSpy).toHaveBeenCalledWith('Monastery afterFind error: you cannot return a promise AND call next()')
+  expect(logSpy).toHaveBeenCalledWith('Monastery user.afterFind error: you cannot return a promise AND call next()')
 
   await expect(user2.find({ query: user2Doc._id })).resolves.toEqual({ _id: expect.any(Object), age: 2 })
-  expect(logSpy).toHaveBeenCalledWith('Monastery afterFind error: you cannot return a promise AND call next()')
+  expect(logSpy).toHaveBeenCalledWith('Monastery user.afterFind error: you cannot return a promise AND call next()')
 
   await expect(user3.find({ query: user3Doc._id })).resolves.toEqual({ _id: expect.any(Object), age: 2 })
-  expect(logSpy).toHaveBeenCalledWith('Monastery afterFind error: you cannot return a promise AND call next()')
+  expect(logSpy).toHaveBeenCalledWith('Monastery user.afterFind error: you cannot return a promise AND call next()')
 
   await expect(user4.find({ query: user4Doc._id })).resolves.toEqual({ _id: expect.any(Object), age: 2 })
-  expect(logSpy).toHaveBeenCalledWith('Monastery afterFind error: you cannot return a promise AND call next()')
+  expect(logSpy).toHaveBeenCalledWith('Monastery user.afterFind error: you cannot return a promise AND call next()')
 
   await expect(user5.find({ query: user5Doc._id })).rejects.toThrow('An async error occurred with Martin3')
-  expect(logSpy).toHaveBeenCalledWith('Monastery afterFind error: you cannot return a promise AND call next()')
+  expect(logSpy).toHaveBeenCalledWith('Monastery user.afterFind error: you cannot return a promise AND call next()')
 
   db2.close()
 })
