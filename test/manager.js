@@ -8,7 +8,7 @@ test('manager > basics', async () => {
   // Basic find command
   expect(await manager.db.collection('non-collection').findOne({})).toEqual(null)
   // Raw MongoDB ping command
-  expect(await manager.command({ ping: 1 })).toEqual({ ok: 1 })
+  expect(await manager.command({ ping: 1 })).toMatchObject({ ok: 1 }) // cluster connections return extra fields
   manager.close()
 })
 
