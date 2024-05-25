@@ -571,6 +571,63 @@ test('update mixing formData', async() => {
   })
 })
 
+test('update large document', async () => {
+  // todo: sereach util.deepCopy
+  // todo: check castIds and any other recursive functions
+  // todo: move default fields to before validate
+  db.model('a', { fields: {} })
+  db.model('b', { fields: {} })
+  db.model('c', { fields: {} })
+  db.model('d', { fields: {} })
+  db.model('e', { fields: {} })
+  const large = db.model('large', require('../resources/fixtures/large-definition.js'))
+  const largePayload = require('../resources/fixtures/large-payload.json')
+  // Insert
+  let inserted = await large._insert({})
+  // Update
+  console.time('update large document')
+  let update = await large.update({
+    query: inserted._id,
+    data: largePayload,
+  })
+  console.timeEnd('update large document')
+  // Check
+  await expect(update).toEqual(removePrunedProperties(largePayload))
+  // Find
+  console.time('find large document')
+  await large.findOne({
+    query: inserted._id,
+  })
+  console.timeEnd('find large document')
+
+  function removePrunedProperties(entity) {
+    for (let entitiesKey of [
+      'components', 'connections', 'bridges', 'openings', 'spaces', 'elements', 'elementTypes', 
+      'categories', 'typologies',
+    ]) {
+      if (entity[entitiesKey]) {
+        for (let i=0, l=entity[entitiesKey].length; i<l; i++) {
+          entity[entitiesKey][i] = removePrunedProperties(entity[entitiesKey][i])
+        }
+      }
+    }
+    // remove actually keys
+    if (entity.metrics) {
+      for (let key in entity.metrics) {
+        delete entity.metrics[key].actually
+      }
+    }
+    if (entity.code?.match(/^(ELEM|CAT)/)) {
+      delete entity.name
+    }
+    // // convert _id to ObjectId
+    // if (entity._id) {
+    //   entity._id = db.id(entity._id)
+    // }
+    return entity
+  }
+})
+
 test('findOneAndUpdate general', async () => {
   // todo: test all findOneAndUpdate options (e.g. array population)
   // todo: test find & update hooks
