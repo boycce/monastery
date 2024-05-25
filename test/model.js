@@ -21,7 +21,7 @@ test('model > model on manager', async () => {
   db2.close()
 })
 
-test('model setup', async () => {
+test('model setup basics', async () => {
   // Setup
   let user = db.model('user', { fields: {
     name: { type: 'string' },
@@ -35,60 +35,81 @@ test('model setup', async () => {
   // no fields defined
   expect(db.model('user2', { fields: {} }).fields).toEqual({
     _id: {
+      schema: {
         insertOnly: true,
         isId: true,
+        isSchema: true,
+        isType: 'isId',
         type: 'id',
       },
+    },
     createdAt: {
+      schema: {
         default: expect.any(Function),
         insertOnly: true,
         isInteger: true,
+        isSchema: true,
+        isType: 'isInteger',
         timestampField: true,
         type: 'integer',
       },
-      updatedAt: {
+    },
+    updatedAt: {
+      schema: {
         default: expect.any(Function),
         isInteger: true,
+        isSchema: true,
+        isType: 'isInteger',
         timestampField: true,
         type: 'integer',
       },
+    },
   })
 
   // Has model name
-  expect(user.name).toEqual('user')
+  expect(user.name)
+    .toEqual('user')
 
   // Basic field
-  expect(user.fields.name).toEqual({ type: 'string', isString: true })
+  expect(user.fields.name.schema)
+    .toEqual({ type: 'string', isString: true, isSchema: true, isType: 'isString' })
 
-  // Image field
-  expect(user.fields.logo).toEqual({ type: 'any', isAny: true, image: true })
+  // Image field (not processed by plugin)
+  expect(user.fields.logo.schema)
+    .toEqual({ type: 'any', isAny: true, image: true, isSchema: true, isType: 'isAny' })
 
   // Array field
-  expect(user.fields.pets).toContainEqual({ type: 'string', isString: true })
+  expect(user.fields.pets)
+    .toContainEqual({ schema: { type: 'string', isString: true, isType: 'isString', isSchema: true } })
 
   // Array schema
-  expect(user.fields.pets.schema).toEqual({ type: 'array', isArray: true })
+  expect(user.fields.pets.schema)
+    .toEqual({ type: 'array', isArray: true, isSchema: true, isType: 'isArray' })
 
   // Subdocument field and schema
   expect(user.fields.colors).toEqual({
-    red: { isString: true, type: 'string' },
-    schema: { isObject: true, type: 'object' },
+    red: { schema: { isString: true, type: 'string', isSchema: true, isType: 'isString' }},
+    schema: { isObject: true, type: 'object', isSchema: true, isType: 'isObject' },
   })
 
   // Array array field (no array properties)
   expect(JSON.stringify(user.fields.points)).toEqual(JSON.stringify(
-    [[{ type: 'number', isNumber: true }]]
+    [[{
+      schema: { type: 'number', isType: 'isNumber', isNumber: true, isSchema: true },
+    }]]
   ))
 
   // Array array schema
-  expect(user.fields.points.schema).toEqual({ type: 'array', isArray: true })
-  expect(user.fields.points[0].schema).toEqual({ type: 'array', isArray: true })
+  expect(user.fields.points.schema).toEqual({ type: 'array', isArray: true, isSchema: true, isType: 'isArray' })
+  expect(user.fields.points[0].schema).toEqual({ type: 'array', isArray: true, isSchema: true, isType: 'isArray' })
 
   // Array array subdocument field (no array properties)
   expect(JSON.stringify(user.fields.points2)).toEqual(JSON.stringify(
     [[{
-      x: { type: 'number', isNumber: true },
-      schema: { type: 'object', isObject: true },
+      x: { 
+        schema: { type: 'number', isType: 'isNumber', isNumber: true, isSchema: true },
+      },
+      schema: { type: 'object', isObject: true, isSchema: true, isType: 'isObject' },
     }]]
   ))
 })
@@ -97,22 +118,34 @@ test('model setup with default fields', async () => {
   // Default fields
   expect(db.model('user2', { fields: {} }).fields).toEqual({
     _id: {
-      insertOnly: true,
-      isId: true,
-      type: 'id',
+      schema: {
+        insertOnly: true,
+        isId: true,
+        isSchema: true,
+        isType: 'isId',
+        type: 'id',
+      },
     },
     createdAt: {
-      default: expect.any(Function),
-      insertOnly: true,
-      isInteger: true,
-      timestampField: true,
-      type: 'integer',
+      schema: {
+        default: expect.any(Function),
+        insertOnly: true,
+        isInteger: true,
+        isSchema: true,
+        isType: 'isInteger',
+        timestampField: true,
+        type: 'integer',
+      },
     },
     updatedAt: {
-      default: expect.any(Function),
-      isInteger: true,
-      timestampField: true,
-      type: 'integer',
+      schema: {
+        default: expect.any(Function),
+        isInteger: true,
+        isSchema: true,
+        isType: 'isInteger',
+        timestampField: true,
+        type: 'integer',
+      },
     },
   })
 })
@@ -131,13 +164,28 @@ test('model setup with default objects', async () => {
   expect(user.fields.pets.schema).toEqual({
     type: 'array',
     isArray: true,
+    isSchema: true,
+    isType: 'isArray',
     default: expect.any(Function),
   })
 
   // Subdocument field and schema
   expect(user.fields.colors).toEqual({
-    red: { isString: true, type: 'string' },
-    schema: { isObject: true, type: 'object', default: expect.any(Function) },
+    red: { 
+      schema: {
+        isString: true, 
+        type: 'string',
+        isSchema: true,
+        isType: 'isString',
+      },
+    },
+    schema: { 
+      isObject: true, 
+      type: 'object', 
+      isSchema: true,
+      isType: 'isObject',
+      default: expect.any(Function),
+    },
   })
   db2.close()
 })
@@ -157,31 +205,45 @@ test('model setup with schema', async () => {
   // Object with schema
   expect(user.fields.pet).toEqual({
     name: {
-      type: 'string', 
-      isString: true,
-      minLength: 5,
+      schema: {
+        type: 'string', 
+        isString: true,
+        isSchema: true,
+        isType: 'isString',
+        minLength: 5,
+      },
     },
     schema: {
       type: 'object', 
       isObject: true,
+      isSchema: true,
+      isType: 'isObject',
       virtual: true,
     },
   })
   // Array with schema
   expect(user.fields.pets[0]).toEqual({
     name: {
-      type: 'string', 
-      isString: true,
-      minLength: 5,
+      schema: {
+        type: 'string', 
+        isString: true,
+        isSchema: true,
+        isType: 'isString',
+        minLength: 5,
+      },
     },
     schema: {
       type: 'object', 
       isObject: true,
+      isSchema: true,
+      isType: 'isObject',
     },
   })
   expect(user.fields.pets.schema).toEqual({
     type: 'array', 
     isArray: true,
+    isSchema: true,
+    isType: 'isArray',
     virtual: true,
   })
 })
@@ -313,7 +375,7 @@ test('model setup with messages', async () => {
   })
 })
 
-test('model reserved rules', async () => {
+test('model setup reserved rules', async () => {
   // Setup
   const db2 = monastery('127.0.0.1/monastery', { logLevel: 0 })
   let user = db2.model('user-model', {
@@ -338,7 +400,7 @@ test('model reserved rules', async () => {
   db2.close()
 })
 
-test('model indexes', async () => {
+test('model indexes basic', async () => {
   // Setup: Need to test different types of indexes
   // Setup: Drop previously tested collections
   const allCollections = await db.db.listCollections().toArray()
@@ -430,7 +492,7 @@ test('model indexes', async () => {
   }])
 })
 
-test('model unique indexes', async () => {
+test('model indexes unique', async () => {
   // Setup: Drop previously tested collections
   if ((await db.db.listCollections().toArray()).find(o => o.name == 'userUniqueIndex')) {
     await db.db.collection('userUniqueIndex').drop()
@@ -494,7 +556,7 @@ test('model unique indexes', async () => {
   })
 })
 
-test('model subdocument indexes', async () => {
+test('model indexes subdocument', async () => {
   // Setup: Need to test different types of indexes
   // Setup: Drop previously tested collections
   if ((await db.db.listCollections().toArray()).find(o => o.name == 'userIndexSubdoc')) {
@@ -536,7 +598,7 @@ test('model subdocument indexes', async () => {
   }])
 })
 
-test('model array indexes', async () => {
+test('model indexes array', async () => {
   // Setup: Need to test different types of indexes
   // Setup: Drop previously tested collections
   if ((await db.db.listCollections().toArray()).find(o => o.name == 'userIndexArray')) {
@@ -578,7 +640,7 @@ test('model array indexes', async () => {
   }])
 })
 
-test('model 2dsphere indexes', async () => {
+test('model indexes 2dsphere', async () => {
   // Setup. The tested model needs to be unique as race condition issue arises when the same model
   // with text indexes are setup at the same time
   await db.model('user99', {
@@ -599,24 +661,40 @@ test('model 2dsphere indexes', async () => {
 
   // Schema check
   expect(db.user99.fields.location).toEqual({
-    type: { type: 'string', default: 'Point', isString: true },
     coordinates: expect.any(Array),
+    type: { 
+      schema: { 
+        default: 'Point', 
+        isSchema: true,
+        isString: true,
+        isType: 'isString', 
+        type: 'string', 
+      },
+    },
     schema: {
-      default: undefined,
       index: '2dsphere',
       isObject: true,
-      nullObject: undefined,
+      isSchema: true,
+      isType: 'isObject', 
       type: 'object',
     },
   })
   expect(db.user99.fields.location2).toEqual({
-    type: { type: 'string', default: 'Point', isString: true },
     coordinates: expect.any(Array),
+    type: {
+      schema: {
+        type: 'string', 
+        default: 'Point', 
+        isSchema: true,
+        isString: true,
+        isType: 'isString', 
+      },
+    },
     schema: {
-      default: undefined,
       index: { type: '2dsphere' },
       isObject: true,
-      nullObject: undefined,
+      isSchema: true,
+      isType: 'isObject', 
       type: 'object',
     },
   })

@@ -328,7 +328,8 @@ test('find project population', async () => {
   expect(find3).toEqual(customProject)
 })
 
-test('insert blacklisting (validate)', async () => {
+test('insert blacklisting validate', async () => {
+  // todo: isolated model._pathBlacklisted test
   let user = db.model('user', {
     fields: {
       list: [{ type: 'number' }],

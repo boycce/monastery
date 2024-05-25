@@ -40,9 +40,13 @@ test('images no initialisation', async () => {
 
   // schema
   expect(db2.company.fields.logo).toEqual({
-    image: true,
-    isAny: true,
-    type: 'any',
+    schema: {
+      image: true,
+      isAny: true,
+      isSchema: true,
+      isType: 'isAny',
+      type: 'any',
+    },
   })
 
   // found company
@@ -63,27 +67,45 @@ test('images no initialisation', async () => {
 })
 
 test('images initialisation', async () => {
-  let user = db.model('user', { fields: {
-    logo: { type: 'image' },
-    logos: [{ type: 'image' }],
-    users: [{ logo: { type: 'image' } }],
-  }})
+  let user = db.model('user', { 
+    fields: {
+      logo: { type: 'image' },
+      logos: [{ type: 'image' }],
+      users: [{ logo: { type: 'image' } }],
+    },
+  })
 
   // Initialisation success
   expect(db.opts.imagePlugin).toEqual(imagePluginFakeOpts)
 
+  function schemaForType(type) {
+    return {
+      schema: {
+        type: type, 
+        isType: `is${util.ucFirst(type)}`, 
+        [`is${util.ucFirst(type)}`]: true, 
+        isSchema: true,
+      },
+    }
+  }
   let expected = {
-    bucket: { type: 'string', isString: true },
-    date: { type: 'number', isNumber: true },
-    filename: { type: 'string', isString: true },
-    filesize: { type: 'number', isNumber: true },
-    metadata: { type: 'any', isAny: true },
-    path: { type: 'string', isString: true },
+    bucket: schemaForType('string'),
+    date: schemaForType('number'),
+    filename: schemaForType('string'),
+    filesize: schemaForType('number'),
+    metadata: schemaForType('any'),
+    path: schemaForType('string'),
+    uid: schemaForType('string'),
     schema: {
-      type: 'object', isObject: true, image: true, nullObject: true, default: undefined,
+      type: 'object', 
+      isObject: true,
+      isSchema: true,
+      isType: 'isObject',
+      nullObject: true,
+      // Image rules
+      image: true, 
       isImageObject: true,
     },
-    uid: { type: 'string', isString: true },
   }
 
   // Logo schema

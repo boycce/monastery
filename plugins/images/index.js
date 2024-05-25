@@ -482,27 +482,27 @@ let plugin = module.exports = {
     })).then(() => validFiles)
   },
 
-  _findAndTransformImageFields: function(fields, path) {
+  _findAndTransformImageFields: function(unprocessedFields, path) {
     /**
-     * Returns a list of valid image fields
-     * @param {object|array} fields
+     * Returns a list of valid image field schemas
+     * @param {object|array} unprocessedFields - fields not yet setup
      * @param {string} path
      * @return [{}, ...]
      * @this plugin
      */
     let list = []
     let that = this
-    util.forEach(fields, (field, fieldName) => {
+    util.forEach(unprocessedFields, (field, fieldName) => {
       let path2 = `${path}.${fieldName}`.replace(/^\./, '')
-      // let schema = field.schema || {}
+      if (fieldName == 'schema') return
 
       // Subdocument field
-      if (util.isSubdocument(field)) {//schema.isObject
+      if (util.isSubdocument(field)) {
         // log(`Recurse 1: ${path2}`)
         list = list.concat(plugin._findAndTransformImageFields(field, path2))
 
       // Array field
-      } else if (util.isArray(field)) {//schema.isArray
+      } else if (util.isArray(field)) {
         // log(`Recurse 2: ${path2}`)
         list = list.concat(plugin._findAndTransformImageFields(field, path2))
 
@@ -532,15 +532,15 @@ let plugin = module.exports = {
           params: field.params ? util.deepCopy(field.params) : undefined,
         })
         // Convert image field to subdocument
-        fields[fieldName] = {
+        unprocessedFields[fieldName] = {
           bucket: { type: 'string' },
           date: { type: 'number' },
           filename: { type: 'string' },
           filesize: { type: 'number' },
           metadata: { type: 'any' },
           path: { type: 'string' },
-          schema: { image: true, nullObject: true, isImageObject: true },
           uid: { type: 'string' },
+          schema: { image: true, isImageObject: true, nullObject: true },
         }
       }
     })

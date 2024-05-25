@@ -20,8 +20,8 @@ test('virtuals', async () => {
       name: { type: 'string' },
     },
   })
-  expect(user.fields.name.virtual).toEqual(undefined)
-  expect(user.fields.myBirds[0].virtual).toEqual(true)
+  expect(user.fields.name.schema.virtual).toEqual(undefined)
+  expect(user.fields.myBirds[0].schema.virtual).toEqual(true)
   expect(user.fields.myBirds.schema.virtual).toEqual(true)
 
   // Test insert/update/validate
