@@ -48,7 +48,7 @@ Model definition object.
     address: {
       name: { type: 'string' },
       type: { type: 'string' },
-      schema: { minLength: 1 },
+      schema: { strict: false }, // allows non-defined fields to save
     },
     pets: db.arrayWithSchema(
       [{
@@ -134,6 +134,9 @@ fieldType: {
   // Monastery will automatically create a mongodb index for this field, see "MongoDB indexes"
   // below for more information
   index: true|1|-1|'text'|'unique'|Object,
+
+  // Allows non-defined fields to save
+  strict: false,
 
   // The field  won't stored, handy for fields that get populated with documents, see ./find for more details
   virtual: true
