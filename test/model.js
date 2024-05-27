@@ -21,18 +21,8 @@ test('model > model on manager', async () => {
   db2.close()
 })
 
-test('model setup basics', async () => {
-  // Setup
-  let user = db.model('user', { fields: {
-    name: { type: 'string' },
-    pets: [{ type: 'string' }],
-    colors: { red: { type: 'string' } },
-    points: [[{ type: 'number' }]],
-    points2: [[{ x: { type: 'number' } }]],
-    logo: { type: 'image' },
-  }})
-
-  // no fields defined
+test('model setup with default fields', async () => {
+  // Default fields
   expect(db.model('user2', { fields: {} }).fields).toEqual({
     _id: {
       schema: {
@@ -64,7 +54,25 @@ test('model setup basics', async () => {
         type: 'integer',
       },
     },
+    schema: {
+      isObject: true,
+      isSchema: true,
+      isType: 'isObject',
+      type: 'object',
+    },
   })
+})
+
+test('model setup basics', async () => {
+  // Setup
+  let user = db.model('user', { fields: {
+    name: { type: 'string' },
+    pets: [{ type: 'string' }],
+    colors: { red: { type: 'string' } },
+    points: [[{ type: 'number' }]],
+    points2: [[{ x: { type: 'number' } }]],
+    logo: { type: 'image' },
+  }})
 
   // Has model name
   expect(user.name)
@@ -112,42 +120,6 @@ test('model setup basics', async () => {
       schema: { type: 'object', isObject: true, isSchema: true, isType: 'isObject' },
     }]]
   ))
-})
-
-test('model setup with default fields', async () => {
-  // Default fields
-  expect(db.model('user2', { fields: {} }).fields).toEqual({
-    _id: {
-      schema: {
-        insertOnly: true,
-        isId: true,
-        isSchema: true,
-        isType: 'isId',
-        type: 'id',
-      },
-    },
-    createdAt: {
-      schema: {
-        default: expect.any(Function),
-        insertOnly: true,
-        isInteger: true,
-        isSchema: true,
-        isType: 'isInteger',
-        timestampField: true,
-        type: 'integer',
-      },
-    },
-    updatedAt: {
-      schema: {
-        default: expect.any(Function),
-        isInteger: true,
-        isSchema: true,
-        isType: 'isInteger',
-        timestampField: true,
-        type: 'integer',
-      },
-    },
-  })
 })
 
 test('model setup with default objects', async () => {
@@ -246,6 +218,20 @@ test('model setup with schema', async () => {
     isType: 'isArray',
     virtual: true,
   })
+})
+
+test('model setup with schema on root', async () => {
+  // Expect to throw an error
+  expect(() => db.model('user', { fields: { name: 'string' } }))
+    .toThrow('The user.fields object should be a valid document, e.g. { name: { type: \'string\' }}')
+
+  // root has schema
+  expect(db.model('user', { fields: { name: { type: 'string' } } }).fields.schema)
+    .toEqual({ type: 'object', isObject: true, isSchema: true, isType: 'isObject' })
+
+  // root has custom schema
+  expect(db.model('user', { fields: { schema: { nullObject: true } } }).fields.schema)
+    .toEqual({ type: 'object', isObject: true, isSchema: true, isType: 'isObject', nullObject: true })
 })
 
 test('model setup with messages', async () => {
@@ -375,15 +361,15 @@ test('model setup with messages', async () => {
   })
 })
 
-test('model setup reserved rules', async () => {
+test('model setup with reserved and invalid rules', async () => {
   // Setup
   const db2 = monastery('127.0.0.1/monastery', { logLevel: 0 })
   let user = db2.model('user-model', {
     fields: {
       name: {
         type: 'string',
-        params: {}, // reserved keyword (image plugin)
-        paramsUnreserved: {},
+        params: {}, // reserved keyword (image plugin) 
+        invalidRule: {}, // no rule function found
       },
     },
     rules: {
@@ -392,10 +378,15 @@ test('model setup reserved rules', async () => {
       },
     },
   })
-  await expect(user.validate({ name: 'Martin' })).resolves.toEqual({
-    name: 'Martin',
-    createdAt: expect.any(Number),
-    updatedAt: expect.any(Number),
+  expect(user.fields.name).toEqual({
+    schema: {
+      type: 'string',
+      isString: true,
+      isSchema: true,
+      isType: 'isString',
+      params: {}, // still included
+      // invalidRule: {}, should be removed
+    },
   })
   db2.close()
 })

@@ -154,6 +154,53 @@ test('validation basic errors', async () => {
   })
 })
 
+test('validation type any', async () => {
+  let user1 = db.model('user', { 
+    fields: { 
+      name: { type: 'any' },
+    },
+  })
+  // Any type on field
+  await expect(user1.validate({ name: 'benjamin' })).resolves.toEqual({ name: 'benjamin' })
+  await expect(user1.validate({ name: 1 })).resolves.toEqual({ name: 1 })
+  await expect(user1.validate({ name: null })).resolves.toEqual({ name: null })
+  await expect(user1.validate({ name: true })).resolves.toEqual({ name: true })
+  await expect(user1.validate({ name: false })).resolves.toEqual({ name: false })
+  await expect(user1.validate({ name: [1, 2] })).resolves.toEqual({ name: [1, 2] })
+  await expect(user1.validate({ name: { first: 1 } })).resolves.toEqual({ name: { first: 1 } })
+})
+
+test('validation schema with reserved and invalid rules', async () => {
+  const db2 = monastery('127.0.0.1/monastery', { logLevel: 0 })
+  let user = db2.model('user-model', {
+    fields: {
+      sub: {
+        name: {
+          type: 'string',
+          default: true, // reserved keyword
+          invalidRule: {}, // no rule function found
+          validRule: true,
+        },
+      },
+    },
+    rules: {
+      default: (value) => { // function shouldn't run (i.e. value still is 'Martin')
+        return false
+      },
+      validRule: (value) => {
+        if (value === 'Martin') return true
+      },
+    },
+  })
+  await expect(user.validate({ sub: { name: 'Martin' } })).resolves.toEqual({
+    createdAt: expect.any(Number),
+    updatedAt: expect.any(Number),
+    sub: {
+      name: 'Martin',
+    },
+  })
+})
+
 test('validation subdocument errors', async () => {
   let user = db.model('user', { fields: {
     animals: {
