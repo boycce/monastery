@@ -65,18 +65,27 @@ test('model setup with default fields', async () => {
 
 test('model setup basics', async () => {
   // Setup
-  let user = db.model('user', { fields: {
-    name: { type: 'string' },
-    pets: [{ type: 'string' }],
-    colors: { red: { type: 'string' } },
-    points: [[{ type: 'number' }]],
-    points2: [[{ x: { type: 'number' } }]],
-    logo: { type: 'image' },
-  }})
+  let user = db.model('user', { 
+    fields: {
+      name: { type: 'string' },
+      pets: [{ type: 'string' }],
+      colors: { red: { type: 'string' } },
+      points: [[{ type: 'number' }]],
+      points2: [[{ x: { type: 'number' } }]],
+      logo: { type: 'image' },
+    },
+  })
 
   // Has model name
   expect(user.name)
     .toEqual('user')
+
+  // Expect to throw an error
+  expect(() => db.model('user', { fields: { type: 'any' } }))
+    .toThrow(
+      'Instead of using { type: \'any\' } for user.fields, please use the new \'strict\' definition rule, '
+      + 'e.g. { schema: { strict: false }}'
+    )
 
   // Basic field
   expect(user.fields.name.schema)
@@ -232,6 +241,10 @@ test('model setup with schema on root', async () => {
   // root has custom schema
   expect(db.model('user', { fields: { schema: { nullObject: true } } }).fields.schema)
     .toEqual({ type: 'object', isObject: true, isSchema: true, isType: 'isObject', nullObject: true })
+
+  // strict mode off
+  expect(db.model('user', { fields: { schema: { strict: false } } }).fields.schema)
+    .toEqual({ type: 'object', isObject: true, isSchema: true, isType: 'isObject', strict: false })
 })
 
 test('model setup with messages', async () => {

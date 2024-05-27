@@ -201,6 +201,39 @@ test('validation schema with reserved and invalid rules', async () => {
   })
 })
 
+test('validation strict false', async () => {
+  let user1 = db.model('user', { 
+    fields: {
+      name: { type: 'string' },
+    },
+  })
+  // strict on (default)
+  let inserted1 = await user1.insert({ data: { nonDefinedField: 1 } })
+  expect(inserted1).toEqual({
+    _id: inserted1._id,
+  })
+  let user2 = db.model('user', { 
+    fields: {
+      name: { type: 'string' },
+      sub: {
+        name: { type: 'string' },
+        schema: { strict: false },
+      },
+      subArray: [{
+        name: { type: 'string' },
+        schema: { strict: false },
+      }],
+      schema: { strict: false },
+    },
+  })
+  // strict off
+  let inserted2 = await user2.insert({ data: { nonDefinedField: 1 } })
+  expect(inserted2).toEqual({
+    _id: inserted2._id,
+    nonDefinedField: 1,
+  })
+})
+
 test('validation subdocument errors', async () => {
   let user = db.model('user', { fields: {
     animals: {
