@@ -94,6 +94,7 @@ You can view MongoDB's [compatibility table here](https://www.mongodb.com/docs/d
   - db._db moved to db.db
   - db.catch/then() moved to db.onError/db.onOpen()
   - next() is now redundant when returning promises from hooks, e.g. `afterFind: [async (data) => {...}]`
+  - option `skipValidation: true` now skips validation hooks 
 
 ## v2 Breaking Changes
 
