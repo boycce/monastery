@@ -199,6 +199,7 @@ test('validation schema with reserved and invalid rules', async () => {
       name: 'Martin',
     },
   })
+  db2.close()
 })
 
 test('validation strict false', async () => {
