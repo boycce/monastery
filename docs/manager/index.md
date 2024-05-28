@@ -50,7 +50,7 @@ db.onError((err) => {
 ### Properties
 
 - `manager.db`: Raw Mongo db instance
-- `manager.client`: Raw Mongo client instance. *You can use this to create a transaction, e.g. `await db.client.startSession().withTransaction(async () => {...})`*
+- `manager.client`: Raw Mongo client instance, which you can use to create [transactions](#transactions).
 
 ### Methods
 
@@ -61,6 +61,20 @@ db.onError((err) => {
 - `manager.onError(Function)`: Catches connection errors
 - `manager.onOpen(Function)`: Triggers on successful connection
 - `manager.getSignedUrl(path, expires, bucket)`: You can sign AWS S3 paths using this image plugin helper
+
+### Transactions
+
+You can create a Mongo transaction using the `manager.client` instance:
+
+```js
+const session = db.client.startSession()
+
+// Start the transaction, any thrown errors rollback all operations within the callback. The callback must return a promise.
+await session.withTransaction(async () => {
+  // Important:: You must pass the session to the operations
+  await db.person.insert({ data, session })
+})
+```
 
 ### Dates
 
