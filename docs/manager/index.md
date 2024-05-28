@@ -50,7 +50,7 @@ db.onError((err) => {
 ### Properties
 
 - `manager.db`: Raw Mongo db instance
-- `manager.client`: Raw Mongo client instance
+- `manager.client`: Raw Mongo client instance. *You can use this to create a transaction, e.g. `await db.client.startSession().withTransaction(async () => {...})`*
 
 ### Methods
 
