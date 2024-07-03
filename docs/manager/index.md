@@ -62,28 +62,6 @@ db.onError((err) => {
 - `manager.onOpen(Function)`: Triggers on successful connection
 - `manager.getSignedUrl(path, expires, bucket)`: You can sign AWS S3 paths using this image plugin helper
 
-### Transactions
-
-You can create a Mongo transaction using the `manager.client` instance:
-
-```js
-try {
-  // Create a new session
-  var session = db.client.startSession()
-  // Start the transaction, any thrown errors rollback all operations within the callback. The callback must return a promise.
-  await session.withTransaction(async () => {
-    // Important:: You must pass the session to the operations
-    await db.person.insert({ data, session })
-  })
-} catch (err) {
-  console.error(err)
-} finally {
-  if (session) {
-    await session.endSession()
-  }
-}
-```
-
 ### Dates
 
 *Dates are unix timestamps in seconds, you change this to milliseconds via the [manager configurations](./manager). We hope to support other string based timestamp variations soon..*
