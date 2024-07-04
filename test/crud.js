@@ -590,20 +590,20 @@ test('update large document', async () => {
   // Insert
   let inserted = await large._insert({})
   // Update
-  // console.time('update large document')
+  console.time('update large document')
   let update = await large.update({
     query: inserted._id,
     data: largePayload,
   })
-  // console.timeEnd('update large document')
+  console.timeEnd('update large document')
   // Check
   await expect(update).toEqual(removePrunedProperties(largePayload))
   // Find
-  // console.time('find large document')
-  // await large.findOne({
-  //   query: inserted._id,
-  // })
-  // console.timeEnd('find large document')
+  console.time('find large document')
+  await large.findOne({
+    query: inserted._id,
+  })
+  console.timeEnd('find large document')
 
   function removePrunedProperties(entity) {
     for (let entitiesKey of [
@@ -632,6 +632,71 @@ test('update large document', async () => {
     return entity
   }
 })
+
+// test('update larger document', async () => {
+//   // todo: sereach util.deepCopy
+//   // todo: check castIds and any other recursive functions
+//   // todo: move default fields to before validate
+//   db.model('a', { fields: {} })
+//   db.model('b', { fields: {} })
+//   db.model('c', { fields: {} })
+//   db.model('d', { fields: {} })
+//   db.model('e', { fields: {} })
+//   try {
+//     var larger = db.model('larger', require('../resources/fixtures/larger-definition.js'))
+//     var largerPayload = require('../resources/fixtures/larger-payload.json').version
+//   } catch (e) {
+//     // ignore publicly for now
+//     return
+//   }
+//   // Validate
+//   console.time('validate larger document')
+//   let validate = await larger.validate(largerPayload, { update: true })
+//   console.timeEnd('validate larger document')
+//   // // Insert
+//   // let inserted = await larger._insert({})
+//   // // Update
+//   // console.time('update larger document')
+//   // let update = await larger.update({
+//   //   query: inserted._id,
+//   //   data: largerPayload,
+//   // })
+//   // console.timeEnd('update larger document')
+//   // // Check
+//   // await expect(update).toEqual(convertIdsToObjectIdsAndRemoveActuallyValues(largerPayload))
+//   // // Find
+//   // console.time('find larger document')
+//   // await larger.findOne({
+//   //   query: inserted._id,
+//   // })
+//   // console.timeEnd('find larger document')
+
+//   // function convertIdsToObjectIdsAndRemoveActuallyValues(entity) {
+//   //   for (let entitiesKey of [
+//   //     'components', 'connections', 'bridges', 'openings', 'spaces', 'elements', 'elementTypes', 'categories', 
+//   //     'typologies',
+//   //   ]) {
+//   //     if (entity[entitiesKey]) {
+//   //       for (let i=0, l=entity[entitiesKey].length; i<l; i++) {
+//   //         entity[entitiesKey][i] = convertIdsToObjectIdsAndRemoveActuallyValues(entity[entitiesKey][i])
+//   //       }
+//   //     }
+//   //   }
+//   //   // remove index and actually keys
+//   //   if (entity.metrics) {
+//   //     delete entity.index
+//   //     for (let key in entity.metrics) {
+//   //       if (entity.metrics[key].S_ == 'A_') delete entity.metrics[key].S_
+//   //       delete entity.metrics[key].A_
+//   //     }
+//   //   }
+//   //   // convert _id to ObjectId
+//   //   if (entity._id) {
+//   //     entity._id = db.id(entity._id)
+//   //   }
+//   //   return entity
+//   // }
+// })
 
 test('findOneAndUpdate general', async () => {
   // todo: test all findOneAndUpdate options (e.g. array population)

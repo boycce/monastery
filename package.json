@@ -20,6 +20,7 @@
   ],
   "scripts": {
     "dev": "npm run lint & jest --watchAll --runInBand --verbose=false",
+    "dev-profile": "node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand",
     "docs": "cd docs && bundle exec jekyll serve --livereload --livereload-port 4001",
     "lint": "eslint ./lib ./plugins ./test",
     "mona": "nodemon resources/mona.js",
