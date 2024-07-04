@@ -787,6 +787,7 @@ test('validation custom rules', async () => {
 
 test('validated data', async () => {
   let fields = {
+    age: { type: 'number' },
     name: { type: 'string' },
     names: [{ type: 'string' }],
     animals: {
@@ -807,6 +808,12 @@ test('validated data', async () => {
   // String data
   await expect(user.validate({ name: 'Martin Luther' })).resolves.toEqual({ name: 'Martin Luther' })
   await expect(user.validate({ name: null })).resolves.toEqual({ name: null })
+
+  // Number data
+  await expect(user.validate({ age: 1 })).resolves.toEqual({ age: 1 })
+  await expect(user.validate({ age: Infinity })).resolves.toEqual({ age: Infinity })
+  await expect(user.validate({ age: NaN })).resolves.toEqual({ age: NaN })
+  await expect(user.validate({ age: null })).resolves.toEqual({ age: null })
 
   // Array data
   await expect(user.validate({ names: ['blue'] })).resolves.toEqual({ names: ['blue'] })

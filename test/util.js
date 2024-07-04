@@ -35,8 +35,24 @@ test('util > isId', async () => {
   expect(util.isId('')).toEqual(false)
   expect(util.isId(1234)).toEqual(false)
   expect(util.isId('1234')).toEqual(false)
+  expect(util.isId(null)).toEqual(false)
+  expect(util.isId({})).toEqual(false)
+  expect(util.isId(['5ff50fe955da2c00170de734'])).toEqual(false)
   expect(util.isId('5ff50fe955da2c00170de734')).toEqual(true)
+  expect(util.isId(monastery.prototype.id())).toEqual(true)
 })
+
+test('util > isHex24', async () => {
+  expect(util.isHex24('')).toEqual(false)
+  expect(util.isHex24(1234)).toEqual(false)
+  expect(util.isHex24('1234')).toEqual(false)
+  expect(util.isHex24(null)).toEqual(false)
+  expect(util.isHex24({})).toEqual(false)
+  expect(util.isHex24(['5ff50fe955da2c00170de734'])).toEqual(false)
+  expect(util.isHex24('5ff50fe955da2c00170de734')).toEqual(true)
+  expect(util.isHex24(monastery.prototype.id())).toEqual(true)
+})
+
 
 test('util > arrayWithSchema', async () => {
   let res = monastery.prototype.arrayWithSchema([{ name: { type: 'string' }}], { minLength: 1 })

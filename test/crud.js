@@ -340,6 +340,7 @@ test('find default field blacklisted', async () => {
 test('update general', async () => {
   let user = db.model('user', {
     fields: {
+      age: { type: 'number' },
       name: { type: 'string' },
     },
   })
@@ -364,8 +365,8 @@ test('update general', async () => {
   ])
 
   // Update
-  await expect(user.update({ query: inserted._id, data: { name: 'Martin Luther2' }}))
-    .resolves.toEqual({ name: 'Martin Luther2' })
+  await expect(user.update({ query: inserted._id, data: { name: 'Martin Luther2', age: Infinity }}))
+    .resolves.toEqual({ name: 'Martin Luther2', age: Infinity })
 
   // Update (no/empty data object)
   await expect(user.update({ query: inserted._id, data: {}}))
