@@ -337,6 +337,96 @@ test('find default field blacklisted', async () => {
   })
 })
 
+test('find default field population with noDefaults', async () => {
+  // similar to "find default field population"
+  db.model('user', {
+    fields: {
+      name: { type: 'string', default: 'Martin Luther' },
+      addresses: [{ city: { type: 'string' }, country: { type: 'string', default: 'Germany' } }],
+      address: { country:  { type: 'string', default: 'Germany' }},
+      pet:  { dog: { model: 'dog' }},
+      pets:  { dog: [{ model: 'dog' }]},
+      dogs: [{ model: 'dog' }], // virtual association
+    },
+  })
+  db.model('dog', {
+    fields: {
+      name: { type: 'string', default: 'Scruff' },
+      user: { model: 'user' },
+    },
+  })
+
+  // Default field population test
+  // Insert documents (without defaults)
+  let dog1 = await db.dog._insert({})
+  let dog2 = await db.dog._insert({})
+  let user1 = await db.user._insert({
+    addresses: [
+      { city: 'Frankfurt' },
+      { city: 'Christchurch', country: 'New Zealand' },
+    ],
+    pet: { dog: dog1._id },
+    pets: { dog: [dog1._id, dog2._id]},
+  })
+  await db.dog._update(dog1._id, { $set: { user: user1._id }})
+
+  let find1 = await db.user.findOne({
+    query: user1._id,
+    populate: ['pet.dog', 'pets.dog', {
+      from: 'dog',
+      localField: '_id',
+      foreignField: 'user',
+      as: 'dogs',
+    }],
+    noDefaults: true,
+  })
+
+  expect(find1).toEqual({
+    _id: user1._id,
+    addresses: [
+      { city: 'Frankfurt' },
+      { city: 'Christchurch', country: 'New Zealand' },
+    ],
+    pet: { dog: { _id: dog1._id, user: user1._id }},
+    pets: {
+      dog: [
+        { _id: dog1._id, user: user1._id },
+        { _id: dog2._id },
+      ],
+    },
+    dogs: [{ _id: dog1._id, user: user1._id }],
+  })
+
+  let find2 = await db.user.findOne({
+    query: user1._id,
+    populate: ['pet.dog', 'pets.dog', {
+      from: 'dog',
+      localField: '_id',
+      foreignField: 'user',
+      as: 'dogs',
+    }],
+    noDefaults: ['dogs', 'pet.dog'],
+  })
+
+  expect(find2).toEqual({
+    _id: user1._id,
+    name: 'Martin Luther',
+    addresses: [
+      { city: 'Frankfurt', country: 'Germany' },
+      { city: 'Christchurch', country: 'New Zealand' },
+    ],
+    address: { country: 'Germany' },
+    pet: { dog: { _id: dog1._id, user: user1._id }},
+    pets: {
+      dog: [
+        { _id: dog1._id, name: 'Scruff', user: user1._id },
+        { _id: dog2._id, name: 'Scruff' },
+      ],
+    },
+    dogs: [{ _id: dog1._id, user: user1._id }],
+  })
+})
+
 test('update general', async () => {
   let user = db.model('user', {
     fields: {

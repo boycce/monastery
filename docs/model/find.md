@@ -14,6 +14,7 @@ Find document(s) in a collection, and call the model hook: `afterFind`
 - `query` *(object\|id)*: [`MongoDB query document`](https://www.mongodb.com/docs/v5.0/tutorial/query-documents/), or id
 - [[`blacklist`](#blacklisting)] *(array\|string\|false)*: augment `definition.findBL`. `false` will remove all blacklisting
 - [`getSignedUrls`] *(boolean)*: get signed urls for all image objects
+- [`noDefaults`] *(boolean\|string\|array)*: dont add defaults for any matching paths, e.g. ['pet.name']]
 - [[`populate`](#populate)] *(array)*
 - [`project`] *(string\|array\|object)*: return only these fields, ignores blacklisting
 - [`sort`] *(string\|array\|object)*: same as the mongodb option, but allows string parsing e.g. 'name', 'name:1'
