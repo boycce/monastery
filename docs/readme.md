@@ -14,6 +14,7 @@
 * Blacklist sensitive fields once in your model definition, or per operation
 * Model methods can accept data in bracket (multipart/form) and dot notation, you can also mix these together
 * Automatic Mongo index creation
+* Documents validate, insert and update 7-10x faster than Mongoose
 
 #### Why Monastery over Mongoose?
 
@@ -131,6 +132,8 @@ You can view MongoDB's [compatibility table here](https://www.mongodb.com/docs/d
 - ~~Docs: model.methods~~
 - ~~Convert hooks to promises~~
 - ~~added `model.count()`~~
+- Typescript support
+- Add soft remove plugin
 
 ## Debugging
 
