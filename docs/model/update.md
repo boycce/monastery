@@ -22,7 +22,17 @@ Update document(s) in a collection and calls model hooks: `beforeUpdate`,  `afte
 
 ### Returns
 
-A promise
+`{Promise<Object>}` A promise that resolves to an object with the updated fields.
+ 
+You can also access the native MongoDB output via `result._output`:
+```js
+{
+  acknowledged: true,
+  modifiedCount: 1,
+  matchedCount: 1,
+  ...
+}
+```
 
 ### Example
 
