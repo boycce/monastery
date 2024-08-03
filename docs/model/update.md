@@ -24,7 +24,7 @@ Update document(s) in a collection and calls model hooks: `beforeUpdate`,  `afte
 
 `{Promise<Object>}` A promise that resolves to an object with the updated fields.
  
-You can also access the native MongoDB output via `result._output`:
+You can also access the native MongoDB output via `result._output`, a prototype property:
 ```js
 {
   acknowledged: true,
