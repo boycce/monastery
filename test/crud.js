@@ -663,7 +663,7 @@ test('update operators', async () => {
   expect(beforeValidateHookCalled).toEqual(false)
 })
 
-test('update mixing formData', async() => {
+test('update mixing data structures (bracket notation and objects)', async() => {
   // Mixing data
   let consignment = db.model('consignment', {
     fields: {

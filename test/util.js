@@ -1,35 +1,190 @@
 const util = require('../lib/util.js')
 const monastery = require('../lib/index.js')
 
-test('util > formdata', async () => {
-  expect(await util.parseFormData({
+test('util > parseDotNotation', async () => {
+  const input = {
+    'name': 'Martin',
+    'deep.companyLogo1': 'a',
+    // not dot notation
+    'specialInstructions': [
+      {
+        text: 'POD added by driver',
+        createdAt: 1653603212886,
+        updatedByName: 'Paul Driver 3',
+        importance: 'low',
+      }, {
+        text: 'filler',
+        createdAt: 1653601752472,
+        updatedByName: 'Paul',
+        importance: 'low',
+      },
+    ],
+    // Fields below are not dot notation, but should still be kept, in order.
+    'specialInstructions[0][text]': 'filler',
+    'specialInstructions[0][createdAt]': 1653601752472,
+    'specialInstructions[0][updatedByName]': 'Paul',
+    'specialInstructions[0][importance]': 'low',
+    // should override above
+    'deep': {
+      companyLogo2: 'b',
+      companyLogo3: 'b',
+    },
+    // should be added into above
+    'deep.companyLogo3': 'c',
+    'deep.companyLogos.0.logo': 'd',
+    'deep.companyLogos.1.logo': 'e',
+  }
+  const output = {
+    name: 'Martin',
+    deep: { // object first seen here
+      companyLogo2: 'b',
+      companyLogo3: 'c',
+      companyLogos: [{ logo: 'd' }, { logo: 'e' }],
+    },
+    specialInstructions: [
+      {
+        text: 'POD added by driver',
+        createdAt: 1653603212886,
+        updatedByName: 'Paul Driver 3',
+        importance: 'low',
+      }, {
+        text: 'filler',
+        createdAt: 1653601752472,
+        updatedByName: 'Paul',
+        importance: 'low',
+      },
+    ],
+    'specialInstructions[0][text]': 'filler',
+    'specialInstructions[0][createdAt]': 1653601752472,
+    'specialInstructions[0][updatedByName]': 'Paul',
+    'specialInstructions[0][importance]': 'low',
+  }
+
+  // parseDotNotation output
+  expect(util.parseDotNotation(input)).toEqual(output)
+
+  // expected order of keys
+  expect(Object.keys(output)).toEqual([
+    'name',
+    'deep',
+    'specialInstructions',
+    'specialInstructions[0][text]',
+    'specialInstructions[0][createdAt]',
+    'specialInstructions[0][updatedByName]',
+    'specialInstructions[0][importance]',
+  ])
+
+})
+
+test('util > parseBracketNotation', async () => {
+  const input = {
     'name': 'Martin',
     'pets[]': '',
-    'deep[companyLogo]': 'a',
-    'deep[companyLogos][0]': 'b',
-    'deep[companyLogos2][0][logo]':'c',
-    'deep[companyLogos2][1][logo]': '',
-    'users[0][first]': 'Martin',
-    'users[0][last]': 'Luther',
-    'users[1][first]': 'Bruce',
-    'users[1][last]': 'Lee',
-  })).toEqual({
+    'deep[companyLogo1]': 'a',
+    // not dot notation
+    'specialInstructions': [
+      {
+        text: 'POD added by driver',
+        createdAt: 1653603212886,
+        updatedByName: 'Paul Driver 3',
+        importance: 'low',
+      }, {
+        text: 'filler',
+        createdAt: 1653601752472,
+        updatedByName: 'Paul',
+        importance: 'low',
+      },
+    ],
+    // Fields below are not bracket notation, but should still be kept, in order.
+    'specialInstructions.0.text': 'filler',
+    'specialInstructions.0.createdAt': 1653601752472,
+    'specialInstructions.0.updatedByName': 'Paul',
+    'specialInstructions.0.importance': 'low',
+    // should override above
+    'deep': {
+      companyLogo2: 'b',
+      companyLogo3: 'b',
+    },
+    // should be added into above
+    'deep[companyLogo3]': 'c',
+    'deep[companyLogos][0][logo]':'d',
+    'deep[companyLogos][1][logo]':'e',
+  }
+  const output = {
     name: 'Martin',
     pets: expect.any(Array),
-    deep: {
-      companyLogo: 'a',
-      companyLogos: ['b'],
-      companyLogos2: [{ logo: 'c' }, { logo: '' }],
+    deep: { // object first seen here
+      companyLogo2: 'b',
+      companyLogo3: 'c',
+      companyLogos: [{ logo: 'd' }, { logo: 'e' }],
     },
-    users: [
-      { 'first': 'Martin', 'last': 'Luther' },
-      { 'first': 'Bruce', 'last': 'Lee' },
+    specialInstructions: [
+      {
+        text: 'POD added by driver',
+        createdAt: 1653603212886,
+        updatedByName: 'Paul Driver 3',
+        importance: 'low',
+      }, {
+        text: 'filler',
+        createdAt: 1653601752472,
+        updatedByName: 'Paul',
+        importance: 'low',
+      },
     ],
-  })
-  expect(() => util.parseFormData({ 'users[][\'name\']': 'Martin' })).toThrow(
+    'specialInstructions.0.text': 'filler',
+    'specialInstructions.0.createdAt': 1653601752472,
+    'specialInstructions.0.updatedByName': 'Paul',
+    'specialInstructions.0.importance': 'low',
+  }
+
+  // parseBracketNotation output
+  expect(util.parseBracketNotation(input)).toEqual(output)
+
+  // expected order of keys
+  expect(Object.keys(output)).toEqual([
+    'name',
+    'pets',
+    'deep',
+    'specialInstructions',
+    'specialInstructions.0.text',
+    'specialInstructions.0.createdAt',
+    'specialInstructions.0.updatedByName',
+    'specialInstructions.0.importance',
+  ])
+
+  expect(() => util.parseBracketNotation({ 'users[][\'name\']': 'Martin' })).toThrow(
     'Monastery: Array items in bracket notation need array indexes "users[][\'name\']", e.g. users[0][name]'
   )
 })
+
+// test('util > parseBracketToDotNotation', async () => {
+//   expect(await util.parseBracketToDotNotation({
+//     'name': 'Martin',
+//     'pets[]': '',
+//     'deep[companyLogo]': 'a',
+//     'deep[companyLogos][0]': 'b',
+//     'deep[companyLogos2][0][logo]':'c',
+//     'deep[companyLogos2][1][logo]': '',
+//     'users[0][first]': 'Martin',
+//     'users[0][last]': 'Luther',
+//     'users[1][first]': 'Bruce',
+//     'users[1][last]': 'Lee',
+//   })).toEqual({
+//     name: 'Martin',
+//     pets: expect.any(Array),
+//     'deep.companyLogo': 'a',
+//     'deep.companyLogos.0': 'b',
+//     'deep.companyLogos2.0.logo': 'c',
+//     'deep.companyLogos2.1.logo': '',
+//     'users.0.first': 'Martin',
+//     'users.0.last': 'Luther',
+//     'users.1.first': 'Bruce',
+//     'users.1.last': 'Lee',
+//   })
+//   expect(() => util.parseBracketNotation({ 'users[][\'name\']': 'Martin' })).toThrow(
+//     'Monastery: Array items in bracket notation need array indexes "users[][\'name\']", e.g. users[0][name]'
+//   )
+// })
 
 test('util > isId', async () => {
   expect(util.isId('')).toEqual(false)
