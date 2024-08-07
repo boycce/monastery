@@ -337,41 +337,54 @@ test('find default field blacklisted', async () => {
   })
 })
 
-test('find default field population with noDefaults', async () => {
-  // similar to "find default field population"
-  db.model('user', {
-    fields: {
-      name: { type: 'string', default: 'Martin Luther' },
-      addresses: [{ city: { type: 'string' }, country: { type: 'string', default: 'Germany' } }],
-      address: { country:  { type: 'string', default: 'Germany' }},
-      pet:  { dog: { model: 'dog' }},
-      pets:  { dog: [{ model: 'dog' }]},
-      dogs: [{ model: 'dog' }], // virtual association
-    },
-  })
-  db.model('dog', {
-    fields: {
-      name: { type: 'string', default: 'Scruff' },
-      user: { model: 'user' },
-    },
-  })
+test('find default field population with option noDefaults', async () => {
+  async function setup(noDefaults) {
+    /**
+     * Setup
+     * @returns {Object} {dog, user, dog1Doc, dog2Doc, user1Doc}
+     */
+    // similar to "find default field population"
+    const db = monastery('127.0.0.1/monastery', { noDefaults: noDefaults, timestamps: false })
+    const userDefinition = {
+      fields: {
+        name: { type: 'string', default: 'Martin Luther' },
+        addresses: [{ city: { type: 'string' }, country: { type: 'string', default: 'Germany' } }],
+        address: { country:  { type: 'string', default: 'Germany' }},
+        pet:  { dog: { model: 'dog' }},
+        pets:  { dog: [{ model: 'dog' }]},
+        dogs: [{ model: 'dog' }], // virtual association
+      },
+    }
+    const dogDefinition = {
+      fields: {
+        name: { type: 'string', default: 'Scruff' },
+        user: { model: 'user' },
+      },
+    }
+    const user = db.model('user', userDefinition)
+    const dog = db.model('dog', dogDefinition)
 
-  // Default field population test
-  // Insert documents (without defaults)
-  let dog1 = await db.dog._insert({})
-  let dog2 = await db.dog._insert({})
-  let user1 = await db.user._insert({
-    addresses: [
-      { city: 'Frankfurt' },
-      { city: 'Christchurch', country: 'New Zealand' },
-    ],
-    pet: { dog: dog1._id },
-    pets: { dog: [dog1._id, dog2._id]},
-  })
-  await db.dog._update(dog1._id, { $set: { user: user1._id }})
+    // Default field population test
+    // Insert documents (without defaults)
+    let dog1Doc = await dog._insert({})
+    let dog2Doc = await dog._insert({})
+    let user1Doc = await user._insert({
+      addresses: [
+        { city: 'Frankfurt' },
+        { city: 'Christchurch', country: 'New Zealand' },
+      ],
+      pet: { dog: dog1Doc._id },
+      pets: { dog: [dog1Doc._id, dog2Doc._id]},
+    })
+    await dog._update(dog1Doc._id, { $set: { user: user1Doc._id }})
+    return { db, dog, user, dog1Doc, dog2Doc, user1Doc }
+  }
 
-  let find1 = await db.user.findOne({
-    query: user1._id,
+  const s1 = await setup()
+
+  // Test noDefaults = true
+  const find1 = await s1.db.user.findOne({
+    query: s1.user1Doc._id,
     populate: ['pet.dog', 'pets.dog', {
       from: 'dog',
       localField: '_id',
@@ -380,25 +393,25 @@ test('find default field population with noDefaults', async () => {
     }],
     noDefaults: true,
   })
-
   expect(find1).toEqual({
-    _id: user1._id,
+    _id: s1.user1Doc._id,
     addresses: [
       { city: 'Frankfurt' },
       { city: 'Christchurch', country: 'New Zealand' },
     ],
-    pet: { dog: { _id: dog1._id, user: user1._id }},
+    pet: { dog: { _id: s1.dog1Doc._id, user: s1.user1Doc._id }},
     pets: {
       dog: [
-        { _id: dog1._id, user: user1._id },
-        { _id: dog2._id },
+        { _id: s1.dog1Doc._id, user: s1.user1Doc._id },
+        { _id: s1.dog2Doc._id },
       ],
     },
-    dogs: [{ _id: dog1._id, user: user1._id }],
+    dogs: [{ _id: s1.dog1Doc._id, user: s1.user1Doc._id }],
   })
 
-  let find2 = await db.user.findOne({
-    query: user1._id,
+  // Test noDefaults = ['dogs', 'pet.dog']
+  const find2 = await s1.db.user.findOne({
+    query: s1.user1Doc._id,
     populate: ['pet.dog', 'pets.dog', {
       from: 'dog',
       localField: '_id',
@@ -407,23 +420,79 @@ test('find default field population with noDefaults', async () => {
     }],
     noDefaults: ['dogs', 'pet.dog'],
   })
-
   expect(find2).toEqual({
-    _id: user1._id,
+    _id: s1.user1Doc._id,
     name: 'Martin Luther',
     addresses: [
       { city: 'Frankfurt', country: 'Germany' },
       { city: 'Christchurch', country: 'New Zealand' },
     ],
     address: { country: 'Germany' },
-    pet: { dog: { _id: dog1._id, user: user1._id }},
+    pet: { dog: { _id: s1.dog1Doc._id, user: s1.user1Doc._id }}, // should not have a default name
     pets: {
       dog: [
-        { _id: dog1._id, name: 'Scruff', user: user1._id },
-        { _id: dog2._id, name: 'Scruff' },
+        { _id: s1.dog1Doc._id, name: 'Scruff', user: s1.user1Doc._id },
+        { _id: s1.dog2Doc._id, name: 'Scruff' },
       ],
     },
-    dogs: [{ _id: dog1._id, user: user1._id }],
+    dogs: [{ _id: s1.dog1Doc._id, user: s1.user1Doc._id }], // should not have a default name
+  })
+
+  const s2 = await setup(['dogs'])
+
+  // Test noDefaults = true overrides manager option noDefaults = ['dogs']
+  const find3 = await s2.db.user.findOne({
+    query: s2.user1Doc._id,
+    populate: ['pet.dog', 'pets.dog', {
+      from: 'dog',
+      localField: '_id',
+      foreignField: 'user',
+      as: 'dogs',
+    }],
+    noDefaults: true,
+  })
+  expect(find3).toEqual({
+    _id: s2.user1Doc._id,
+    addresses: [
+      { city: 'Frankfurt' },
+      { city: 'Christchurch', country: 'New Zealand' },
+    ],
+    pet: { dog: { _id: s2.dog1Doc._id, user: s2.user1Doc._id }},
+    pets: {
+      dog: [
+        { _id: s2.dog1Doc._id, user: s2.user1Doc._id },
+        { _id: s2.dog2Doc._id },
+      ],
+    },
+    dogs: [{ _id: s2.dog1Doc._id, user: s2.user1Doc._id }],
+  })
+
+  // Test manager option noDefaults = ['dogs']
+  const find4 = await s2.db.user.findOne({
+    query: s2.user1Doc._id,
+    populate: ['pet.dog', 'pets.dog', {
+      from: 'dog',
+      localField: '_id',
+      foreignField: 'user',
+      as: 'dogs',
+    }],
+  })
+  expect(find4).toEqual({
+    _id: s2.user1Doc._id,
+    name: 'Martin Luther',
+    addresses: [
+      { city: 'Frankfurt', country: 'Germany' },
+      { city: 'Christchurch', country: 'New Zealand' },
+    ],
+    address: { country: 'Germany' },
+    pet: { dog: { _id: s2.dog1Doc._id, user: s2.user1Doc._id, name: 'Scruff' }},
+    pets: {
+      dog: [
+        { _id: s2.dog1Doc._id, name: 'Scruff', user: s2.user1Doc._id },
+        { _id: s2.dog2Doc._id, name: 'Scruff' },
+      ],
+    },
+    dogs: [{ _id: s2.dog1Doc._id, user: s2.user1Doc._id }], // should not have a default name
   })
 })
 
