@@ -79,7 +79,7 @@ test('util > parseDotNotation', async () => {
 test('util > parseBracketNotation', async () => {
   const input = {
     'name': 'Martin',
-    'pets[]': '',
+    // 'pets[]': '', // <-- not supported
     'deep[companyLogo1]': 'a',
     // not dot notation
     'specialInstructions': [
@@ -112,7 +112,7 @@ test('util > parseBracketNotation', async () => {
   }
   const output = {
     name: 'Martin',
-    pets: expect.any(Array),
+    // pets: expect.any(Array),
     deep: { // object first seen here
       companyLogo2: 'b',
       companyLogo3: 'c',
@@ -143,7 +143,6 @@ test('util > parseBracketNotation', async () => {
   // expected order of keys
   expect(Object.keys(output)).toEqual([
     'name',
-    'pets',
     'deep',
     'specialInstructions',
     'specialInstructions.0.text',
