@@ -86,7 +86,7 @@ You can view MongoDB's [compatibility table here](https://www.mongodb.com/docs/d
 ## v3 Breaking Changes
 
   - Removed callback functions on all model methods, you can use the returned promise instead
-  - model.update() now returns the following _update property: `{ acknowledged: true, matchedCount: 1, modifiedCount: 1, upsertedCount: 0, upsertedId: null }` instead of `{ n: 1, nModified: 1, ok: 1 }`
+  - model.update() now returns the following res._output property: `{ acknowledged: true, matchedCount: 1, modifiedCount: 1, upsertedCount: 0, upsertedId: null }` instead of `{ n: 1, nModified: 1, ok: 1 }`
   - model.remove() now returns `{ acknowledged: true, deletedCount: 1 }`, instead of `{ results: {n:1, ok:1} }`
   - model._indexes() now returns collection._indexes() not collection._indexInformation()
   - db.model.* moved to db.models.*
@@ -95,7 +95,7 @@ You can view MongoDB's [compatibility table here](https://www.mongodb.com/docs/d
   - db._db moved to db.db
   - db.catch/then() moved to db.onError/db.onOpen()
   - next() is now redundant when returning promises from hooks, e.g. `afterFind: [async (data) => {...}]`
-  - option `skipValidation: true` now skips validation hooks 
+  - deep paths in data, e.g. `books[].title` are now validated, and don't replace the whole object, e.g. `books`
 
 ## v2 Breaking Changes
 
@@ -134,6 +134,8 @@ You can view MongoDB's [compatibility table here](https://www.mongodb.com/docs/d
 - ~~added `model.count()`~~
 - Typescript support
 - Add soft remove plugin
+- ~~Added deep path validation support for updates~~
+- ~~Added option skipHooks~~
 
 ## Debugging
 
