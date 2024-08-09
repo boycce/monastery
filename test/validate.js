@@ -300,7 +300,7 @@ test('validation subdocument errors', async () => {
     ])
   )
 
-  // Insert: Ignore required subdocument property with a defined parent
+  // Insert: Required subdocument property is ignored with a parent/grandparent specificed
   await expect(user.validate({ animals: {} }, { validateUndefined: false })).resolves.toEqual({
     animals: {},
   })
