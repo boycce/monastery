@@ -1448,27 +1448,35 @@ test('update set and unset with option skipValidation', async () => {
     status: '400',
   }]
 
-  // $set with skipValidation: undefined
+  // --- $set/data ---
+
+  // $set with skipValidation: undefined (true)
   const u1 = { query: userId, $set: { 'profile.age': 'not a number' } }
   await expect(user.update(u1)).resolves.toEqual({ 'profile.age': 'not a number' })
   await expect(user.findOne(userId)).resolves.toEqual({ _id: userId, profile: { name: 'John Doe', age: 'not a number' } })
 
-  // $set with skipValidation: true
-  const u2 = { query: userId, $set: { 'profile.age': 'not a number2' }, skipValidation: true }
-  await expect(user.update(u2)).resolves.toEqual({ 'profile.age': 'not a number2' })
+  // data with skipValidation: undefined (false)
+  const u11 = { query: userId, data: { 'profile.age': 'not a number' } }
+  await expect(user.update(u11)).rejects.toEqual(error('Value was not a number.', 'profile.age'))
 
-  // $set with skipValidation: false
-  const u3 = { query: userId, $set: { 'profile.age': '8' }, skipValidation: false }
-  await expect(user.update(u3)).resolves.toEqual({ 'profile.age': 8 })
-  await expect(user.findOne(userId)).resolves.toEqual({ _id: userId, profile: { name: 'John Doe', age: 8 } })
+  for (let key of ['$set', 'data']) {
+    // $set with skipValidation: true
+    const u2 = { query: userId, [key]: { 'profile.age': 'not a number2' }, skipValidation: true }
+    await expect(user.update(u2)).resolves.toEqual({ 'profile.age': 'not a number2' })
 
-  // $set error with skipValidation: false
-  const u4 = { query: userId, $set: { 'profile.age': 'not a number' }, skipValidation: false }
-  await expect(user.update(u4)).rejects.toEqual(error('Value was not a number.', 'profile.age'))
+    // $set with skipValidation: false
+    const u3 = { query: userId, [key]: { 'profile.age': '8' }, skipValidation: false }
+    await expect(user.update(u3)).resolves.toEqual({ 'profile.age': 8 })
+    await expect(user.findOne(userId)).resolves.toEqual({ _id: userId, profile: { name: 'John Doe', age: 8 } })
 
-  // $set error with skipValidation: ['profile']
-  const u6 = { query: userId, $set: { 'profile.age': 'not a number4' }, skipValidation: ['profile'] }
-  await expect(user.update(u6)).resolves.toEqual({ 'profile.age': 'not a number4' })
+    // $set error with skipValidation: false
+    const u4 = { query: userId, [key]: { 'profile.age': 'not a number' }, skipValidation: false }
+    await expect(user.update(u4)).rejects.toEqual(error('Value was not a number.', 'profile.age'))
+
+    // $set error with skipValidation: ['profile']
+    const u6 = { query: userId, [key]: { 'profile.age': 'not a number4' }, skipValidation: ['profile'] }
+    await expect(user.update(u6)).resolves.toEqual({ 'profile.age': 'not a number4' })
+  }
 
   // --- $unset ---
 
