@@ -1181,8 +1181,85 @@ test('validation option validateUndefined', async () => {
     .resolves.toEqual({ names: [{}] })
 })
 
-test('validation hooks', async () => {
-  let user = db.model('user', {
+test('validation update dot notation', async () => {
+  // Only updates the fields that are passed in the data object, similar to $set. They don't 
+  // remove subdocument fields that are not present in the data object.
+  const user = db.model('user_partialUpdate1', {
+    fields: {
+      name: { type: 'string' },
+      address: {
+        city: { type: 'string' },
+        country: { type: 'string' },
+      },
+    },
+  })
+  const user2 = db.model('user_partialUpdate2', {
+    fields: {
+      name: { type: 'string' },
+      address: {
+        city: { type: 'string' },
+        country: { type: 'string', required: true },
+      },
+      books: [{
+        title: { type: 'string', required: true },
+        pages: {
+          count: { type: 'number', required: true },
+        },
+      }],
+    },
+  })
+
+  // Partial validate
+  const validated1 = await user.validate({ 
+    'address.city': 'Berlin2',
+    'address': { city: 'Berlin' }, // preserved
+  })
+  expect(validated1).toEqual({ 
+    'address': { city: 'Berlin' }, 
+    'address.city': 'Berlin2',
+  })
+
+   /// { partialUpdate: true }
+
+  // Order of fields, normal objects are ordered first
+  expect(Object.keys(validated1)).toEqual(['address', 'address.city'])
+
+  // validate (update) throws required error for deep field (as normal)
+  await expect(user2.validate({ 'address': { city: 'Berlin' }}, { update: true }))
+    .rejects.toEqual(expect.any(Array))
+
+  // validate (update) works with dot notatation paths
+  await expect(user2.validate({ 'address.city': 'Berlin2' }, { update: true }))
+    .resolves.toEqual({ 'address.city': 'Berlin2' })
+
+  // validate (insert) still throws required errors, even with dot notatation paths
+  await expect(user2.validate({ 'address.city': 'Berlin2' }))
+    .rejects.toEqual(expect.any(Array))
+
+  // validate (update) works with dot notation array paths, and validates data
+  await expect(user2.validate({ 'books.0.pages.count': '1' }, { update: true }))
+    .resolves.toEqual({ 'books.0.pages.count': 1 })
+
+  // validate (update) works with positional array paths
+  await expect(user2.validate({ 'books.$.pages.count': '2' }, { update: true }))
+    .resolves.toEqual({ 'books.$.pages.count': 2 })
+
+  // Non-field dot notation paths removed
+  await expect(user2.validate({ 'books.0.badfield': 2 }, { update: true }))
+    .resolves.toEqual({})
+
+  // validate (update) should continue on throwing validation errors for dot notation array paths with subdocument values
+  await expect(user2.validate({ 'books.$.pages': {} }, { update: true }))
+    .rejects.toEqual([{
+      'detail': 'This field is required.',
+      'meta': { 'detailLong': undefined, 'field': 'count', 'model': 'user_partialUpdate2', 'rule': 'required' },
+      'status': '400',
+      'title': 'books.$.pages.count',
+    }])
+})
+
+test('validation hooks and option skipHooks', async () => {
+  let user = db.model('user_validation_hooks', {
     fields: {
       first: { type: 'string'},
       last: { type: 'string'},
@@ -1204,6 +1281,7 @@ test('validation hooks', async () => {
   // Catch validate (a)synchronous errors thrown in function or through `next(err)`
   await expect(user.validate({ first: '' })).rejects.toThrow('beforeValidate error 1..')
   await expect(user.validate({ first: 'Martin' })).rejects.toThrow('beforeValidate error 2..')
+  await expect(user.validate({ first: 'Martin' }, { skipHooks: true })).resolves.toEqual({ first: 'Martin' })
   await expect(user.validate({ first: 'Martin', last: 'Luther' })).resolves.toEqual({
     first: 'Martin',
     last: 'Luther',
@@ -1212,6 +1290,10 @@ test('validation hooks', async () => {
   // Catch insert (a)synchronous errors thrown in function or through `next(err)`
   await expect(user.insert({ data: { first: '' } })).rejects.toThrow('beforeValidate error 1..')
   await expect(user.insert({ data: { first: 'Martin' } })).rejects.toThrow('beforeValidate error 2..')
+  await expect(user.insert({ data: { first: 'Martin' }, skipHooks: true })).resolves.toEqual({
+    _id: expect.any(Object),
+    first: 'Martin',
+  })
   await expect(user.insert({ data: { first: 'Martin', last: 'Luther' } })).resolves.toEqual({
     _id: expect.any(Object),
     first: 'Martin',
@@ -1223,6 +1305,8 @@ test('validation hooks', async () => {
     .rejects.toThrow('beforeValidate error 1..')
   await expect(user.update({ query: userDoc._id, data: { first: 'Martin' } }))
     .rejects.toThrow('beforeValidate error 2..')
+  await expect(user.update({ query: userDoc._id, data: { first: 'Martin' }, skipHooks: true }))
+    .resolves.toEqual({ first: 'Martin' })
   await expect(user.update({ query: userDoc._id, data: { first: 'Martin', last: 'Luther' } }))
     .resolves.toEqual({
       first: 'Martin',

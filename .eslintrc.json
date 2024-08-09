@@ -32,7 +32,7 @@
       "exports": "always-multiline",
       "functions": "never"
     }],
-    "max-len": ["error", { "code": 125, "ignorePattern": "^\\s*<(rect|path|line)\\s" }],
+    "max-len": ["error", { "code": 130, "ignorePattern": "^\\s*<(rect|path|line)\\s" }],
     "no-prototype-builtins": "off",
     "no-unused-vars": ["error", { "args": "none" }],
     "object-shorthand": ["error", "consistent"],

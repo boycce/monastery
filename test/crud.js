@@ -1374,3 +1374,122 @@ test('hooks > async and next conflict', async () => {
 
   db2.close()
 })
+
+test('hooks > option skipHooks', async () => {
+  let user = db.model('user_crud_skiphooks', {
+    fields: {
+      name: { type: 'string' },
+    },
+    beforeInsert: [async (data) => {
+      data.name = 'Hooked ' + data.name
+      return data
+    }],
+    beforeUpdate: [async (data) => {
+      data.name = 'Hooked ' + data.name
+      return data
+    }],
+  })
+
+  // Insert with hooks
+  let inserted = await user.insert({ data: { name: 'Martin Luther' } })
+  expect(inserted).toEqual({
+    _id: expect.any(Object),
+    name: 'Hooked Martin Luther',
+  })
+
+  // Update with hooks (use $set in this case)
+  let updated = await user.update({
+    query: inserted._id,
+    $set: { name: 'Updated Name' },
+  })
+  expect(updated).toEqual({
+    name: 'Hooked Updated Name',
+  })
+
+  // Insert with skipHooks option
+  let insertedSkipHooks = await user.insert({
+    data: { name: 'Skipped Hooks Name' },
+    skipHooks: true,
+  })
+  expect(insertedSkipHooks).toEqual({
+    _id: expect.any(Object),
+    name: 'Skipped Hooks Name',
+  })
+
+  // Update with skipHooks option
+  let updatedSkipHooks = await user.update({
+    query: inserted._id,
+    $set: { name: 'Skipped Hooks Name Updated' },
+    skipHooks: true,
+  })
+  expect(updatedSkipHooks).toEqual({
+    name: 'Skipped Hooks Name Updated',
+  })
+})
+
+test('update set and unset with option skipValidation', async () => {
+  const db2 = monastery('127.0.0.1/monastery', { timestamps: false })
+  let user = db2.model('user_set_and_unset', { 
+    fields: {
+      profile: {
+        name: { type: 'string', required: true },
+        age: { type: 'number' },
+      },
+    },
+  })
+
+  // Insert a document to update
+  let inserted = await user.insert({ data: { profile: { name: 'John Doe', age: 30 } } })
+  let userId = inserted._id
+  let error = (detail, title) => [{ 
+    detail: detail, 
+    title: title || expect.any(String), 
+    meta: expect.any(Object), 
+    status: '400',
+  }]
+
+  // $set with skipValidation: undefined
+  const u1 = { query: userId, $set: { 'profile.age': 'not a number' } }
+  await expect(user.update(u1)).resolves.toEqual({ 'profile.age': 'not a number' })
+  await expect(user.findOne(userId)).resolves.toEqual({ _id: userId, profile: { name: 'John Doe', age: 'not a number' } })
+
+  // $set with skipValidation: true
+  const u2 = { query: userId, $set: { 'profile.age': 'not a number2' }, skipValidation: true }
+  await expect(user.update(u2)).resolves.toEqual({ 'profile.age': 'not a number2' })
+
+  // $set with skipValidation: false
+  const u3 = { query: userId, $set: { 'profile.age': '8' }, skipValidation: false }
+  await expect(user.update(u3)).resolves.toEqual({ 'profile.age': 8 })
+  await expect(user.findOne(userId)).resolves.toEqual({ _id: userId, profile: { name: 'John Doe', age: 8 } })
+
+  // $set error with skipValidation: false
+  const u4 = { query: userId, $set: { 'profile.age': 'not a number' }, skipValidation: false }
+  await expect(user.update(u4)).rejects.toEqual(error('Value was not a number.', 'profile.age'))
+
+  // $set error with skipValidation: ['profile']
+  const u6 = { query: userId, $set: { 'profile.age': 'not a number4' }, skipValidation: ['profile'] }
+  await expect(user.update(u6)).resolves.toEqual({ 'profile.age': 'not a number4' })
+
+  // --- $unset ---
+
+  // $unset with skipValidation: undefined
+  const u7 = { query: userId, $unset: { 'profile.age': '' } }
+  await expect(user.update(u7)).resolves.toEqual({}) // returns empty object
+  await expect(user.findOne(userId)).resolves.toEqual({ _id: userId, profile: { name: 'John Doe' } })
+
+  // $unset error with skipValidation: false
+  const u9 = { query: userId, $unset: { 'profile.name': '' }, skipValidation: false }
+  await expect(user.update(u9)).rejects.toEqual(error('This field is required.', 'profile.name'))
+  await expect(user.findOne(userId)).resolves.toEqual({ _id: userId, profile: { name: 'John Doe' } })
+
+  // $unset error with skipValidation: ['profile.name']
+  const u10 = { query: userId, $unset: { 'profile.name': '' }, skipValidation: ['profile.name'] }
+  await expect(user.update(u10)).resolves.toEqual({}) // returns empty object
+  await expect(user.findOne(userId)).resolves.toEqual({ _id: userId, profile: {} }) /////////unseeeet
+
+  // $unset with skipValidation: true
+  await expect(user.update({ query: userId, $set: { 'profile.name': 'John Doe2' } })) // add age back
+  const u8 = { query: userId, $unset: { 'profile.name': '' }, skipValidation: true }
+  await expect(user.update(u8)).resolves.toEqual({})
+  await expect(user.findOne(userId)).resolves.toEqual({ _id: userId, profile: {} })
+})
