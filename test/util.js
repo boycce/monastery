@@ -33,13 +33,14 @@ test('util > parseDotNotation', async () => {
     'deep.companyLogo3': 'c',
     'deep.companyLogos.0.logo': 'd',
     'deep.companyLogos.1.logo': 'e',
+    'deep.companyLogos.2': 'f',
   }
   const output = {
     name: 'Martin',
     deep: { // object first seen here
       companyLogo2: 'b',
       companyLogo3: 'c',
-      companyLogos: [{ logo: 'd' }, { logo: 'e' }],
+      companyLogos: [{ logo: 'd' }, { logo: 'e' }, 'f'],
     },
     specialInstructions: [
       {
@@ -79,7 +80,7 @@ test('util > parseDotNotation', async () => {
 test('util > parseBracketNotation', async () => {
   const input = {
     'name': 'Martin',
-    // 'pets[]': '', // <-- not supported
+    // 'pets[]': '', // <-- no longer supported
     'deep[companyLogo1]': 'a',
     // not dot notation
     'specialInstructions': [
@@ -107,8 +108,9 @@ test('util > parseBracketNotation', async () => {
     },
     // should be added into above
     'deep[companyLogo3]': 'c',
-    'deep[companyLogos][0][logo]':'d',
-    'deep[companyLogos][1][logo]':'e',
+    'deep[companyLogos][0][logo]': 'd',
+    'deep[companyLogos][1][logo]': 'e',
+    'deep[companyLogos][2]': 'f',
   }
   const output = {
     name: 'Martin',
@@ -116,7 +118,7 @@ test('util > parseBracketNotation', async () => {
     deep: { // object first seen here
       companyLogo2: 'b',
       companyLogo3: 'c',
-      companyLogos: [{ logo: 'd' }, { logo: 'e' }],
+      companyLogos: [{ logo: 'd' }, { logo: 'e' }, 'f'],
     },
     specialInstructions: [
       {
@@ -156,34 +158,6 @@ test('util > parseBracketNotation', async () => {
   )
 })
 
-// test('util > parseBracketToDotNotation', async () => {
-//   expect(await util.parseBracketToDotNotation({
-//     'name': 'Martin',
-//     'pets[]': '',
-//     'deep[companyLogo]': 'a',
-//     'deep[companyLogos][0]': 'b',
-//     'deep[companyLogos2][0][logo]':'c',
-//     'deep[companyLogos2][1][logo]': '',
-//     'users[0][first]': 'Martin',
-//     'users[0][last]': 'Luther',
-//     'users[1][first]': 'Bruce',
-//     'users[1][last]': 'Lee',
-//   })).toEqual({
-//     name: 'Martin',
-//     pets: expect.any(Array),
-//     'deep.companyLogo': 'a',
-//     'deep.companyLogos.0': 'b',
-//     'deep.companyLogos2.0.logo': 'c',
-//     'deep.companyLogos2.1.logo': '',
-//     'users.0.first': 'Martin',
-//     'users.0.last': 'Luther',
-//     'users.1.first': 'Bruce',
-//     'users.1.last': 'Lee',
-//   })
-//   expect(() => util.parseBracketNotation({ 'users[][\'name\']': 'Martin' })).toThrow(
-//     'Monastery: Array items in bracket notation need array indexes "users[][\'name\']", e.g. users[0][name]'
-//   )
-// })
 
 test('util > isId', async () => {
   expect(util.isId('')).toEqual(false)
