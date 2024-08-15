@@ -17,6 +17,7 @@ Model definition object.
 - [Custom field rules](#custom-field-rules)
 - [Custom error messages](#custom-error-messages)
 - [Operation hooks](#operation-hooks)
+- [Methods](#methods)
 - [Full example](#full-example)
 
 ### Fields
@@ -307,17 +308,42 @@ You are able provide an array of callbacks to these model operation hooks. If yo
 
 ```js
 {
-  afterFind: [function(data, next) {}],
-  afterInsert: [function(data, next) {}],
-  afterInsertUpdate: [function(data, next) {}],
-  afterUpdate: [function(data, next) {}],
-  afterRemove: [function(next) {}],
-  beforeInsert: [function(data, next) {}],
-  beforeInsertUpdate: [function(data, next) {}],
-  beforeUpdate: [function(data, next) {}],
-  beforeRemove: [function(next) {}],
-  beforeValidate: [function(data, next) {}],
+  // Model hooks
+  afterFind: [await function(data) {}],
+  afterInsert: [await function(data) {}],
+  afterInsertUpdate: [await function(data) {}],
+  afterUpdate: [await function(data) {}],
+  afterRemove: [await function() {}],
+  beforeInsert: [await function(data) {}],
+  beforeInsertUpdate: [await function(data) {}],
+  beforeUpdate: [await function(data) {}],
+  beforeRemove: [await function() {}],
+  beforeValidate: [await function(data) {}],
+
+  // You can also return an object which will be passed to the next hook in the chain, or if it's the last hook, returned as the result:
+  afterFind: [await function(data) {
+    data.age = 30
+    return data
+  }],
 }
+```
+
+### Methods
+
+You are able define reusable methods in the definition which is handy for storing related functions.
+
+```js
+// Method definition
+{
+  methods: {
+    getAge: function () {
+      return 30
+    },
+  }
+}
+
+// Above can be called directly from the model via:
+db.user.getAge()
 ```
 
 ### Definition example
