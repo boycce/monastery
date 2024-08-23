@@ -24,7 +24,7 @@ Model definition object.
 
 1. Fields can either be a field-type, embedded document, or an array of field-types or embedded documents
 2. Field-types are recognised by having a `type` property defined as a string
-3. Field-types can contain [custom](#custom-field-rules) and [default field rules](./rules), e.g. `{ minLength: 2 }`
+3. Field-types can contain [custom](#custom-field-rules) and [default field rules](./field-rules), e.g. `{ minLength: 2 }`
 4. Field-types can contain [field options](#field-options).
 
 ```js
