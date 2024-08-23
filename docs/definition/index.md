@@ -62,7 +62,7 @@ Model definition object.
 }
 ```
 
-The fields below implicitly get assigned and take presidence over any input data when [`manager.timestamps`](./manager) is true (default). You can override the `timestamps` value per operation, e.g. `db.user.update({ ..., timestamps: false})`. These fields use unix timestamps in seconds (by default), but can be configured to use use milliseconds via the manager [`useMilliseconds` ](./manager) option.
+The fields below implicitly get assigned and take presidence over any input data when [`manager.timestamps`](../manager) is true (default). You can override the `timestamps` value per operation, e.g. `db.user.update({ ..., timestamps: false})`. These fields use unix timestamps in seconds (by default), but can be configured to use use milliseconds via the manager [`useMilliseconds` ](../manager) option.
 
 ```js
 {
