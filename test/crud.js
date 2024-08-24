@@ -52,19 +52,32 @@ test('insert basics', async () => {
 })
 
 test('insert option defaultObjects', async () => {
-  let db2 = monastery('127.0.0.1/monastery', { defaultObjects: true, timestamps: false })
+  let db2 = monastery('127.0.0.1/monastery', { 
+    defaultObjects: true, 
+    timestamps: false, 
+    imagePlugin: {
+      awsBucket: 'test',
+      awsRegion: 'test',
+      awsAccessKeyId: 'test',
+      awsSecretAccessKey: 'test',
+    },
+  })
   let schema = { 
     fields: {
+      avatar: { type: 'image' }, // its an object but should default to `undefined`
       name: { type: 'string' },
       names: [{ type: 'string' }],
+      animal: {
+        name: { type: 'string' },
+      },
       animals: {
         dog: { type: 'string' },
         dogs: [{ name: { type: 'string' } }],
       },
     },
   }
-  let user1 = db.model('user', schema)
-  let user2 = db2.model('user', schema)
+  let user1 = db.model('user-defaultObjects', schema)
+  let user2 = db2.model('user-defaultObjects', schema)
 
   // defaultObjects off (default)
   let inserted1 = await user1.insert({ data: {} })
@@ -76,6 +89,7 @@ test('insert option defaultObjects', async () => {
   let inserted2 = await user2.insert({ data: {} })
   expect(inserted2).toEqual({
     _id: inserted2._id,
+    animal: {},
     names: [],
     animals: { dogs: [] },
   })

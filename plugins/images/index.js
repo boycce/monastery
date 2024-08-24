@@ -13,7 +13,6 @@ let plugin = module.exports = {
      *
      * @param {object} monastery manager instance
      * @param {options} options - plugin options
-     * @this plugin
      */
 
     // Depreciation warnings
@@ -23,19 +22,21 @@ let plugin = module.exports = {
     }
 
     // Settings
-    this.awsAcl = options.awsAcl || 'public-read' // default
-    this.awsBucket = options.awsBucket
-    this.awsAccessKeyId = options.awsAccessKeyId
-    this.awsSecretAccessKey = options.awsSecretAccessKey
-    this.awsRegion = options.awsRegion
-    this.bucketDir = options.bucketDir || 'full' // depreciated > 1.36.2
-    this.filesize = options.filesize
-    this.formats = options.formats || ['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff']
-    this.getSignedUrlOption = options.getSignedUrl
-    this.manager = manager
-    this.metadata = options.metadata ? util.deepCopy(options.metadata) : undefined,
-    this.params = options.params ? util.deepCopy(options.params) : {},
-    this.path = options.path || function (uid, basename, ext, file) { return `full/${uid}.${ext}` }
+    manager.imagePlugin = {
+      _s3Client: null,
+      awsAcl: options.awsAcl || 'public-read', // default
+      awsBucket: options.awsBucket,
+      awsAccessKeyId: options.awsAccessKeyId,
+      awsSecretAccessKey: options.awsSecretAccessKey,
+      awsRegion: options.awsRegion,
+      bucketDir: options.bucketDir || 'full', // depreciated > 1.36.2
+      filesize: options.filesize,
+      formats: options.formats || ['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff'],
+      getSignedUrlOption: options.getSignedUrl,
+      metadata: options.metadata ? util.deepCopy(options.metadata) : undefined,
+      params: options.params ? util.deepCopy(options.params) : {},
+      path: options.path || function (uid, basename, ext, file) { return `full/${uid}.${ext}` },
+    }
 
     if (!options.awsBucket || !options.awsAccessKeyId || !options.awsSecretAccessKey) {
       throw new Error('Monastery imagePlugin: awsRegion, awsBucket, awsAccessKeyId, or awsSecretAccessKey is not defined')
@@ -48,21 +49,21 @@ let plugin = module.exports = {
     // v2: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#constructor-property
     // v3: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3/
     // v3 examples: https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/javascript_s3_code_examples.html
-    this.getS3Client = (useRegion) => {
+    manager.imagePlugin.getS3Client = (useRegion) => {
       const { S3 } = require('@aws-sdk/client-s3')
       const key  = '_s3Client'// useRegion ? '_s3ClientRegional' : '_s3Client'
-      return this[key] || (this[key] = new S3({
+      return manager.imagePlugin[key] || (manager.imagePlugin[key] = new S3({
         // ...(region: useRegion ? this.awsRegion : undefined,
-        region: this.awsRegion, // if region is missing it throws an error, but only in production...
+        region: manager.imagePlugin.awsRegion, // if region is missing it throws an error, but only in production...
         credentials: {
-          accessKeyId: this.awsAccessKeyId,
-          secretAccessKey: this.awsSecretAccessKey,
+          accessKeyId: manager.imagePlugin.awsAccessKeyId,
+          secretAccessKey: manager.imagePlugin.awsSecretAccessKey,
         },
       }))
     }
 
     // Add before model hook
-    manager.beforeModel.push(this.setupModel.bind(this))
+    manager.beforeModel.push(plugin.setupModel)
   },
 
   setupModel: function(model) {
@@ -70,35 +71,35 @@ let plugin = module.exports = {
      * Cache all model image paths for a model and add monastery operation hooks
      * Todo: need to test the model hook arguement signatures here
      * @param {object} model
-     * @this plugin
+     * @this {object} - null
      */
-    model.imageFields = plugin._findAndTransformImageFields(model.fields, '')
+    model.imageFields = plugin._findAndTransformImageFields.call(model, model.fields, '')
 
     if (model.imageFields.length) {
       // Todo?: Update image fields / blacklists with the new object schema
       //   model._setupFields(model.fields)/model._getFieldsFlattened(model.fields)
       model.beforeValidate.push(function(data, n) {
-        plugin.keepImagePlacement(this, data).then(() => n(null, data)).catch(e => n(e))
+        plugin.keepImagePlacement.call(this, data).then(() => n(null, data)).catch(e => n(e))
       })
       model.beforeUpdate.push(function(data, n) {
-        plugin.removeImages(this, data).then(() => n(null, data)).catch(e => n(e))
+        plugin.removeImages.call(this, data).then(() => n(null, data)).catch(e => n(e))
       })
       model.beforeRemove.push(function(n) {
-        plugin.removeImages(this, {}).then(() => n(null, {})).catch(e => n(e))
+        plugin.removeImages.call(this, {}).then(() => n(null, {})).catch(e => n(e))
       })
       model.afterUpdate.push(function(data, n) {
-        plugin.addImages(this, data).then(() => n(null, data)).catch(e => n(e))
+        plugin.addImages.call(this, data).then(() => n(null, data)).catch(e => n(e))
       })
       model.afterInsert.push(function(data, n) {
-        plugin.addImages(this, data).then(() => n(null, data)).catch(e => n(e))
+        plugin.addImages.call(this, data).then(() => n(null, data)).catch(e => n(e))
       })
       model.afterFind.push(function(data, n) {
-        plugin.getSignedUrls.call(model, this, data).then(() => n(null, data)).catch(e => n(e))
+        plugin.getSignedUrls.call(this, data).then(() => n(null, data)).catch(e => n(e))
       })
     }
   },
 
-  addImages: function(options, data, test) {
+  addImages: function(data, test) {
     /**
      * Hooked after create/update
      * Uploads viable images and saves their details on the model. AWS Lambda takes
@@ -115,19 +116,20 @@ let plugin = module.exports = {
      * 2mb: 1864ms, 1164ms
      * 0.1mb: 480ms
      *
-     * @param {object} options - monastery operation options {model, query, files, ..}
      * @param {object} data -
      * @param {boolean} test -
+     * 
      * @return promise(
      *   {object} data - data object containing new S3 image-object
      * ])
-     * @this plugin
+     * @this {object} - monastery operation options {model, query, files, create, multi }
      */
-    let { model, query, files } = options
+    const { model, query, files, create, multi } = this
+    const imagePlugin = model.manager.imagePlugin
     if (!files) return Promise.resolve([])
 
     // Build an ID query from query/data. Inserts add _id to the data automatically.
-    let idquery = query && query._id? query : { _id: data._id }
+    const idquery = query && query._id? query : { _id: data._id }
 
     // We currently don't support an array of data objects.
     if (util.isArray(data)) {
@@ -144,32 +146,32 @@ let plugin = module.exports = {
     }
 
     // Find valid images and upload to S3, and update data with image objects
-    return plugin._findValidImages(files, model).then(files => {
+    return plugin._findValidImages.call(model, files).then(files => {
       return Promise.all(files.map(filesArr => {
         return Promise.all(filesArr.map(file => {
           return new Promise((resolve, reject) => {
             let uid = require('nanoid').nanoid()
-            let path = filesArr.imageField.path || plugin.path
+            let path = filesArr.imageField.path || imagePlugin.path
             let image = {
-              bucket: filesArr.imageField.awsBucket || plugin.awsBucket,
-              date: plugin.manager.opts.useMilliseconds? Date.now() : Math.floor(Date.now() / 1000),
+              bucket: filesArr.imageField.awsBucket || imagePlugin.awsBucket,
+              date: model.manager.opts.useMilliseconds? Date.now() : Math.floor(Date.now() / 1000),
               filename: file.name,
               filesize: file.size,
-              metadata: filesArr.imageField.metadata || plugin.metadata,
+              metadata: filesArr.imageField.metadata || imagePlugin.metadata,
               path: path(uid, file.name, file.ext, file),
               uid: uid,
             }
             let s3Options = {
               // ACL: Some IAM permissions "s3:PutObjectACL" must be included in the policy
               // params: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#upload-property
-              ACL: filesArr.imageField.awsAcl || plugin.awsAcl,
+              ACL: filesArr.imageField.awsAcl || imagePlugin.awsAcl,
               Body: file.data,
               Bucket: image.bucket,
               Key: image.path,
               Metadata: image.metadata,
-              ...(filesArr.imageField.params || plugin.params),
+              ...(filesArr.imageField.params || imagePlugin.params),
             }
-            plugin.manager.info(
+            model.manager.info(
               `Uploading '${image.filename}' to '${image.bucket}/${image.path}'`
             )
             if (test) {
@@ -178,7 +180,7 @@ let plugin = module.exports = {
             } else {
               const { Upload } = require('@aws-sdk/lib-storage')
               const upload = new Upload({
-                client: plugin.getS3Client(),
+                client: imagePlugin.getS3Client(),
                 params: s3Options,
               })
               // upload.on('httpUploadProgress', (progress) => {
@@ -206,44 +208,74 @@ let plugin = module.exports = {
       return model._update(
         idquery,
         { '$set': prunedData },
-        { 'multi': options.multi || options.create }
+        { 'multi': multi || create }
       )
 
     // If errors, remove inserted documents to prevent double ups when the user resaves.
     // We are pretty much trying to emulate a db transaction.
     }).catch(err => {
-      if (options.create) model._remove(idquery)
+      if (create) model._remove(idquery)
       throw err
     })
   },
 
-  getSignedUrls: async function(options, data) {
+  getSignedUrl: async function(path, expires=3600, bucket) {
+    /**
+     * @param {string} path - aws file path
+     * @param {number} <expires> - seconds
+     * @param {string} <bucket>
+     * 
+     * @return {promise} signedUrl
+     * @see v2: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getSignedUrl-property
+     * @see v3: https://github.com/aws/aws-sdk-js-v3/blob/main/UPGRADING.md#s3-presigned-url
+     * 
+     * @this manager
+     */
+    const { imagePlugin } = this
+    if (!imagePlugin) {
+      throw new Error(
+        'You must call getSignedUrl() with a manager as the context. The manager also needs to have the imagePlugin setup too, ' +
+        'e.g. `monastery(..., { imagePlugin })`'
+      )
+    }
+    const { GetObjectCommand } = require('@aws-sdk/client-s3')
+    const params = { Bucket: bucket || imagePlugin.awsBucket, Key: path }
+    const command = new GetObjectCommand(params)
+    let signedUrl = await getSignedUrl(imagePlugin.getS3Client(true), command, { expiresIn: expires })
+    // console.log(signedUrl)
+    return signedUrl
+  },
+
+  getSignedUrls: async function(data) {
     /**
      * Get signed urls for all image objects in data
-     * @param {object} options - monastery operation options {model, query, files, ..}
+     * 
      * @param {object} data
+     * 
      * @return promise() - mutates data
-     * @this model
+     * @this {object} - monastery operation options {model, query, files, ..}
      */
     // Not wanting signed urls for this operation?
-    if (util.isDefined(options.getSignedUrls) && !options.getSignedUrls) return
+    const { getSignedUrls, model } = this
+    const imagePlugin = model.manager.imagePlugin
+    if (util.isDefined(getSignedUrls) && !getSignedUrls) return
 
     // Find all image objects in data
     for (let doc of util.toArray(data)) {
-      for (let imageField of this.imageFields) {
-        if (options.getSignedUrls
-            || (util.isDefined(imageField.getSignedUrl) ? imageField.getSignedUrl : plugin.getSignedUrlOption)) {
+      for (let imageField of model.imageFields) {
+        if (getSignedUrls
+            || (util.isDefined(imageField.getSignedUrl) ? imageField.getSignedUrl : imagePlugin.getSignedUrlOption)) {
           let images = plugin._findImagesInData(doc, imageField, 0, '').filter(o => o.image)
           // todo: we could do this in parallel
           for (let image of images) {
-            image.image.signedUrl = await plugin.getSignedUrl(image.image.path, 3600, imageField.awsBucket)
+            image.image.signedUrl = await plugin.getSignedUrl.call(model.manager, image.image.path, 3600, imageField.awsBucket)
           }
         }
       }
     }
   },
 
-  keepImagePlacement: async function(options, data) {
+  keepImagePlacement: async function(data) {
     /**
      * Hook before update/remove
      * Since monastery removes undefined array items on validate, we need to convert any
@@ -254,22 +286,22 @@ let plugin = module.exports = {
      * req.body  = 'photos[0]' : undefined || non existing (set to null)
      * req.files = 'photos[0]' : { ...binary }
      *
-     * @param {object} options - monastery operation options {query, model, files, multi, ..}
      * @return promise
-     * @this plugin
+     * @this {object} - monastery operation options {query, model, files, multi, ..}
      */
-    if (typeof options.files == 'undefined') return
+    const { model, files } = this
+    if (typeof files == 'undefined') return
     // Check upload errors and find valid uploaded images
-    let files = await plugin._findValidImages(options.files || {}, options.model)
+    let validFiles = await plugin._findValidImages.call(model, files || {})
     // Set undefined primative-array items to null where files are located
-    for (let filesArray of files) {
-      if (filesArray.inputPath.match(/\.[0-9]+$/)) {
-        util.setDeepValue(data, filesArray.inputPath, null, true, false, true)
+    for (let item of validFiles) {
+      if (item.inputPath.match(/\.[0-9]+$/)) {
+        util.setDeepValue(data, item.inputPath, null, true, false, true)
       }
     }
   },
 
-  removeImages: async function(options, data, test) {
+  removeImages: async function(data, test) {
     /**
      * Hook before update/remove
      * Removes images not found in data, this means you will need to pass the image objects to every update operation
@@ -280,24 +312,25 @@ let plugin = module.exports = {
      * 3. delete leftovers from S3
      *
      * @ref https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#deleteObjects-property
-     * @param {object} options - monastery operation options {query, model, files, multi, ..}
      * @return promise([
      *   {object} useCount - images that wont be removed, e.g. { lion1: 1 }
      *   {array} unused - S3 image uris to be removed,  e.g. [{ Key: 'small/lion1.jpg' }, ..]
      * ])
-     * @this plugin
+     * @this {object} - monastery operation options {query, model, files, multi, ..}
      */
     let pre
-    let preExistingImages = []
-    let useCount = {}
-    if (typeof options.files == 'undefined') return
+    const preExistingImages = []
+    const useCount = {}
+    const { model, files, query } = this
+    const imagePlugin = model.manager.imagePlugin
+    if (typeof files == 'undefined') return
 
     // Find all documents from the same query
-    let docs = await options.model._find(options.query, options)
+    const docs = await model._find(query, this)
 
     // Find all pre-existing image objects in documents
     for (let doc of util.toArray(docs)) { //x2
-      for (let imageField of options.model.imageFields) { //x5
+      for (let imageField of model.imageFields) { //x5
         let images = plugin._findImagesInData(doc, imageField, 0, '').filter(o => o.image)
         for (let image of images) {
           preExistingImages.push(image)
@@ -320,10 +353,10 @@ let plugin = module.exports = {
     // console.log(dataFilled)
 
     // Check upload errors and find valid uploaded images
-    let files = await plugin._findValidImages(options.files || {}, options.model)
+    let validFiles = await plugin._findValidImages.call(model, files || {})
 
     // Loop all schema image fields
-    for (let imageField of options.model.imageFields) { //x5
+    for (let imageField of model.imageFields) { //x5
       let images = plugin._findImagesInData(dataFilled, imageField, 0, '')
       if (!images.length) continue
       // console.log(images)
@@ -353,8 +386,8 @@ let plugin = module.exports = {
             useCount[image.image.uid]++
           }
           // Any file overriding this image?
-          for (let filesArray of files) {
-            if (image.dataPath == filesArray.inputPath) {
+          for (let item of validFiles) {
+            if (image.dataPath == item.inputPath) {
               useCount[image.image.uid]--
             }
           }
@@ -376,17 +409,17 @@ let plugin = module.exports = {
         { Key: `medium/${key}.jpg` },
         { Key: `large/${key}.jpg` }
       )
-      plugin.manager.info(
+      model.manager.info(
         `Removing '${pre.image.filename}' from '${pre.image.bucket}/${pre.image.path}'`
       )
     }
     if (test) return [useCount, unused]
     // Delete any unused images from s3. If the image is on a different bucket
-    // the file doesnt get deleted, we only delete from plugin.awsBucket.
+    // the file doesnt get deleted, we only delete from imagePlugin.awsBucket.
     if (!unused.length) return
     await new Promise((resolve, reject) => {
-      plugin.getS3Client().deleteObjects({
-        Bucket: plugin.awsBucket,
+      imagePlugin.getS3Client().deleteObjects({
+        Bucket: imagePlugin.awsBucket,
         Delete: { Objects: unused },
       }, (err, data) => {
         if (err) reject(err)
@@ -402,6 +435,7 @@ let plugin = module.exports = {
      * @param {object} data
      * @param {object} image
      * @return mutates data
+     * @this null
      */
     let chunks = path.split('.')
     let target = data
@@ -421,22 +455,24 @@ let plugin = module.exports = {
     return data
   },
 
-  _findValidImages: function(files, model) {
+  _findValidImages: function(files) {
     /**
      * Find and return valid uploaded files
      * @param {object} files - req.files
-     * @param {object} model
      * @return promise([
      *   [{..file}, .imageField, .inputPath],
      *   ..
      * ])
+     * @this model
      */
     let validFiles = []
+    const { imageFields, manager } = this
+    const imagePlugin = manager.imagePlugin
 
     // Filter valid image files by `type='image'`, convert file keys to dot notation, and force array
     for (let key in files) {
       let key2 = key.replace(/\]/g, '').replace(/\[/g, '.')
-      let imageField = model.imageFields.find(o => key2.match(o.fullPathRegex))
+      let imageField = imageFields.find(o => key2.match(o.fullPathRegex))
       if (imageField) {
         let filesArr = util.toArray(files[key])
         filesArr.imageField = imageField
@@ -452,8 +488,8 @@ let plugin = module.exports = {
       return Promise.all(filesArr.map((file, i) => {
         return new Promise((resolve, reject) => {
           require('file-type').fromBuffer(file.data).then(res => {
-            let filesize = filesArr.imageField.filesize || plugin.filesize
-            let formats = filesArr.imageField.formats || plugin.formats
+            let filesize = filesArr.imageField.filesize || imagePlugin.filesize
+            let formats = filesArr.imageField.formats || imagePlugin.formats
             let allowAny = util.inArray(formats, 'any')
             file.format = res? res.ext : ''
             file.ext = file.format || (file.name.match(/\.(.*)$/) || [])[1] || 'unknown'
@@ -488,10 +524,11 @@ let plugin = module.exports = {
      * @param {object|array} unprocessedFields - fields not yet setup
      * @param {string} path
      * @return [{}, ...]
-     * @this plugin
+     * @this model
      */
     let list = []
-    let that = this
+    const { manager } = this
+    const imagePlugin = manager.imagePlugin
     util.forEach(unprocessedFields, (field, fieldName) => {
       let path2 = `${path}.${fieldName}`.replace(/^\./, '')
       if (fieldName == 'schema') return
@@ -499,12 +536,12 @@ let plugin = module.exports = {
       // Subdocument field
       if (util.isSubdocument(field)) {
         // log(`Recurse 1: ${path2}`)
-        list = list.concat(plugin._findAndTransformImageFields(field, path2))
+        list = list.concat(plugin._findAndTransformImageFields.call(this, field, path2))
 
       // Array field
       } else if (util.isArray(field)) {
         // log(`Recurse 2: ${path2}`)
-        list = list.concat(plugin._findAndTransformImageFields(field, path2))
+        list = list.concat(plugin._findAndTransformImageFields.call(this, field, path2))
 
       // Image field. Test for field.image as field.type may be 'any'
       } else if (field.type == 'image' || field.image) {
@@ -514,8 +551,9 @@ let plugin = module.exports = {
         }
         if (field.filename) { // > v1.36.3
           this.manager.warn(`${path2}.filename has been depreciated in favour of ${path2}.path()`)
-          field.path = field.path
-            || function(uid, basename, ext, file) { return `${that.bucketDir}/${uid}/${field.filename}.${ext}` }
+          field.path = field.path || function(uid, basename, ext, file) { 
+            return `${imagePlugin.bucketDir}/${uid}/${field.filename}.${ext}` 
+          }
         }
 
         list.push({
@@ -540,7 +578,7 @@ let plugin = module.exports = {
           metadata: { type: 'any' },
           path: { type: 'string' },
           uid: { type: 'string' },
-          schema: { image: true, isImageObject: true, nullObject: true },
+          schema: { image: true, isImageObject: true, nullObject: true, default: undefined },
         }
       }
     })
@@ -555,6 +593,7 @@ let plugin = module.exports = {
      * @param {number} imageFieldChunkIndex - imageField path chunk index
      * @param {string} dataPath
      * @return [{ imageField: {}, dataPath: '', image: {} }, ..]
+     * @this null
      */
     let list = []
     let chunks = imageField.fullPath.split('.').slice(imageFieldChunkIndex)
@@ -590,27 +629,4 @@ let plugin = module.exports = {
 
     return list
   },
-
-  getSignedUrl: async (path, expires=3600, bucket) => {
-    /**
-     * @param {string} path - aws file path
-     * @param {number} <expires> - seconds
-     * @param {string} <bucket>
-     * @return {promise} signedUrl
-     * @see v2: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getSignedUrl-property
-     * @see v3: https://github.com/aws/aws-sdk-js-v3/blob/main/UPGRADING.md#s3-presigned-url
-     */
-    if (!plugin.getS3Client) {
-      throw new Error(
-        'To use db.getSignedUrl(), the imagePlugin manager option must be defined, e.g. `monastery(..., { imagePlugin })`'
-      )
-    }
-    const { GetObjectCommand } = require('@aws-sdk/client-s3')
-    const params = { Bucket: bucket || plugin.awsBucket, Key: path }
-    const command = new GetObjectCommand(params)
-    let signedUrl = await getSignedUrl(plugin.getS3Client(true), command, { expiresIn: expires })
-    // console.log(signedUrl)
-    return signedUrl
-  },
-
 }
