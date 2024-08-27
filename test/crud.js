@@ -353,10 +353,7 @@ test('find default field blacklisted', async () => {
 
 test('find default field population with option noDefaults', async () => {
   async function setup(noDefaults) {
-    /**
-     * Setup
-     * @returns {Object} {dog, user, dog1Doc, dog2Doc, user1Doc}
-     */
+    // @returns {Object} {dog, user, dog1Doc, dog2Doc, user1Doc}
     // similar to "find default field population"
     const db = monastery('127.0.0.1/monastery', { noDefaults: noDefaults, timestamps: false })
     const userDefinition = {
@@ -508,6 +505,9 @@ test('find default field population with option noDefaults', async () => {
     },
     dogs: [{ _id: s2.dog1Doc._id, user: s2.user1Doc._id }], // should not have a default name
   })
+
+  s1.db.close()
+  s2.db.close()
 })
 
 test('update general', async () => {
@@ -1074,7 +1074,6 @@ test('hooks > basic', async () => {
   await expect(user2.update({ query: userDoc2._id, data: { first: 'MM'  } })).resolves.toEqual({ first: 'MM' })
   await expect(user2.update({ query: userDoc2._id, data: { first: 'M', bad: true } })).rejects.toThrow('error2')
 })
-
 test('hooks > chained values', async () => {
   let bookCount = 0
   const afterInsertAsync = [
@@ -1514,4 +1513,6 @@ test('update set and unset with option skipValidation', async () => {
   const u8 = { query: userId, $unset: { 'profile.name': '' }, skipValidation: true }
   await expect(user.update(u8)).resolves.toEqual({})
   await expect(user.findOne(userId)).resolves.toEqual({ _id: userId, profile: {} })
+
+  db2.close()
 })

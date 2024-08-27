@@ -449,12 +449,11 @@ test('model indexes basic', async () => {
 
   // Unique & text index
   let userIndexModel = await db.model('userIndex', {
-    waitForIndexes: true,
     fields: {
       email: { type: 'string', index: 'unique' },
       name: { type: 'string', index: 'text' },
     },
-  })
+  }, { waitForIndexes: true })
 
   let userIndexModelIndexes = await db.db.collection('userIndex').indexes()
   expect(userIndexModelIndexes[0]).toEqual({ 
@@ -504,7 +503,6 @@ test('model indexes unique', async () => {
 
   // Partial unique indexes (allows mulitple null values)
   await db.model('userUniqueIndex', {
-    waitForIndexes: true,
     fields: {
       email: {
         type: 'string',
@@ -516,7 +514,7 @@ test('model indexes unique', async () => {
         },
       },
     },
-  })
+  }, { waitForIndexes: true })
 
   let indexes2 = await db.db.collection('userUniqueIndex').indexes()
   expect(indexes2[0]).toEqual({ 
@@ -648,7 +646,6 @@ test('model indexes 2dsphere', async () => {
   // Setup. The tested model needs to be unique as race condition issue arises when the same model
   // with text indexes are setup at the same time
   await db.model('user99', {
-    waitForIndexes: true,
     fields: {
       location: {
         index: '2dsphere',
@@ -661,7 +658,7 @@ test('model indexes 2dsphere', async () => {
         coordinates: [{ type: 'number' }], // lat, lng
       },
     },
-  })
+  }, { waitForIndexes: true })
 
   // Schema check
   expect(db.user99.fields.location).toEqual({

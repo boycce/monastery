@@ -11,7 +11,9 @@ Sets up a model, retrieves a collection, and sets up any required indexes
 
 `name` *(string)*: name of the mongo collection
 
-[`definition`] *(object)*: [definition](../definition)
+`definition` *(object)*: [definition](../definition)
+
+`waitForIndexes` *(boolean)*: wait for indexes to be setup (returns a promise instead of a model)
 
 ### Returns
 

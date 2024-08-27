@@ -13,7 +13,7 @@ Setup model definitions from a folder location
 
 [`options`] *(object)*:
   - [`commonJs=false`] *(boolean)*: for old commonjs projects, you will need to set this to `true` which uses `require` instead of `import` (removed in `3.0.0`)
-  - [`waitForIndexes=false`] *(boolean)*: returns a proimse that waits for the Mongo collection indexes to be setup
+  - [`waitForIndexes=false`] *(boolean)*: wait for collection indexes to be setup
 
 ### Returns
 
@@ -39,5 +39,5 @@ export default { // Make sure the model definition is exported as the default
 ```
 
 ```js
-await db.models(__dirname + "models")
+await db.models(__dirname + 'models', { waitForIndexes: true })
 ```

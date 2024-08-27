@@ -778,27 +778,26 @@ test('images option getSignedUrls', async () => {
   })
 
   // Find signed URL via query option
-  // await expect(db3.user.findOne({ query: userInserted._id, getSignedUrls: true })).resolves.toEqual({
-  //   _id: expect.any(Object),
-  //   photos: [imageWithSignedUrl, imageWithSignedUrl],
-  //   photos2: [imageWithSignedUrl, imageWithSignedUrl],
-  // })
+  await expect(db3.user.findOne({ query: userInserted._id, getSignedUrls: true })).resolves.toEqual({
+    _id: expect.any(Object),
+    photos: [imageWithSignedUrl, imageWithSignedUrl],
+    photos2: [imageWithSignedUrl, imageWithSignedUrl],
+  })
 
-  // // Find signed URL via schema option
-  // await expect(db3.user.findOne({ query: userInserted._id })).resolves.toEqual({
-  //   _id: expect.any(Object),
-  //   photos: [image, image],
-  //   photos2: [imageWithSignedUrl, imageWithSignedUrl],
-  // })
+  // Find signed URL via schema option
+  await expect(db3.user.findOne({ query: userInserted._id })).resolves.toEqual({
+    _id: expect.any(Object),
+    photos: [image, image],
+    photos2: [imageWithSignedUrl, imageWithSignedUrl],
+  })
 
   // Works with _processAfterFind
   let rawUser = await db3.user._findOne({ _id: userInserted._id })
-  db3.user._processAfterFind(rawUser)
-  // await expect(db3.user._processAfterFind(rawUser)).resolves.toEqual({
-  //   _id: expect.any(Object),
-  //   photos: [image, image],
-  //   photos2: [imageWithSignedUrl, imageWithSignedUrl],
-  // })
+  await expect(db3.user._processAfterFind(rawUser)).resolves.toEqual({
+    _id: expect.any(Object),
+    photos: [image, image],
+    photos2: [imageWithSignedUrl, imageWithSignedUrl],
+  })
   db3.close()
 })
 
