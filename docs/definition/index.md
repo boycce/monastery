@@ -304,7 +304,7 @@ You are able to define custom error messages for each field rule.
 
 ### Operation hooks
 
-You are able provide an array of callbacks to these model operation hooks. If you need to throw an error asynchronously, please pass an error as the first argument to `next()`, e.g. `next(new Error('Your error here'))`. You can also access the operation details via `this` in each callback.
+You are able provide an array of promises to the following model operation hooks. `this` is the operation details.
 
 ```js
 {
