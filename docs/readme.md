@@ -96,6 +96,7 @@ You can view MongoDB's [compatibility table here](https://www.mongodb.com/docs/d
   - db.catch/then() moved to db.onError/db.onOpen()
   - next() is now redundant when returning promises from hooks, e.g. `afterFind: [async (data) => {...}]`
   - deep paths in data, e.g. `books[].title` are now validated, and don't replace the whole object, e.g. `books`
+  - `db()` moved to `db.manager()`
 
 ## v2 Breaking Changes
 
