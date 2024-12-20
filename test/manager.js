@@ -2,23 +2,23 @@ const { MongoClient } = require('mongodb')
 const monastery = require('../lib/index.js')
 
 test('manager > basics', async () => {
-  const manager = monastery('localhost/monastery', { serverSelectionTimeoutMS: 2000 })
+  const db = monastery.manager('localhost/monastery', { serverSelectionTimeoutMS: 2000 })
   // Manager is exposed
-  expect(manager).toEqual(monastery.manager)
+  expect(monastery.uri).toEqual(expect.any(String))
   // Basic find command
-  expect(await manager.db.collection('non-collection').findOne({})).toEqual(null)
+  expect(await db.db.collection('non-collection').findOne({})).toEqual(null)
   // Raw MongoDB ping command
-  expect(await manager.command({ ping: 1 })).toMatchObject({ ok: 1 }) // cluster connections return extra fields
-  manager.close()
+  expect(await db.command({ ping: 1 })).toMatchObject({ ok: 1 }) // cluster connections return extra fields
+  db.close()
 })
 
 test('manager > uri error', async () => {
-  expect(() => monastery('', {})).toThrow('No connection URI provided.')
+  expect(() => monastery.manager('', {})).toThrow('No connection URI provided.')
 })
 
 test('manager > onError', async () => {
   // Bad port (thrown by MongoDB)
-  const db = monastery('localhost:1234/monastery', { serverSelectionTimeoutMS: 500 })
+  const db = monastery.manager('localhost:1234/monastery', { serverSelectionTimeoutMS: 500 })
   let error, isAPromise
   await db.onError((res) => { error = res.message }).then(() => { isAPromise = true })
   expect(error).toEqual('connect ECONNREFUSED 127.0.0.1:1234')
@@ -27,7 +27,7 @@ test('manager > onError', async () => {
 })
 
 test('manager > onOpen', async () => {
-  const db = monastery('localhost/monastery', { serverSelectionTimeoutMS: 500 })
+  const db = monastery.manager('localhost/monastery', { serverSelectionTimeoutMS: 500 })
 
   let manager1
   await db.onOpen((res) => { manager1 = res })
@@ -52,7 +52,7 @@ test('manager > onOpen', async () => {
 test('manager > onOpen error', async () => {
   // Bad port (thrown by MongoDB)
   let manager
-  const db = monastery('localhost:1234/monastery', { serverSelectionTimeoutMS: 500 })
+  const db = monastery.manager('localhost:1234/monastery', { serverSelectionTimeoutMS: 500 })
   await expect(db.onOpen((res) => { manager = res })).rejects.toThrow('connect ECONNREFUSED 127.0.0.1:1234')
   expect(manager).toEqual(undefined)
   expect(db).toEqual(expect.any(Object))
@@ -60,19 +60,19 @@ test('manager > onOpen error', async () => {
 })
 
 test('manager > return a promise', async () => {
-  const db = await monastery('localhost/monastery', { serverSelectionTimeoutMS: 500, promise: true })
+  const db = await monastery.manager('localhost/monastery', { serverSelectionTimeoutMS: 500, promise: true })
   expect(db).toEqual(expect.any(Object))
   db.close()
 })
 
 test('manager > return a promise with uri error', async () => {
-  await expect(monastery('badlocalhost/monastery', { serverSelectionTimeoutMS: 500, promise: true }))
+  await expect(monastery.manager('badlocalhost/monastery', { serverSelectionTimeoutMS: 500, promise: true }))
     .rejects.toThrow('getaddrinfo EAI_AGAIN badlocalhost')
 })
 
 test('manager > reuse MongoDB Client', async () => {
   const mongoClient = new MongoClient('mongodb://localhost/monastery', {})
-  const db = await monastery(mongoClient, { serverSelectionTimeoutMS: 500, promise: true })
+  const db = await monastery.manager(mongoClient, { serverSelectionTimeoutMS: 500, promise: true })
   expect(db).toEqual(expect.any(Object))
   expect(db.client).toEqual(expect.any(Object))
   expect(db.isId).toEqual(expect.any(Function))
@@ -87,7 +87,7 @@ test('manager > events', async () => {
     })
   }
   // Triggers on opening/open
-  const db = monastery('localhost/monastery', { serverSelectionTimeoutMS: 2000 })
+  const db = monastery.manager('localhost/monastery', { serverSelectionTimeoutMS: 2000 })
   expect(db._state).toEqual('opening')
   // Start waiting for the following events
   const promises = Promise.all([
@@ -101,10 +101,10 @@ test('manager > events', async () => {
 })
 
 test('Manager > get collection', async () => {
-  const manager = monastery('localhost/monastery', { serverSelectionTimeoutMS: 500 })
+  const db = monastery.manager('localhost/monastery', { serverSelectionTimeoutMS: 500 })
   // Basic aggregate command
-  expect(await manager.get('non-collection').aggregate([], {})).toEqual([])
+  expect(await db.get('non-collection').aggregate([], {})).toEqual([])
   // Basic find command
-  expect(await manager.get('non-collection').find({})).toEqual([])
-  manager.close()
+  expect(await db.get('non-collection').find({})).toEqual([])
+  db.close()
 })

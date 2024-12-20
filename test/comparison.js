@@ -2,7 +2,7 @@ const monastery = require('../lib/index.js')
 const mongoose = require('mongoose') // very slow initialisation
 
 test('comparison insert', async () => {
-  const db = monastery('127.0.0.1/monastery', { timestamps: false }) 
+  const db = monastery.manager('127.0.0.1/monastery', { timestamps: false }) 
   const Test1 = db.model('Test1', { fields: {
     raw: {
       words: [{
@@ -70,7 +70,7 @@ test('comparison validate', async () => {
       })),
     }
   }
-  const db = monastery('127.0.0.1/monastery', { timestamps: false }) 
+  const db = monastery.manager('127.0.0.1/monastery', { timestamps: false }) 
   const Test1 = db.model('Test1', { fields: {
     raw: {
       words: [{

@@ -1,7 +1,7 @@
 const monastery = require('../lib/index.js')
 
 let db
-beforeAll(async () => { db = monastery('127.0.0.1/monastery', { timestamps: false }) })
+beforeAll(async () => { db = monastery.manager('127.0.0.1/monastery', { timestamps: false }) })
 afterAll(async () => { db.close() })
 
 test('virtuals', async () => {

@@ -6,7 +6,7 @@ has_children: true
 
 # Manager
 
-Monastery manager constructor.
+Creates a new manager instance and makes the first instance available globally via the `db`.
 
 ### Arguments
 
@@ -24,26 +24,27 @@ Monastery manager constructor.
 
 ### Returns
 
-A manager instance.
+A new manager instance.
 
 ### Example
 
 ```js
-import monastery from 'monastery'
+import db from 'monastery'
 
-const db = monastery('localhost/mydb', options)
+// this manager instance is now available via the `db` object on subsequent imports
+const manager = db.manager('localhost/mydb', options)
 // replica set
-const db = monastery('localhost/mydb,192.168.1.1')
+const manager = db.manager('localhost/mydb,192.168.1.1')
 // you can wait for the connection (which is not required before calling methods)
-const db = await monastery('localhost/mydb,192.168.1.1', { promise: true })
+const manager = await db.manager('localhost/mydb,192.168.1.1', { promise: true })
 ```
 
 You can also listen for errors or successful connection using these hooks
 ```js
-db.onOpen((manager) => {
+manager.onOpen((manager) => {
   // manager.client is connected...
 })
-db.onError((err) => {
+manager.onError((err) => {
   // connection error
 })
 ```

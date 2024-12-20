@@ -35,10 +35,10 @@ $ npm install --save monastery
 ## Usage
 
 ```javascript
-import monastery from 'monastery'
+import db from 'monastery'
 
 // Initialize a monastery manager
-const db = monastery('localhost/mydb')
+db.manager('localhost/mydb')
 
 // Define a model
 db.model('user', {

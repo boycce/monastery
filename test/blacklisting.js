@@ -4,7 +4,7 @@ const bird = require('./mock/blacklisting.js').bird
 const user = require('./mock/blacklisting.js').user
 
 let db
-beforeAll(async () => { db = monastery('127.0.0.1/monastery', { timestamps: false }) })
+beforeAll(async () => { db = monastery.manager('127.0.0.1/monastery', { timestamps: false }) })
 afterAll(async () => { db.close() })
 
 test('find blacklisting basic', async () => {

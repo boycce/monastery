@@ -7,14 +7,14 @@ const imagePluginFakeOpts = { awsBucket: 'fake', awsRegion: 'fake', awsAccessKey
 let db
 afterAll(async () => { db.close() })
 beforeAll(async () => { 
-  db = monastery('127.0.0.1/monastery', {
+  db = monastery.manager('127.0.0.1/monastery', {
     timestamps: false, 
     imagePlugin: imagePluginFakeOpts,
   }) 
 })
 
 test('images no initialisation', async () => {
-  const db2 = monastery('127.0.0.1/monastery', { timestamps: false })
+  const db2 = monastery.manager('127.0.0.1/monastery', { timestamps: false })
   db2.model('company', {
     fields: {
       logo: { type: 'image' },
@@ -666,7 +666,7 @@ test('images option defaults', async () => {
 })
 
 test('images options formats & filesizes', async () => {
-  const db3 = monastery('127.0.0.1/monastery', {
+  const db3 = monastery.manager('127.0.0.1/monastery', {
     timestamps: false, 
     imagePlugin: { 
       ...imagePluginFakeOpts,
@@ -745,7 +745,7 @@ test('images options formats & filesizes', async () => {
 
 test('images option getSignedUrls', async () => {
   // latest (2022.02)
-  const db3 = monastery('127.0.0.1/monastery', {
+  const db3 = monastery.manager('127.0.0.1/monastery', {
     timestamps: false, 
     imagePlugin: { 
       ...imagePluginFakeOpts,
@@ -802,7 +802,7 @@ test('images option getSignedUrls', async () => {
 })
 
 test('images options awsAcl, awsBucket, metadata, params, path', async () => {
-  const db3 = monastery('127.0.0.1/monastery', {
+  const db3 = monastery.manager('127.0.0.1/monastery', {
     timestamps: false, 
     imagePlugin: { 
       ...imagePluginFakeOpts,
@@ -902,7 +902,7 @@ test('images options awsAcl, awsBucket, metadata, params, path', async () => {
 
 test('images option depreciations', async () => {
   // testing (filename bucketDir)
-  const db3 = monastery('127.0.0.1/monastery', {
+  const db3 = monastery.manager('127.0.0.1/monastery', {
     logLevel: 1,
     timestamps: false, 
     imagePlugin: { 

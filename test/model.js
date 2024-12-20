@@ -3,11 +3,11 @@ const Model = require('../lib/model.js')
 const monastery = require('../lib/index.js')
 
 let db
-beforeAll(async () => { db = monastery('127.0.0.1/monastery') })
+beforeAll(async () => { db = monastery.manager('127.0.0.1/monastery') })
 afterAll(async () => { db.close() })
 
 test('model > model on manager', async () => {
-  const db2 = monastery('127.0.0.1', { logLevel: 0 })
+  const db2 = monastery.manager('127.0.0.1', { logLevel: 0 })
   db2.model('user', { fields: {} })
   let modelNamedConflict = db2.model('open', { fields: {} })
 
@@ -132,7 +132,7 @@ test('model setup basics', async () => {
 })
 
 test('model setup with default objects', async () => {
-  const db2 = monastery('127.0.0.1/monastery', { defaultObjects: true })
+  const db2 = monastery.manager('127.0.0.1/monastery', { defaultObjects: true })
   let user = db2.model('user', { fields: {
     name: { type: 'string' },
     pets: [{ type: 'string' }],
@@ -376,7 +376,7 @@ test('model setup with messages', async () => {
 
 test('model setup with reserved and invalid rules', async () => {
   // Setup
-  const db2 = monastery('127.0.0.1/monastery', { logLevel: 0 })
+  const db2 = monastery.manager('127.0.0.1/monastery', { logLevel: 0 })
   let user = db2.model('user-model', {
     fields: {
       name: {

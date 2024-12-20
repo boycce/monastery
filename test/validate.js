@@ -3,7 +3,7 @@ const monastery = require('../lib/index.js')
 const Model = require('../lib/model.js')
 
 let db
-beforeAll(async () => { db = monastery('127.0.0.1/monastery', { timestamps: false }) })
+beforeAll(async () => { db = monastery.manager('127.0.0.1/monastery', { timestamps: false }) })
 afterAll(async () => { db.close() })
 
 test('validation basic errors', async () => {
@@ -171,7 +171,7 @@ test('validation type any', async () => {
 })
 
 test('validation schema with reserved and invalid rules', async () => {
-  const db2 = monastery('127.0.0.1/monastery', { logLevel: 0 })
+  const db2 = monastery.manager('127.0.0.1/monastery', { logLevel: 0 })
   let user = db2.model('user-model', {
     fields: {
       sub: {
@@ -972,7 +972,7 @@ test('schema options default', async () => {
 })
 
 test('schema options objects', async () => {
-  const db2 = monastery('127.0.0.1/monastery', { nullObjects: true, timestamps: false })
+  const db2 = monastery.manager('127.0.0.1/monastery', { nullObjects: true, timestamps: false })
   let user = db2.model('user', {
     fields: {
       location: {
@@ -998,7 +998,7 @@ test('schema options objects', async () => {
 })
 
 test('validate defaultObjects', async () => {
-  const db2 = monastery('127.0.0.1/monastery', { defaultObjects: true, timestamps: false })
+  const db2 = monastery.manager('127.0.0.1/monastery', { defaultObjects: true, timestamps: false })
   // let base = { names: [], animals: { dogs: [] }}
   let user = db2.model('user', { fields: {
     name: { type: 'string' },
@@ -1018,7 +1018,7 @@ test('validate defaultObjects', async () => {
 })
 
 test('validate nullObjects', async () => {
-  const db2 = monastery('127.0.0.1/monastery', { nullObjects: true, timestamps: false })
+  const db2 = monastery.manager('127.0.0.1/monastery', { nullObjects: true, timestamps: false })
   let user = db2.model('user', { fields: {
     names: [{ type: 'string' }],
     animals: {

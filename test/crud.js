@@ -2,11 +2,11 @@
 const monastery = require('../lib/index.js')
 
 let db
-beforeAll(async () => { db = monastery('127.0.0.1/monastery', { timestamps: false }) })
+beforeAll(async () => { db = monastery.manager('127.0.0.1/monastery', { timestamps: false }) })
 afterAll(async () => { db.close() })
 
 test('insert basics', async () => {
-  let db2 = monastery('127.0.0.1/monastery', { timestamps: false }) 
+  let db2 = monastery.manager('127.0.0.1/monastery', { timestamps: false }) 
   let user = db2.model('user', { fields: {
     name: { type: 'string' },
     names: [{ type: 'string' }],
@@ -52,7 +52,7 @@ test('insert basics', async () => {
 })
 
 test('insert option defaultObjects', async () => {
-  let db2 = monastery('127.0.0.1/monastery', { 
+  let db2 = monastery.manager('127.0.0.1/monastery', { 
     defaultObjects: true, 
     timestamps: false, 
     imagePlugin: {
@@ -97,7 +97,7 @@ test('insert option defaultObjects', async () => {
 })
 
 test('insert option timestamps', async () => {
-  let db2 = monastery('127.0.0.1/monastery', { timestamps: true })
+  let db2 = monastery.manager('127.0.0.1/monastery', { timestamps: true })
   let schema = { 
     fields: {
       name: { type: 'string' },
@@ -355,7 +355,7 @@ test('find default field population with option noDefaults', async () => {
   async function setup(noDefaults) {
     // @returns {Object} {dog, user, dog1Doc, dog2Doc, user1Doc}
     // similar to "find default field population"
-    const db = monastery('127.0.0.1/monastery', { noDefaults: noDefaults, timestamps: false })
+    const db = monastery.manager('127.0.0.1/monastery', { noDefaults: noDefaults, timestamps: false })
     const userDefinition = {
       fields: {
         name: { type: 'string', default: 'Martin Luther' },
@@ -577,7 +577,7 @@ test('update general', async () => {
 })
 
 test('update defaults', async () => {
-  const db2 = monastery('127.0.0.1/monastery', { useMilliseconds: true })
+  const db2 = monastery.manager('127.0.0.1/monastery', { useMilliseconds: true })
   let user = db2.model('user', {
     fields: {
       name: { type: 'string' },
@@ -1276,7 +1276,7 @@ test('hooks > async', async () => {
 })
 
 test('hooks > async and next conflict', async () => {
-  const db2 = monastery('127.0.0.1/monastery', { timestamps: false })
+  const db2 = monastery.manager('127.0.0.1/monastery', { timestamps: false })
   let user1 = db2.model('user', {
     fields: { age: { type: 'number'} },
     afterFind: [
@@ -1441,7 +1441,7 @@ test('hooks > option skipHooks', async () => {
 })
 
 test('update set and unset with option skipValidation', async () => {
-  const db2 = monastery('127.0.0.1/monastery', { timestamps: false })
+  const db2 = monastery.manager('127.0.0.1/monastery', { timestamps: false })
   let user = db2.model('user_set_and_unset', { 
     fields: {
       profile: {

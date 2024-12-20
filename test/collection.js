@@ -5,7 +5,7 @@ const util = require('../lib/util.js')
 // Setup/destroy
 let db, userCol, indexCol, indexDropCol
 beforeAll(async () => {
-  db = monastery('127.0.0.1/monastery')
+  db = monastery.manager('127.0.0.1/monastery')
   userCol = db.get('users-' + Date.now())
   indexCol = db.get('index-' + Date.now())
   indexDropCol = db.get('index-' + Date.now())
