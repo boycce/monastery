@@ -83,7 +83,7 @@ test('manager > events', async () => {
   // note: jests tests only wait for 5s
   function eventTester(db, eventName) {
     return new Promise((resolve) => {
-      db.on(eventName, () => resolve(true))
+      db.emitter.on(eventName, () => resolve(true))
     })
   }
   // Triggers on opening/open
@@ -107,4 +107,18 @@ test('Manager > get collection', async () => {
   // Basic find command
   expect(await db.get('non-collection').find({})).toEqual([])
   db.close()
+})
+
+test('Manager > multiple managers', async () => {
+  const db1 = monastery.manager('localhost/monastery', { logLevel: 5 })
+  const db2 = monastery.manager('localhost/monastery', { logLevel: 6 })
+  const db3 = monastery.manager('localhost/monastery', { logLevel: 7 })
+
+  expect(monastery.opts.logLevel).not.toEqual(6) // default manager
+  expect(db2.opts.logLevel).not.toEqual(db1.opts.logLevel)
+  expect(db3.opts.logLevel).not.toEqual(db2.opts.logLevel)
+
+  db1.close()
+  db2.close()
+  db3.close()
 })
