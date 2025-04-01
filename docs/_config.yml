@@ -4,6 +4,7 @@ description: A simple, straightforward MongoDB ODM
 github_url: "https://github.com/boycce/monastery"
 port: 4001
 basedir: "docs"
+favicon: "/assets/imgs/favicon.ico"
 
 # Aux links for the navigation.
 aux_links:
