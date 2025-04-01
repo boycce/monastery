@@ -162,4 +162,5 @@ npm run dev -- -t 'Model indexes'
 
 ## License
 
-Copyright 2024 Ricky Boyce. Code released under the MIT license.
+Copyright 2024 Ricky Boyce. Code released under the MIT license
+
