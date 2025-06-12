@@ -7,6 +7,7 @@
   "repository": "github:boycce/monastery",
   "homepage": "https://boycce.github.io/monastery/",
   "main": "lib/index.js",
+  "types": "./types/index.d.ts",
   "keywords": [
     "database",
     "javascript",
@@ -30,7 +31,8 @@
     "patch": "standard-version --release-as patch && npm publish",
     "release": "standard-version && npm publish && git push --tags",
     "test": "npm run lint && jest",
-    "test-one-example": "jest -t \"images addImages\" --watchAll"
+    "test-one-example": "jest -t \"images addImages\" --watchAll",
+    "types": "tsc"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.549.0",
