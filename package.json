@@ -7,7 +7,7 @@
   "repository": "github:boycce/monastery",
   "homepage": "https://boycce.github.io/monastery/",
   "main": "lib/index.js",
-  "types": "./types/index.d.ts",
+  "types": "./types/lib/index.d.ts",
   "keywords": [
     "database",
     "javascript",

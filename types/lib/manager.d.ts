@@ -14,7 +14,7 @@ declare class Manager {
     models(pathname: any, opts?: {}): Promise<{}>;
     onError(fn: any): Promise<any>;
     onOpen(fn: any): Promise<any>;
-    open(): Promise<Manager>;
+    open(): Promise<this>;
     db: any;
     parseData(obj: any, parseBracketToDotNotation: any, parseDotNotation: any): any;
     model: typeof Model;

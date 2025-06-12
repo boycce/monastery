@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "allowJs": true,
-    "allowSyntheticDefaultImports": true,
     "checkJs": true,
     "declaration": true,
     "declarationMap": true,
@@ -18,7 +17,8 @@
     "outDir": "types",
     "skipLibCheck": true,
     "strict": false,
-    "target": "es2022"
+    "module": "commonjs",
+    "target": "es6"
   },
   "include": [
     "lib/**/*"
