@@ -51,7 +51,7 @@
     "express-fileupload": "^1.5.0",
     "jest": "27.4.7",
     "nodemon": "^3.1.0",
-    "standard-version": "9.3.2",
+    "standard-version": "github:boycce/standard-version",
     "supertest": "4.0.2"
   },
   "engines": {
