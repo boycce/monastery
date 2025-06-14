@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.5.5](https://github.com/boycce/monastery/compare/3.5.4...3.5.5) (2025-06-14)
+
 ### [3.5.4](https://github.com/boycce/monastery/compare/3.5.3...3.5.4) (2025-06-12)
 
 ### [3.5.3](https://github.com/boycce/monastery/compare/3.5.2...3.5.3) (2025-06-12)
