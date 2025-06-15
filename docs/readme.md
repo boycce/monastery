@@ -1,6 +1,7 @@
 ![](./assets/imgs/monastery.jpg)
 
-[![NPM](https://img.shields.io/npm/v/monastery.svg)](https://www.npmjs.com/package/monastery) [![Build Status](https://travis-ci.com/boycce/monastery.svg?branch=master)](https://app.travis-ci.com/github/boycce/monastery)
+[![NPM](https://img.shields.io/npm/v/monastery.svg)](https://www.npmjs.com/package/monastery) 
+<!--[![Build Status](https://travis-ci.com/boycce/monastery.svg?branch=master)](https://app.travis-ci.com/github/boycce/monastery)-->
 
 > v3.0 has been released 🎉 refer to [breaking changes](#v3-breaking-changes) below when upgrading from v2.x.
 
