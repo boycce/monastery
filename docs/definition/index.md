@@ -147,7 +147,7 @@ fieldType: {
 
 ### MongoDB indexes
 
-You are able to automatically setup MongoDB indexes via the `index` field option.
+You are able to define MongoDB indexes via the `index` field option, these are automatically on initialisation. **Note, Monastery doesn't delete old indexes**.
 
 ```js
 fieldType: {
