@@ -123,12 +123,9 @@ user.find({
     as: 'myBooks',
     from: 'book',
     let: { userId: '$_id' },
-    pipeline: [{
-      $match: {
-        $expr: {
-          $eq: ['$bookOwnerId', '$$userId']
-        }
-      }
+    pipeline: [
+      { $match: { $expr: { $eq: ['$bookOwnerId', '$$userId'] } } },
+      { $project: { '_id': 1, 'bookTitle': 1 }}, // <-- optional line to make responses smaller.
     }]
   }]
 })
