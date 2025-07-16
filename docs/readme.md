@@ -138,6 +138,7 @@ You can view MongoDB's [compatibility table here](https://www.mongodb.com/docs/d
 - Add soft remove plugin
 - ~~Added deep path validation support for updates~~
 - ~~Added option skipHooks~~
+- beforeValidate should pass the document rather than the whole array of documents
 
 ## Debugging
 
