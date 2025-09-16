@@ -8,12 +8,12 @@ test('manager > basics', async () => {
   // Basic find command
   expect(await db.db.collection('non-collection').findOne({})).toEqual(null)
   // Raw MongoDB ping command
-  expect(await db.command({ ping: 1 })).toMatchObject({ ok: 1 }) // cluster connections return extra fields
+  expect(await db.rawCommand({ ping: 1 })).toMatchObject({ ok: 1 }) // cluster connections return extra fields
   db.close()
 })
 
 test('manager > uri error', async () => {
-  expect(() => monastery.manager('', {})).toThrow('No connection URI provided.')
+  expect(() => monastery.manager('', {})).toThrow('No monastery connection URI provided.')
 })
 
 test('manager > onError', async () => {
