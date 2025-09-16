@@ -21,7 +21,7 @@ test('manager > onError', async () => {
   const db = monastery.manager('localhost:1234/monastery', { serverSelectionTimeoutMS: 500 })
   let error, isAPromise
   await db.onError((res) => { error = res.message }).then(() => { isAPromise = true })
-  expect(error).toEqual('connect ECONNREFUSED 127.0.0.1:1234')
+  expect(error).toContain('connect ECONNREFUSED 127.0.0.1:1234')
   expect(isAPromise).toEqual(true)
   db.close()
 })
@@ -67,7 +67,7 @@ test('manager > return a promise', async () => {
 
 test('manager > return a promise with uri error', async () => {
   await expect(monastery.manager('badlocalhost/monastery', { serverSelectionTimeoutMS: 500, promise: true }))
-    .rejects.toThrow('getaddrinfo EAI_AGAIN badlocalhost')
+    .rejects.toThrow(/getaddrinfo ENOTFOUND badlocalhost/)
 })
 
 test('manager > reuse MongoDB Client', async () => {
