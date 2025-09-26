@@ -318,7 +318,7 @@ You are able provide an array of promises to the following model operation hooks
   beforeInsertUpdate: [await function(data) {}],
   beforeUpdate: [await function(data) {}],
   beforeRemove: [await function() {}],
-  beforeValidate: [await function(data) {}],
+  beforeValidate: [await function(data) {}], // runs prior to beforeInsert/Update
 
   // You can also return an object which will be passed to the next hook in the chain, or if it's the last hook, returned as the result:
   afterFind: [await function(data) {
