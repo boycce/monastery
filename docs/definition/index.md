@@ -304,7 +304,7 @@ You are able to define custom error messages for each field rule.
 
 ### Operation hooks
 
-You are able provide an array of promises to the following model operation hooks. `this` is the operation details.
+You are able provide an array of promises to the following model operation hooks.
 
 ```js
 {
@@ -325,6 +325,20 @@ You are able provide an array of promises to the following model operation hooks
     data.age = 30
     return data
   }],
+}
+```
+
+The context (`this`) inside each hook will contain extra information relating to the operation, for an example, a basic update operation may contain the following fields:
+```js
+{
+  query: { _id: new ObjectId("68d66a33ae584af64197c971") },
+  data: { name: 'John Doe' },
+  limit: 1,
+  sort: { createdAt: -1 },
+  type: 'update',
+  model: {...}, // Model reference,
+  skipValidation: [],
+  // ...
 }
 ```
 
