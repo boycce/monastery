@@ -5,7 +5,7 @@ parent: Model
 
 # `model.insert`
 
-Validate and insert document(s) in a collection and calls model hooks: `beforeInsert`,  `afterInsert`
+Validate and insert document(s) in a collection and calls model hooks: `beforeValidate`, `beforeInsert`, `afterInsert`
 
 ### Arguments
 
