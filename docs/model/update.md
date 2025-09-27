@@ -5,7 +5,7 @@ parent: Model
 
 # `model.update`
 
-Update document(s) in a collection and calls model hooks: `beforeUpdate`,  `afterUpdate`. By default this method method updates a single document. Set the `multi` mongodb option to update all documents that match the query criteria.
+Update document(s) in a collection and calls model hooks: `beforeValidate`,  `beforeUpdate`,  `afterUpdate`. By default this method method updates a single document. Set the `multi` mongodb option to update all documents that match the query criteria.
 
 ### Arguments
 
