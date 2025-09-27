@@ -12,7 +12,7 @@ Update document(s) in a collection and calls model hooks: `beforeValidate`,  `be
 `options` *(object)*
 
 - `query` *(object\|id)*: [`MongoDB query document`](https://www.mongodb.com/docs/v5.0/tutorial/query-documents/), or id
-- [`data`](#data) *(object)* - data that's validated against the model fields (always wrapped in `{ $set: .. }`)
+- [`data`](#data) *(object)* - data that's validated against the model fields, which eventually gets wrapped in `{ $set: .. }`
 - [[`blacklist`](#blacklisting)]*(array\|string\|false)*: augment `definition.updateBL`. `false` will remove all blacklisting
 - [`project`] *(string\|array\|object)*: project these fields, ignores blacklisting
 - [`skipValidation`] *(string\|array\|boolean)*:  skip validation for these fields, or pass `true` to skip all fields and validation hooks
@@ -42,7 +42,7 @@ await user.update({ query: { name: 'foo' }, data: { name: 'bar' }})
 
 ### Data
 
-Data that's validated against the model fields (always wrapped in `{ $set: .. }`). Key names can be in dot or bracket notation which is handy for HTML FormData.
+Data that's validated against the model fields, which eventually gets wrapped in `{ $set: .. }`. Key names can be in dot or bracket notation which is handy for HTML FormData.
 
 You can also pass `options.$set` or any other mongodb update operation instead of `options.data`, which bypasses validation, e.g.
 
