@@ -6,7 +6,7 @@ declare class Manager {
     arrayWithSchema(array: any, schema: any): any;
     close(): Promise<any>;
     _state: string;
-    command(...args: any[]): any;
+    rawCommand(...args: any[]): any;
     connectionString(uri: any, databaseName: any): any;
     get(name: any, options: any): any;
     id(str: any): import("bson").ObjectId;
