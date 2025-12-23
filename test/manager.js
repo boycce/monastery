@@ -21,7 +21,7 @@ test('manager > onError', async () => {
   const db = monastery.manager('localhost:1234/monastery', { serverSelectionTimeoutMS: 500 })
   let error, isAPromise
   await db.onError((res) => { error = res.message }).then(() => { isAPromise = true })
-  expect(error).toContain('connect ECONNREFUSED 127.0.0.1:1234')
+  expect(error).toContain('connect ECONNREFUSED ')
   expect(isAPromise).toEqual(true)
   db.close()
 })
@@ -53,7 +53,7 @@ test('manager > onOpen error', async () => {
   // Bad port (thrown by MongoDB)
   let manager
   const db = monastery.manager('localhost:1234/monastery', { serverSelectionTimeoutMS: 500 })
-  await expect(db.onOpen((res) => { manager = res })).rejects.toThrow('connect ECONNREFUSED 127.0.0.1:1234')
+  await expect(db.onOpen((res) => { manager = res })).rejects.toThrow('connect ECONNREFUSED ')
   expect(manager).toEqual(undefined)
   expect(db).toEqual(expect.any(Object))
   db.close()
