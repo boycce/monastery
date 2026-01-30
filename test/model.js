@@ -495,6 +495,50 @@ test('model indexes basic', async () => {
   }])
 })
 
+// test('model index error text index', async () => {
+//   // Setup: Need to test different types of indexes
+//   // Setup: Drop previously tested collections
+//   const db2 = monastery.manager('127.0.0.1/monastery', { logLevel: 0 })
+
+//   // const allCollections = await db2.db.listCollections().toArray()
+//   // if (allCollections.find(o => o.name == 'userIndexErr')) {
+//   //   await db2.db.collection('userIndexErr').drop()
+//   // }
+
+//   // Unique & text index (after model initialisation, in serial)
+//   let userIndexErrModel = db2.model('userIndexErr', { 
+//     fields: {
+//       age: { type: 'number', index: 'text' },
+//       age2: { type: 'number', index: 'text' },
+//       age3: { type: 'number', index: 'text' },
+//       name: { type: 'string', index: 'text' },
+//     },
+//   })
+  
+//   // Add one record
+//   await userIndexErrModel.insert({ data: { age: 1, age2: 2, name: 'John Doe' } })
+
+//   // await userIndexErrModel._setupIndexes({ 
+//   //   age: { type: 'number', index: 'text' }, 
+//   //   name: { type: 'string', index: 'text' },
+//   // }) // err number
+//   // let indexes = await (db2.get('userIndexErr').indexes())
+//   // expect(indexes[0]).toEqual({ 
+//   //   v: 2, 
+//   //   key: { _id: 1 }, 
+//   //   name: '_id_',
+//   // })
+//   // expect(indexes[1]).toEqual({
+//   //   v: 2,
+//   //   key: { _fts: 'text', _ftsx: 1 },
+//   //   name: 'text',
+//   //   weights: { age: 1, name: 1 },
+//   //   default_language: 'english',
+//   //   language_override: 'language',
+//   //   textIndexVersion: 3,
+//   // })
+// })
+
 test('model indexes unique', async () => {
   // Setup: Drop previously tested collections
   if ((await db.db.listCollections().toArray()).find(o => o.name == 'userUniqueIndex')) {
