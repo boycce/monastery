@@ -121,9 +121,9 @@ test('Manager > get collection', async () => {
 })
 
 test('Manager > multiple managers', async () => {
-  const db1 = monastery.manager('localhost/monastery', { logLevel: 5, forJest: true })
-  const db2 = monastery.manager('localhost/monastery', { logLevel: 6, forJest: true })
-  const db3 = monastery.manager('localhost/monastery', { logLevel: 7, forJest: true })
+  const db1 = monastery.manager('localhost/monastery', { logLevel: 5 })
+  const db2 = monastery.manager('localhost/monastery', { logLevel: 6 })
+  const db3 = monastery.manager('localhost/monastery', { logLevel: 7 })
 
   expect(monastery.opts.logLevel).not.toEqual(6) // default manager
   expect(db2.opts.logLevel).not.toEqual(db1.opts.logLevel)
