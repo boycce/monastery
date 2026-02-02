@@ -59,6 +59,17 @@ test('manager > onOpen error', async () => {
   db.close()
 })
 
+test('manager > onOpen timeout error', async () => {
+  // Bad connection url, which will hang and timeout after 100ms
+  // Related: test/model.js > model index timeout topology closed
+  let manager
+  const db = monastery.manager('google.com', { serverSelectionTimeoutMS:100, logLevel: 3 }) // should hang
+  await expect(db.onOpen((res) => { manager = res })).rejects.toThrow('Server selection timed out after 100 ms')
+  expect(manager).toEqual(undefined)
+  expect(db).toEqual(expect.any(Object))
+  db.close()
+})
+
 test('manager > return a promise', async () => {
   const db = await monastery.manager('localhost/monastery', { serverSelectionTimeoutMS: 500, promise: true })
   expect(db).toEqual(expect.any(Object))
@@ -110,9 +121,9 @@ test('Manager > get collection', async () => {
 })
 
 test('Manager > multiple managers', async () => {
-  const db1 = monastery.manager('localhost/monastery', { logLevel: 5 })
-  const db2 = monastery.manager('localhost/monastery', { logLevel: 6 })
-  const db3 = monastery.manager('localhost/monastery', { logLevel: 7 })
+  const db1 = monastery.manager('localhost/monastery', { logLevel: 5, forJest: true })
+  const db2 = monastery.manager('localhost/monastery', { logLevel: 6, forJest: true })
+  const db3 = monastery.manager('localhost/monastery', { logLevel: 7, forJest: true })
 
   expect(monastery.opts.logLevel).not.toEqual(6) // default manager
   expect(db2.opts.logLevel).not.toEqual(db1.opts.logLevel)

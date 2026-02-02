@@ -495,49 +495,26 @@ test('model indexes basic', async () => {
   }])
 })
 
-// test('model index error text index', async () => {
-//   // Setup: Need to test different types of indexes
-//   // Setup: Drop previously tested collections
-//   const db2 = monastery.manager('127.0.0.1/monastery', { logLevel: 0 })
-
-//   // const allCollections = await db2.db.listCollections().toArray()
-//   // if (allCollections.find(o => o.name == 'userIndexErr')) {
-//   //   await db2.db.collection('userIndexErr').drop()
-//   // }
-
-//   // Unique & text index (after model initialisation, in serial)
-//   let userIndexErrModel = db2.model('userIndexErr', { 
-//     fields: {
-//       age: { type: 'number', index: 'text' },
-//       age2: { type: 'number', index: 'text' },
-//       age3: { type: 'number', index: 'text' },
-//       name: { type: 'string', index: 'text' },
-//     },
-//   })
-  
-//   // Add one record
-//   await userIndexErrModel.insert({ data: { age: 1, age2: 2, name: 'John Doe' } })
-
-//   // await userIndexErrModel._setupIndexes({ 
-//   //   age: { type: 'number', index: 'text' }, 
-//   //   name: { type: 'string', index: 'text' },
-//   // }) // err number
-//   // let indexes = await (db2.get('userIndexErr').indexes())
-//   // expect(indexes[0]).toEqual({ 
-//   //   v: 2, 
-//   //   key: { _id: 1 }, 
-//   //   name: '_id_',
-//   // })
-//   // expect(indexes[1]).toEqual({
-//   //   v: 2,
-//   //   key: { _fts: 'text', _ftsx: 1 },
-//   //   name: 'text',
-//   //   weights: { age: 1, name: 1 },
-//   //   default_language: 'english',
-//   //   language_override: 'language',
-//   //   textIndexVersion: 3,
-//   // })
-// })
+test('model index timeout topology closed', async () => {
+  // 1. For a invalid URL, while a connection is still opening, we should expect a 
+  // 'topology is closed' error when trying to create an index.
+  // 2. For valid connection URL, we should expect a 'server selection timed out' error (which we can't reproduce in tests)
+  const db2 = monastery.manager('google.com', { logLevel: 3, serverSelectionTimeoutMS: 50, forJest: true })
+  // Attempt to use the collection while the connection is still opening.
+  const userIndexErrModel = db2.model('userIndexErr', { 
+    fields: {
+      age: { type: 'number' },
+      name: { type: 'string' },
+    },
+  })
+  expect(
+    userIndexErrModel._setupIndexes({ age: { type: 'number', index: 'text' }, name: { type: 'string', index: 'text' } })
+  ).rejects.toThrow('Unable to create an index on the \'userIndexErr\' model, the \'Topology is closed\'. Bad connection URL?')
+  await expect(
+    db2.onOpen((res) => { })
+  ).rejects.toThrow('Server selection timed out after 50 ms')
+  db2.close()
+})
 
 test('model indexes unique', async () => {
   // Setup: Drop previously tested collections
