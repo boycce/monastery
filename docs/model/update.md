@@ -28,8 +28,10 @@ You can also access the native MongoDB output via `result._output`, a prototype 
 ```js
 {
   acknowledged: true,
-  modifiedCount: 1,
-  matchedCount: 1,
+  modifiedCount: 0, // returns zero if the data is the same
+  upsertedId: null, 
+  upsertedCount: 0,
+  matchedCount: 1 // were any documents matched from the query
   ...
 }
 ```
