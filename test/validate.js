@@ -1181,6 +1181,84 @@ test('validation option validateUndefined', async () => {
     .resolves.toEqual({ names: [{}] })
 })
 
+test('validation option strictEmbedTraversal', async () => {
+  // strictEmbedTraversal=true: only recurse into embedded object children when the parent value is an object,
+  // mirroring array behaviour (arrays only recurse when the data value is also an array).
+  let dbStrict = monastery.manager('127.0.0.1/monastery', { timestamps: false, strictEmbedTraversal: true })
+
+  let userStrict = dbStrict.model('userEmbedStrict', { fields: {
+    animals: {
+      cat: { type: 'string', required: true },
+      dog: {
+        name:  { type: 'string' },
+        color: { type: 'string', required: true },
+      },
+    },
+  }})
+
+  let userWithParentRequired = db.model('userEmbedStrictParentRequired', { fields: {
+    animals: {
+      schema: { required: true },
+      cat: { type: 'string', required: true },
+    },
+  }})
+
+  let userStrictWithParentRequired = dbStrict.model('userEmbedStrictParentRequired2', { fields: {
+    animals: {
+      schema: { required: true },
+      cat: { type: 'string', required: true },
+    },
+  }})
+
+  // Parent missing (animals), required child is skipped
+  await expect(userStrict.validate({})).resolves.toEqual({})
+
+  // Parent is non-object (animals)  isObject rule throws
+  await expect(userStrict.validate({ animals: 'bad' })).rejects.toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ title: 'animals', meta: expect.objectContaining({ rule: 'isObject' }) }),
+    ])
+  )
+  // Parent is non-object (animals), required child is skipped
+  await expect(userStrict.validate({ animals: 'bad' })).rejects.not.toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ title: 'animals.cat' }),
+    ])
+  )
+  // Parent is an object (animals), required child throws
+  await expect(userStrict.validate({ animals: {} })).rejects.toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ title: 'animals.cat', meta: expect.objectContaining({ rule: 'required' }) }),
+    ])
+  )
+  // Parent is an object (animals), required child passes
+  await expect(userStrict.validate({ animals: { cat: 'Whiskers', dog: { color: 'black' } } }))
+    .resolves.toMatchObject({ animals: { cat: 'Whiskers', dog: { color: 'black' } } })
+
+  // Parent is requred:
+
+  // (parent required): Parent is non-object (animals), parent required rule throws
+  await expect(userStrictWithParentRequired.validate({})).rejects.toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ title: 'animals', meta: expect.objectContaining({ rule: 'required' }) }),
+    ])
+  )
+  // (parent required): Parent is non-object (animals), child required rule skips
+  await expect(userWithParentRequired.validate({})).rejects.toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ title: 'animals.cat', meta: expect.objectContaining({ rule: 'required' }) }),
+    ])
+  )
+  // (parent required): Parent is non-object (animals), child required rule skips
+  await expect(userStrictWithParentRequired.validate({})).rejects.not.toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ title: 'animals.cat', meta: expect.objectContaining({ rule: 'required' }) }),
+    ])
+  )
+
+  dbStrict.close()
+})
+
 test('validation update dot notation', async () => {
   // Only updates the fields that are passed in the data object, similar to $set. They don't 
   // remove subdocument fields that are not present in the data object.
