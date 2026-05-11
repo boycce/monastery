@@ -51,6 +51,10 @@ Model definition object.
       type: { type: 'string' },
       schema: { strict: false }, // allows non-defined fields to save
     },
+    address: {
+      line1: { type: 'string', required: true },
+      schema: { optionalEmbed: true }, // Skips required sub-field rules when the parent value is not an object
+    },
     pets: db.arrayWithSchema(
       [{
         name: { type: 'string' },

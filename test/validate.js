@@ -1181,6 +1181,74 @@ test('validation option validateUndefined', async () => {
     .resolves.toEqual({ names: [{}] })
 })
 
+test('validation option optionalEmbed', async () => {
+  // schema.optionalEmbed=true on a subdocument: only recurse into children when the parent value is an
+  // object, mirroring array behaviour (arrays only recurse when the data value is also an array).
+  let user = db.model('userOptionalEmbed', { fields: {
+    animals: {
+      schema: { optionalEmbed: true },
+      cat: { type: 'string', required: true },
+      dog: {
+        name:  { type: 'string' },
+        color: { type: 'string', required: true },
+      },
+    },
+  }})
+
+  let userRequired = db.model('userOptionalEmbedRequired', { fields: {
+    animals: {
+      schema: { optionalEmbed: true, required: true },
+      cat: { type: 'string', required: true },
+      dog: {
+        name:  { type: 'string' },
+        color: { type: 'string', required: true },
+      },
+    },
+  }})
+
+
+  // Parent missing (animals), required child is skipped
+  await expect(user.validate({})).resolves.toEqual({})
+
+  // Parent is non-object (animals), isObject rule throws
+  await expect(user.validate({ animals: 'bad' })).rejects.toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ title: 'animals', meta: expect.objectContaining({ rule: 'isObject' }) }),
+    ])
+  )
+  // Parent is non-object (animals), required child is skipped
+  const animalsBadErrors = await user.validate({ animals: 'bad' }).catch(e => e)
+  expect(animalsBadErrors).toHaveLength(1)
+  expect(animalsBadErrors).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ title: 'animals', meta: expect.objectContaining({ rule: 'isObject' }) }),
+    ])
+  )
+  
+  // Parent is an object (animals), required child throws
+  const animalsEmptyErrors = await user.validate({ animals: {} }).catch(e => e)
+  expect(animalsEmptyErrors).toHaveLength(2)
+  expect(animalsEmptyErrors).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ title: 'animals.cat', meta: expect.objectContaining({ rule: 'required' }) }),
+      expect.objectContaining({ title: 'animals.dog.color', meta: expect.objectContaining({ rule: 'required' }) }),
+    ])
+  )
+
+  // Parent is an object (animals), required child passes
+  await expect(user.validate({ animals: { cat: 'Whiskers', dog: { color: 'black' } } }))
+    .resolves.toMatchObject({ animals: { cat: 'Whiskers', dog: { color: 'black' } } })
+
+  // Parent-level required fires regardless of optionalEmbed when parent is missing
+  const animalsRequiredErrors = await userRequired.validate({}).catch(e => e)
+  expect(animalsRequiredErrors).toHaveLength(1)
+  expect(animalsRequiredErrors).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ title: 'animals', meta: expect.objectContaining({ rule: 'required' }) }),
+    ])
+  )
+})
+
 test('validation update dot notation', async () => {
   // Only updates the fields that are passed in the data object, similar to $set. They don't 
   // remove subdocument fields that are not present in the data object.
