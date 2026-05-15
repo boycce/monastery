@@ -201,6 +201,10 @@ test('images addImages', async () => {
       expect(validFiles[1][0].format).toEqual('png')
       expect(validFiles[2][0].format).toEqual('png')
       expect(validFiles[3][0].format).toEqual('png')
+      expect(validFiles[0][0].mime).toEqual('image/png')
+      expect(validFiles[1][0].mime).toEqual('image/png')
+      expect(validFiles[2][0].mime).toEqual('image/png')
+      expect(validFiles[3][0].mime).toEqual('image/png')
 
       let response = await imagePluginFile.addImages.call(
         { model: user, files: req.files, query: { _id: 1234 }},
@@ -648,6 +652,7 @@ test('images option defaults', async () => {
           ACL: 'public-read',
           Body: expect.any(Object),
           Bucket: 'fake',
+          ContentType: 'image/png',
           Key: expect.stringMatching(/^full\/.*png$/),
         }],
       ])
@@ -871,6 +876,7 @@ test('images options awsAcl, awsBucket, metadata, params, path', async () => {
           Body: expect.any(Object),
           Bucket: 'fake',
           ContentLanguage: 'DE',
+          ContentType: 'image/png',
           Key: 'images/logo.png',
           Metadata:  { small: '*x300' , medium: '*x800', large: '*x1200' },
         }],
@@ -879,6 +885,7 @@ test('images options awsAcl, awsBucket, metadata, params, path', async () => {
           Body: expect.any(Object),
           Bucket: 'fake2',
           ContentLanguage: 'NZ',
+          ContentType: 'image/png',
           Key: 'images2/logo2.png',
           Metadata: { small: '*x100' , medium: '*x400', large: '*x800' },
         }],
