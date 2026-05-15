@@ -21,9 +21,27 @@ let plugin = module.exports = {
       options.path = function (uid, basename, ext, file) { `${options.bucketDir}/${uid}.${ext}` }
     }
 
+    let afterHooks = []
+    if (typeof options.afterUploadBeforeUpdate !== 'undefined') {
+      if (!Array.isArray(options.afterUploadBeforeUpdate)) {
+        throw new Error('Monastery imagePlugin: afterUploadBeforeUpdate must be an array of functions')
+      }
+      afterHooks = options.afterUploadBeforeUpdate.filter(fn => typeof fn === 'function')
+    }
+
+    let afterUpdateHooks = []
+    if (typeof options.afterUploadAfterUpdate !== 'undefined') {
+      if (!Array.isArray(options.afterUploadAfterUpdate)) {
+        throw new Error('Monastery imagePlugin: afterUploadAfterUpdate must be an array of functions')
+      }
+      afterUpdateHooks = options.afterUploadAfterUpdate.filter(fn => typeof fn === 'function')
+    }
+
     // Settings
     manager.imagePlugin = {
       _s3Client: null,
+      afterUploadBeforeUpdate: afterHooks,
+      afterUploadAfterUpdate: afterUpdateHooks,
       awsAcl: options.awsAcl || 'public-read', // default
       awsBucket: options.awsBucket,
       awsAccessKeyId: options.awsAccessKeyId,
@@ -146,6 +164,7 @@ let plugin = module.exports = {
     }
 
     // Find valid images and upload to S3, and update data with image objects
+    const afterUpdatePayloads = []
     return plugin._findValidImages.call(model, files).then(files => {
       return Promise.all(files.map(filesArr => {
         return Promise.all(filesArr.map(file => {
@@ -174,9 +193,16 @@ let plugin = module.exports = {
             model.manager.info(
               `Uploading '${image.filename}' to '${image.bucket}/${image.path}'`
             )
+            const imageField = filesArr.imageField
+            const inputPath = filesArr.inputPath
+            const notifyAfterUpload = (s3Result) => {
+              plugin._addImageObjectsToData(inputPath, data, image)
+              const payload = { model, data, image, file, imageField, inputPath, query, create, multi, test, s3Result }
+              afterUpdatePayloads.push(payload)
+              return plugin._invokeAfterUploadBeforeUpdate(payload)
+            }
             if (test) {
-              plugin._addImageObjectsToData(filesArr.inputPath, data, image)
-              resolve(s3Options)
+              notifyAfterUpload(undefined).then(() => resolve(s3Options)).catch(reject)
             } else {
               const { Upload } = require('@aws-sdk/lib-storage')
               const upload = new Upload({
@@ -187,13 +213,9 @@ let plugin = module.exports = {
               //   console.log(progress)
               // })
               upload.done()
-                .then((res) => {
-                  plugin._addImageObjectsToData(filesArr.inputPath, data, image)
-                  resolve(s3Options)
-                })
-                .catch((err) => {
-                  reject(err)
-                })
+                .then((res) => notifyAfterUpload(res))
+                .then(() => resolve(s3Options))
+                .catch((err) => reject(err))
             }
           })
         }))
@@ -209,6 +231,8 @@ let plugin = module.exports = {
         idquery,
         { '$set': prunedData },
         { 'multi': multi || create }
+      ).then(updateResult =>
+        plugin._invokeAfterUploadAfterUpdate(afterUpdatePayloads, updateResult)
       )
 
     // If errors, remove inserted documents to prevent double ups when the user resaves.
@@ -217,6 +241,25 @@ let plugin = module.exports = {
       if (create) model._remove(idquery)
       throw err
     })
+  },
+
+  _invokeAfterUploadBeforeUpdate: async function(payload) {
+    const hooks = payload.model.manager.imagePlugin.afterUploadBeforeUpdate
+    if (!hooks.length) return
+    for (let i = 0; i < hooks.length; i++) {
+      await Promise.resolve(hooks[i](payload))
+    }
+  },
+
+  _invokeAfterUploadAfterUpdate: async function(payloads, updateResult) {
+    if (!payloads.length) return
+    const hooks = payloads[0].model.manager.imagePlugin.afterUploadAfterUpdate
+    if (!hooks.length) return
+    for (let payload of payloads) {
+      for (let i = 0; i < hooks.length; i++) {
+        await Promise.resolve(hooks[i]({ ...payload, updateResult }))
+      }
+    }
   },
 
   getSignedUrl: async function(path, expires=3600, bucket) {

@@ -6,6 +6,7 @@ export function getSignedUrls(data: any): Promise<void>;
 export function keepImagePlacement(data: any): Promise<void>;
 export function removeImages(data: any, test: any): Promise<{}[]>;
 export function _addImageObjectsToData(path: any, data: any, image: any): any;
+export function _invokeAfterUploadBeforeUpdate(payload: any): Promise<void>;
 export function _findValidImages(files: any): Promise<any[]>;
 export function _findAndTransformImageFields(unprocessedFields: any, path: any): any[];
 export function _findImagesInData(target: any, imageField: any, imageFieldChunkIndex: any, dataPath: any): any;

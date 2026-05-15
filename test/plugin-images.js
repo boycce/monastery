@@ -900,6 +900,108 @@ test('images options awsAcl, awsBucket, metadata, params, path', async () => {
   db3.close()
 })
 
+test('images afterUploadBeforeUpdate must be an array', () => {
+  expect(() => monastery.manager('127.0.0.1/monastery', {
+    timestamps: false,
+    imagePlugin: { ...imagePluginFakeOpts, afterUploadBeforeUpdate: () => {} },
+  })).toThrow('afterUploadBeforeUpdate must be an array of functions')
+})
+
+test('images afterUploadBeforeUpdate hook', async () => {
+  const payloads = []
+  const dbHooks = monastery.manager('127.0.0.1/monastery', {
+    timestamps: false,
+    imagePlugin: {
+      ...imagePluginFakeOpts,
+      afterUploadBeforeUpdate: [
+        (ctx) => { payloads.push({ path: ctx.inputPath, fname: ctx.image.filename }) },
+        (ctx) => { payloads.push({ extra: ctx.test === true }) },
+      ],
+    },
+  })
+
+  const user = dbHooks.model('user', {
+    fields: { logo: { type: 'image' } },
+  })
+
+  const supertest = require('supertest')
+  const express = require('express')
+  const upload = require('express-fileupload')
+  const app = express()
+  app.use(upload({ limits: { fileSize: 1 * 1000 * 1000, files: 10 } }))
+
+  app.post('/', async (req, res) => {
+    try {
+      await imagePluginFile.addImages.call(
+        { model: user, files: req.files, query: { _id: 1234 } },
+        req.body || {},
+        true
+      )
+      res.send()
+    } catch (e) {
+      console.log(e.message || e)
+      res.status(500).send()
+    }
+  })
+
+  await supertest(app)
+    .post('/')
+    .attach('logo', `${__dirname}/assets/logo.png`)
+    .expect(200)
+
+  expect(payloads).toEqual([
+    { path: 'logo', fname: 'logo.png' },
+    { extra: true },
+  ])
+
+  dbHooks.close()
+})
+
+test('images afterUploadAfterUpdate must be an array', () => {
+  expect(() => monastery.manager('127.0.0.1/monastery', {
+    timestamps: false,
+    imagePlugin: { ...imagePluginFakeOpts, afterUploadAfterUpdate: () => {} },
+  })).toThrow('afterUploadAfterUpdate must be an array of functions')
+})
+
+test('images afterUploadAfterUpdate hook', async () => {
+  const payloads = []
+  const dbHooks = monastery.manager('127.0.0.1/monastery', {
+    timestamps: false,
+    imagePlugin: {
+      ...imagePluginFakeOpts,
+      afterUploadAfterUpdate: [
+        (ctx) => { payloads.push({ path: ctx.inputPath, fname: ctx.image.filename }) },
+        (ctx) => { payloads.push({ hasUpdateResult: ctx.updateResult != null }) },
+      ],
+    },
+  })
+
+  const user = dbHooks.model('user', { fields: { logo: { type: 'image' } } })
+
+  const fakePayload = {
+    model: user,
+    data: {},
+    image: { filename: 'logo.png', uid: 'abc', path: 'full/abc.png', bucket: 'fake', date: 0, filesize: 100 },
+    file: { name: 'logo.png', size: 100 },
+    imageField: user.imageFields[0],
+    inputPath: 'logo',
+    query: { _id: 1234 },
+    create: false,
+    multi: false,
+    s3Result: { Location: 'fake' },
+  }
+
+  await imagePluginFile._invokeAfterUploadAfterUpdate([fakePayload], { nModified: 1 })
+
+  expect(payloads).toEqual([
+    { path: 'logo', fname: 'logo.png' },
+    { hasUpdateResult: true },
+  ])
+
+  dbHooks.close()
+})
+
 test('images option depreciations', async () => {
   // testing (filename bucketDir)
   const db3 = monastery.manager('127.0.0.1/monastery', {

@@ -23,6 +23,10 @@ To use the default image plugin shipped with monastery, you need to use the opti
       // Any s3 upload param, which takes precedence over the params above
       // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#upload-property)
       params: {},
+      // Called after each file is uploaded to S3, before DB update, see "afterUploadBeforeUpdate" below
+      afterUploadBeforeUpdate: [ async (ctx) => {} ],
+      // Called after each file is uploaded to S3, after DB update, see "afterUploadAfterUpdate" below
+      afterUploadAfterUpdate: [ async (ctx) => {} ],
     }
   })
 ```
@@ -93,3 +97,27 @@ let user = db.model('user', {
   }
 }
 ```
+
+### afterUploadBeforeUpdate
+
+Same pattern as **[Operation hooks](./definition/#operation-hooks)** (e.g. `afterUpdate`): an array of functions defined on **`imagePlugin.afterUploadBeforeUpdate = [ ... ]`**, run in order. Each runs **once per successfuly uploaded S3 file**, after the `image` object is set on `data`, but before the document is updated. Rejecting prevents the document update.
+
+One argument `ctx`: 
+  - **`model`**: model instance
+  - **`data`**: the same document payload passed through insert/update validation (already contains the new `image` at `inputPath`)
+  - **`image`**: stored descriptor (`bucket`, `path`, `uid`, `filename`, `filesize`, `date`, …)
+  - **`file`**: parsed upload (`name`, `size`, `data`, `ext`, …)
+  - **`imageField`**: resolved field settings for this path (`formats`, overrides, `fullPath`, …)
+  - **`inputPath`**: dot path for this upload, e.g. `logo`, `photos.0`
+  - **`query`**: operation query
+  - **`create`**: true when the flow is tied to an insert
+  - **`multi`**: multi flag from the operation
+  - **`test`**: second argument passed to `addImages` (true when using test/dry behaviour)
+  - **`s3Result`**: AWS `upload.done()` result when not in test mode; otherwise undefined
+
+### afterUploadAfterUpdate
+
+Same as `afterUploadBeforeUpdate`, but runs **after** the document has been updated in the DB. Does not fire in test mode.
+
+`ctx` is identical to `afterUploadBeforeUpdate`, minus `test`, plus:
+  - **`updateResult`**: return value from `model._update()` after saving image data to the document
