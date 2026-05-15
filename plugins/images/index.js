@@ -2,6 +2,18 @@
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
 const util = require('../../lib/util.js')
 
+// Fallback MIME map for formats `file-type` can't detect (e.g. non binary file-types)
+const mimeMap = {
+  svg:  'image/svg+xml',
+  txt:  'text/plain',
+  csv:  'text/csv',
+  json: 'application/json',
+  xml:  'application/xml',
+  html: 'text/html',
+  css:  'text/css',
+  js:   'application/javascript',
+}
+
 let plugin = module.exports = {
 
   setup: function(manager, options) {
@@ -188,6 +200,7 @@ let plugin = module.exports = {
               Bucket: image.bucket,
               Key: image.path,
               Metadata: image.metadata,
+              ContentType: file.mime || mimeMap[file.ext] || 'application/octet-stream',
               ...(filesArr.imageField.params || imagePlugin.params),
             }
             model.manager.info(
@@ -535,6 +548,7 @@ let plugin = module.exports = {
             let formats = filesArr.imageField.formats || imagePlugin.formats
             let allowAny = util.inArray(formats, 'any')
             file.format = res? res.ext : ''
+            file.mime   = res? res.mime : ''
             file.ext = file.format || (file.name.match(/\.(.*)$/) || [])[1] || 'unknown'
             file.nameClipped = file.name.length > 14? file.name.substring(0, 14) + '..' : file.name
 
