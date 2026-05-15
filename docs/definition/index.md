@@ -227,7 +227,7 @@ Since unique indexes by default don't allow multiple documents with `null`, you 
 You are able to define custom field rules to use. 
 
 - `this` will refer to the data object passed in
-- by default, custom rules will ignore `undefined` values
+- by default, custom rules will ignore `undefined` values, _unlike the default where null and empty strings are also ignored_
 
 ```js
 {
