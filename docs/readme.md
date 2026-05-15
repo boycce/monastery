@@ -139,6 +139,7 @@ You can view MongoDB's [compatibility table here](https://www.mongodb.com/docs/d
 - ~~Added deep path validation support for updates~~
 - ~~Added option skipHooks~~
 - beforeValidate should pass the document rather than the whole array of documents
+- custom rules should use the default settings, e.g. ignore null, or an empty strings
 
 ## Debugging
 
