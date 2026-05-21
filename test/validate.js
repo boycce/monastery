@@ -235,8 +235,8 @@ test('validation strict false', async () => {
   })
 })
 
-test('validation subdocument errors', async () => {
-  let user = db.model('user', { fields: {
+test('validation subdocument errors & nullObjects', async () => {
+  const schema = {
     animals: {
       cat: { type: 'string', required: true }, // {} = required on insert
       dog: {
@@ -244,120 +244,159 @@ test('validation subdocument errors', async () => {
         color: { type: 'string', required: true }, // {} = required on insert
       },
     },
-  }})
+  }
+  const db2 = monastery.manager('127.0.0.1/monastery', { nullObjects: true, timestamps: false })
+  let user = db.model('user', { fields: schema })
+  let user2 = db2.model('user2', { fields: schema })
+  const opts = { update: true }
 
-  // Insert: Required subdocument properties
-  await expect(user.validate({})).rejects.toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({
-        status: '400',
-        title: 'animals.cat',
-        detail: 'This field is required.',
-        meta: { rule: 'required', model: 'user', field: 'cat' },
-      }),
-      expect.objectContaining({
-        status: '400',
-        title: 'animals.dog.color',
-        detail: 'This field is required.',
-        meta: { rule: 'required', model: 'user', field: 'color' },
-      }),
-    ])
-  )
-
-  // Insert: Required subdocument properties
-  await expect(user.validate({ animals: {} })).rejects.toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({
-        status: '400',
-        title: 'animals.cat',
-        detail: 'This field is required.',
-        meta: { rule: 'required', model: 'user', field: 'cat' },
-      }),
-      expect.objectContaining({
-        status: '400',
-        title: 'animals.dog.color',
-        detail: 'This field is required.',
-        meta: { rule: 'required', model: 'user', field: 'color' },
-      }),
-    ])
-  )
-
-  // Insert: Invalid subdocument type
-  await expect(user.validate({ animals: { dog: 1 }})).rejects.toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({
-        status: '400',
-        title: 'animals.cat',
-        detail: 'This field is required.',
-        meta: { rule: 'required', model: 'user', field: 'cat' },
-      }),
-      expect.objectContaining({
-        status: '400',
-        title: 'animals.dog',
-        detail: 'Value was not an object.',
-        meta: { rule: 'isObject', model: 'user', field: 'dog' },
-      }),
-    ])
-  )
-
-  // Insert: Required subdocument property is ignored with a parent/grandparent specificed
-  await expect(user.validate({ animals: {} }, { validateUndefined: false })).resolves.toEqual({
-    animals: {},
+  const animalsObject = expect.objectContaining({
+    status: '400',
+    title: 'animals',
+    detail: 'Value was not an object.',
+    meta: { rule: 'isObject', model: expect.any(String), field: 'animals' },
   })
-
-  // Update: Required subdocument property when a parent/grandparent is specified
-  await expect(user.validate({ animals: {} }, { update: true })).rejects.toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({
-        status: '400',
-        title: 'animals.cat',
-        detail: 'This field is required.',
-        meta: { rule: 'required', model: 'user', field: 'cat' },
-      }),
-      expect.objectContaining({
-        status: '400',
-        title: 'animals.dog.color',
-        detail: 'This field is required.',
-        meta: { rule: 'required', model: 'user', field: 'color' },
-      }),
-    ])
-  )
-
-  // Update: Required subdocument property when a parent is specified
-  await expect(user.validate({ animals: { dog: {}} }, { update: true })).rejects.toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({
-        status: '400',
-        title: 'animals.cat',
-        detail: 'This field is required.',
-        meta: { rule: 'required', model: 'user', field: 'cat' },
-      }),
-      expect.objectContaining({
-        status: '400',
-        title: 'animals.dog.color',
-        detail: 'This field is required.',
-        meta: { rule: 'required', model: 'user', field: 'color' },
-      }),
-    ])
-  )
-
-  // Update: Ignore required subdocument property when root parent is undefined
-  await expect(user.validate({}, { update: true })).resolves.toEqual({})
-
-
-  // Update: Ignore required subdocument property with a defined parent when validateUndefined = false
-  await expect(user.validate({ animals: {} }, { update: true, validateUndefined: false })).resolves.toEqual({
-    animals: {},
-  })
-
-  // Update: Required defined subdocument property when validateUndefined = false
-  await expect(user.validate({ animals: { cat: '' }}, { update: true, validateUndefined: false }))
-  .rejects.toContainEqual({
+  const catRequired = expect.objectContaining({
     status: '400',
     title: 'animals.cat',
     detail: 'This field is required.',
-    meta: { rule: 'required', model: 'user', field: 'cat' },
+    meta: { rule: 'required', model: expect.any(String), field: 'cat' },
   })
+  const dogObject = expect.objectContaining({
+    status: '400',
+    title: 'animals.dog',
+    detail: 'Value was not an object.',
+    meta: { rule: 'isObject', model: expect.any(String), field: 'dog' },
+  })
+  const colorRequired = expect.objectContaining({
+    status: '400',
+    title: 'animals.dog.color',
+    detail: 'This field is required.',
+    meta: { rule: 'required', model: expect.any(String), field: 'color' },
+  })
+
+  // --- Insert ---------------------------------
+
+  // Insert: Required subdocuments are ignored with validateUndefined=false
+  await expect(user.validate({ animals: {} }, { validateUndefined: false })).resolves.toEqual({ animals: {} })
+
+  // Insert: Required subdocument properties
+  await expect(user.validate({})).rejects.toEqual([ catRequired, colorRequired ])
+  await expect(user.validate({ animals: {} })).rejects.toEqual([ catRequired, colorRequired ])
+  await expect(user.validate({ animals: 1 })).rejects.toEqual([ animalsObject, catRequired, colorRequired ])  
+  await expect(user.validate({ animals: null })).rejects.toEqual([ animalsObject, catRequired, colorRequired ])
+  await expect(user2.validate({ animals: null })).rejects.toEqual([ catRequired, colorRequired ]) // valid object
+
+  // Insert: Required subdocument properties
+  await expect(user.validate({ animals: { dog: '' }})).rejects.toEqual([ catRequired, dogObject, colorRequired ])
+  await expect(user.validate({ animals: { dog: 1 }})).rejects.toEqual([ catRequired, dogObject, colorRequired ])
+  await expect(user.validate({ animals: { dog: false }})).rejects.toEqual([ catRequired, dogObject, colorRequired ])
+  await expect(user.validate({ animals: { dog: null }})).rejects.toEqual([ catRequired, dogObject, colorRequired ])
+  await expect(user2.validate({ animals: { dog: null }})).rejects.toEqual([ catRequired, colorRequired ]) // valid object
+  
+  // ---- Update --------------------------------
+
+  // Update: Ignore required subdocument property when root parent is undefined
+  await expect(user.validate({}, opts)).resolves.toEqual({})
+  // Update: Ignore required subdocument property with a defined parent when validateUndefined = false
+  await expect(user.validate({ animals: {} }, { ...opts, validateUndefined: false })).resolves.toEqual({ animals: {} })
+
+  // Update: Required subdocument property when a parent/grandparent is specified
+  await expect(user.validate({ animals: {} }, opts)).rejects.toEqual([ catRequired, colorRequired ])
+  await expect(user2.validate({ animals: null }, opts)).rejects.toEqual([ catRequired, colorRequired ]) // valid object
+  await expect(user.validate({ animals: { dog: {}} }, opts)).rejects.toEqual([ catRequired, colorRequired ])
+  await expect(user2.validate({ animals: { dog: null }}, opts)).rejects.toEqual([ catRequired, colorRequired ]) // valid object
+
+  // Update: invalid animals object
+  await expect(user.validate({ animals: '' }, opts)).rejects.toEqual([ animalsObject ])
+  await expect(user.validate({ animals: 1 }, opts)).rejects.toEqual([ animalsObject ])
+  await expect(user.validate({ animals: false }, opts)).rejects.toEqual([ animalsObject ])
+  await expect(user.validate({ animals: null }, opts)).rejects.toEqual([ animalsObject ])
+  // Update: required cat string
+  await expect(user.validate({ animals: { cat: '', dog: { color: 'A' } }}, opts)).rejects.toEqual([ catRequired ])
+  // Update: invalid dog object
+  await expect(user.validate({ animals: { dog: '' }}, opts)).rejects.toEqual([ catRequired, dogObject, colorRequired ])
+})
+
+test('validate nullObjects', async () => {
+  const db2 = monastery.manager('127.0.0.1/monastery', { nullObjects: true, timestamps: false })
+  let user = db2.model('user', { fields: {
+    animals: {
+      dog: { type: 'string' },
+      dogs: [{ name: { type: 'string' } }],
+    },
+    names: [{ type: 'string' }],
+  }})
+  await expect(user.validate({ animals: '', names: null })).resolves.toEqual({ 
+    animals: null, // converted automatically to null
+    names: null, // allowed null for arrays
+  })
+  db2.close()
+})
+
+test('validation option optionalEmbed', async () => {
+  // schema.optionalEmbed=true on a subdocument: only recurse into children when the parent value is an
+  // object, mirroring the behaviour of arrays (arrays only recurse when the item is recursable).
+  const db2 = monastery.manager('127.0.0.1/monastery', { nullObjects: true, timestamps: false })
+  let user = db2.model('userOptionalEmbed', { fields: {
+    animals: {
+      schema: { optionalEmbed: true },
+      cat: { type: 'string', required: true },
+      dog: {
+        name:  { type: 'string' },
+        color: { type: 'string', required: true },
+      },
+    },
+  }})
+  let userRequired = db2.model('userOptionalEmbedRequired', { fields: {
+    animals: {
+      schema: { optionalEmbed: true, required: true },
+      cat: { type: 'string', required: true },
+      dog: {
+        name:  { type: 'string' },
+        color: { type: 'string', required: true },
+      },
+    },
+  }})
+
+  const animalsRequired = expect.objectContaining({
+    status: '400',
+    title: 'animals',
+    detail: 'This field is required.',
+    meta: { rule: 'required', model: expect.any(String), field: 'animals' },
+  })
+  const animalsObject = expect.objectContaining({
+    status: '400',
+    title: 'animals',
+    detail: 'Value was not an object.',
+    meta: { rule: 'isObject', model: expect.any(String), field: 'animals' },
+  })
+  const catRequired = expect.objectContaining({
+    status: '400',
+    title: 'animals.cat',
+    detail: 'This field is required.',
+    meta: { rule: 'required', model: expect.any(String), field: 'cat' },
+  })
+  const colorRequired = expect.objectContaining({
+    status: '400',
+    title: 'animals.dog.color',
+    detail: 'This field is required.',
+    meta: { rule: 'required', model: expect.any(String), field: 'color' },
+  })
+
+  // Parent object missing (animals), required subdocument properties are skipped
+  await expect(user.validate({})).resolves.toEqual({})
+  await expect(user.validate({ animals: null })).resolves.toEqual({ animals: null })
+  // Parent is non-object (animals), just the isObject rule throws
+  await expect(user.validate({ animals: 'bad' })).rejects.toEqual([ animalsObject ])
+  // Parent object (animals), required subdocument properties throw
+  await expect(user.validate({ animals: {} })).rejects.toEqual([ catRequired, colorRequired ])
+  // Parent object (animals), required subdocument properties pass
+  await expect(user.validate({ animals: { cat: 'Whiskers', dog: { color: 'black' } } })).resolves.toMatchObject({ 
+    animals: { cat: 'Whiskers', dog: { color: 'black' } },
+  })
+  // Parent-level required fires regardless of optionalEmbed when parent is missing
+  await expect(userRequired.validate({})).rejects.toEqual([ animalsRequired ])
 })
 
 test('validation array errors', async () => {
@@ -1017,29 +1056,6 @@ test('validate defaultObjects', async () => {
   db2.close()
 })
 
-test('validate nullObjects', async () => {
-  const db2 = monastery.manager('127.0.0.1/monastery', { nullObjects: true, timestamps: false })
-  let user = db2.model('user', { fields: {
-    names: [{ type: 'string' }],
-    animals: {
-      dog: { type: 'string' },
-      dogs: [{ name: { type: 'string' } }],
-    },
-  }})
-
-  // Subdocument data (null/string)
-  await expect(user.validate({ animals: 'notAnObject' })).rejects.toEqual([{
-    'detail': 'Value was not an object.',
-    'meta': {'detailLong': undefined, 'field': 'animals', 'model': 'user', 'rule': 'isObject'},
-    'status': '400',
-    'title': 'animals',
-  }])
-  await expect(user.validate({ animals: '', names: null })).resolves.toEqual({ 
-    animals: null, names: null, 
-  })
-  db2.close()
-})
-
 test('validation option skipValidation', async () => {
   let user = db.model('user', { fields: {
     name: { type: 'string', required: true },
@@ -1179,74 +1195,6 @@ test('validation option validateUndefined', async () => {
     .resolves.toEqual({ name: {} })
   await expect(userdeep.validate({ names: [{}] }, { update: true, validateUndefined: false }))
     .resolves.toEqual({ names: [{}] })
-})
-
-test('validation option optionalEmbed', async () => {
-  // schema.optionalEmbed=true on a subdocument: only recurse into children when the parent value is an
-  // object, mirroring array behaviour (arrays only recurse when the data value is also an array).
-  let user = db.model('userOptionalEmbed', { fields: {
-    animals: {
-      schema: { optionalEmbed: true },
-      cat: { type: 'string', required: true },
-      dog: {
-        name:  { type: 'string' },
-        color: { type: 'string', required: true },
-      },
-    },
-  }})
-
-  let userRequired = db.model('userOptionalEmbedRequired', { fields: {
-    animals: {
-      schema: { optionalEmbed: true, required: true },
-      cat: { type: 'string', required: true },
-      dog: {
-        name:  { type: 'string' },
-        color: { type: 'string', required: true },
-      },
-    },
-  }})
-
-
-  // Parent missing (animals), required child is skipped
-  await expect(user.validate({})).resolves.toEqual({})
-
-  // Parent is non-object (animals), isObject rule throws
-  await expect(user.validate({ animals: 'bad' })).rejects.toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({ title: 'animals', meta: expect.objectContaining({ rule: 'isObject' }) }),
-    ])
-  )
-  // Parent is non-object (animals), required child is skipped
-  const animalsBadErrors = await user.validate({ animals: 'bad' }).catch(e => e)
-  expect(animalsBadErrors).toHaveLength(1)
-  expect(animalsBadErrors).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({ title: 'animals', meta: expect.objectContaining({ rule: 'isObject' }) }),
-    ])
-  )
-  
-  // Parent is an object (animals), required child throws
-  const animalsEmptyErrors = await user.validate({ animals: {} }).catch(e => e)
-  expect(animalsEmptyErrors).toHaveLength(2)
-  expect(animalsEmptyErrors).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({ title: 'animals.cat', meta: expect.objectContaining({ rule: 'required' }) }),
-      expect.objectContaining({ title: 'animals.dog.color', meta: expect.objectContaining({ rule: 'required' }) }),
-    ])
-  )
-
-  // Parent is an object (animals), required child passes
-  await expect(user.validate({ animals: { cat: 'Whiskers', dog: { color: 'black' } } }))
-    .resolves.toMatchObject({ animals: { cat: 'Whiskers', dog: { color: 'black' } } })
-
-  // Parent-level required fires regardless of optionalEmbed when parent is missing
-  const animalsRequiredErrors = await userRequired.validate({}).catch(e => e)
-  expect(animalsRequiredErrors).toHaveLength(1)
-  expect(animalsRequiredErrors).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({ title: 'animals', meta: expect.objectContaining({ rule: 'required' }) }),
-    ])
-  )
 })
 
 test('validation update dot notation', async () => {

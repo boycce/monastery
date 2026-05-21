@@ -80,9 +80,11 @@ You can view MongoDB's [compatibility table here](https://www.mongodb.com/docs/d
 
 | Monastery            | Mongo NodeJS Driver | MongoDB Server    | Node                |
 | :------------------- | :-----------------: | :---------------: | ------------------: |
-| `3.x` | [`5.9.x`](https://mongodb.github.io/node-mongodb-native/5.9/) | `>=3.6  <=7.x` | `>=14.x <=latest` |
+| `3-4.x` | [`5.9.x`](https://mongodb.github.io/node-mongodb-native/5.9/) | `>=3.6  <=7.x` | `>=14.x <=latest` |
 | `2.x` | [`3.7.x`](https://mongodb.github.io/node-mongodb-native/3.7/api/) | `>=2.6  <=6.x` | `>=4.x  <=14.x` |
 
+## v4 Breaking Changes
+  - Previously, subdocument properties were ignored when the parent value was `null` (with `nullObjects=true`). You now need to add `{ schema: { optionalEmbed: true } }` to achieve the same behaviour.
 
 ## v3 Breaking Changes
 
