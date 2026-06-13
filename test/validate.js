@@ -1,6 +1,6 @@
 // Todo: split out basic 'type' tests
 const monastery = require('../lib/index.js')
-const Model = require('../lib/model.js')
+const util = require('../lib/util.js')
 
 let db
 beforeAll(async () => { db = monastery.manager('127.0.0.1/monastery', { timestamps: false }) })
@@ -518,7 +518,7 @@ test('validation getMostSpecificKeyMatchingPath', async () => {
     },
   })
 
-  let fn = Model.prototype._getMostSpecificKeyMatchingPath
+  let fn = util.getMostSpecificKeyMatchingPath
   // subdocument
   expect(fn(user.messages, 'cats.name')).toEqual('cats.name')
   // array subdocuments
