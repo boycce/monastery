@@ -282,9 +282,14 @@ All methods return a promise.
   Updates one or more document(s) from the collection. Arguments:
 
   1. `Filter` *(string\|objectId\|object)*
-  1. `Update` *(object)*
+  1. `Update` *(object)|{Pipeline}*
   2. `[Options]` *(object)*
 
   ```js
   await users._update({ name: 'John' }, { $set: { age: 30 } })
+
+  // Pipeline update example
+  await users._update({}, [
+    { $set: { ageInTenYears: { $add: ['$age', 10] } } }
+  ], { multi: true })
   ```
