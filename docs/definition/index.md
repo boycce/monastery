@@ -302,7 +302,7 @@ You are able to define custom error messages for each field rule.
     'pets.0.name': {
       required: `You first pet needs a name`
     },
-    // Unique index violations on insert/update (not validate)
+    // Unique index violations on insert/update
     'email': {
       index_unique: 'That email is already in use',
     },
