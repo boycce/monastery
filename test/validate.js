@@ -635,8 +635,8 @@ test('validation custom messages unique index', async () => {
       profile: { email: { type: 'string', index: 'unique' } },
     },
     messages: {
-      'uid': { unique: (value) => `Duplicate: ${value}` },
-      'profile.email': { unique: 'Oops email must be unique' },
+      'uid': { index_unique: (value) => `Duplicate: ${value}` },
+      'profile.email': { index_unique: 'Oops email must be unique' },
     },
   }, { waitForIndexes: true })
 
@@ -644,13 +644,13 @@ test('validation custom messages unique index', async () => {
     status: '400',
     title: 'uid',
     detail: 'Duplicate: 123',
-    meta: { rule: 'unique', model: 'userUniqueIndex', field: 'uid' },
+    meta: { rule: 'index_unique', model: 'userUniqueIndex', field: 'uid' },
   })
   const emailUniqueError = expect.objectContaining({
     status: '400',
     title: 'profile.email',
     detail: 'Oops email must be unique',
-    meta: { rule: 'unique', model: 'userUniqueIndex', field: 'email' },
+    meta: { rule: 'index_unique', model: 'userUniqueIndex', field: 'email' },
   })
 
   // First entries are valid

@@ -302,9 +302,18 @@ You are able to define custom error messages for each field rule.
     'pets.0.name': {
       required: `You first pet needs a name`
     },
+    // Unique index violations on insert/update (not validate)
+    'email': {
+      index_unique: 'That email is already in use',
+    },
+    'profile.email': {
+      index_unique: (value) => `Duplicate: ${value}`,
+    },
   },
 }
 ```
+
+For fields with `index: 'unique'`, use `index_unique` to return a JSON API error when a duplicate key is saved via [`insert`](../model/insert), [`update`](../model/update), or [`findOneAndUpdate`](../model/findOneAndUpdate). Without a custom message, the raw MongoDB E11000 error is thrown.
 
 ### Operation hooks
 
