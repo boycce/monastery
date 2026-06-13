@@ -404,7 +404,7 @@ test('model setup with reserved and invalid rules', async () => {
   db2.close()
 })
 
-test('model indexes basic', async () => {
+test('model setup indexes basic', async () => {
   // Setup: Need to test different types of indexes
   // Setup: Drop previously tested collections
   const allCollections = await db.db.listCollections().toArray()
@@ -495,7 +495,7 @@ test('model indexes basic', async () => {
   }])
 })
 
-test('model index timeout topology closed', async () => {
+test('model setup indexes timeout topology closed', async () => {
   // 1. For a invalid URL, while a connection is still opening, we should expect a 
   // 'topology is closed' error when trying to create an index.
   // 2. For valid connection URL, we should expect a 'server selection timed out' error (which we can't reproduce in tests)
@@ -579,7 +579,7 @@ test('model indexes unique', async () => {
   })
 })
 
-test('model indexes subdocument', async () => {
+test('model setup indexes subdocument', async () => {
   // Setup: Need to test different types of indexes
   // Setup: Drop previously tested collections
   if ((await db.db.listCollections().toArray()).find(o => o.name == 'userIndexSubdoc')) {
@@ -621,7 +621,7 @@ test('model indexes subdocument', async () => {
   }])
 })
 
-test('model indexes array', async () => {
+test('model setup indexes array', async () => {
   // Setup: Need to test different types of indexes
   // Setup: Drop previously tested collections
   if ((await db.db.listCollections().toArray()).find(o => o.name == 'userIndexArray')) {
