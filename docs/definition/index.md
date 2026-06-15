@@ -168,10 +168,15 @@ fieldType: {
   // { key: { [fieldName1]: 'text', [fieldName2]: 'text', .. }}
   index: 'text'
 
-  // You can also pass an object if you need to use mongodb's index options
+  // You can also pass an object if you need to use mongodb's index options. E.g. this is equivalent to `index: true|1`
   // https://mongodb.github.io/node-mongodb-native/5.9/classes/Collection.html#createIndex
   index: { type: 1, ...(any mongodb index option) },
 
+  // Combined unique index example defined in a nested field, e.g. profile.email
+  // - Index allowing multiple null values
+  // - Since the index object simply spreads the default nitro index options, the default field name is used, e.g. `profile.email_1`
+  // - Throws the duplicate error message: `E11000 duplicate key error collection: {myproject}.{mymodel} index: profile.email_1 dup key: { company: ObjectId('68c266...'), profile.email: 'email@example.com' }`
+  index: { type: 'unique', key: { 'company': 1, 'profile.email': 1 }, partialFilterExpression: { email: { $type: 'string' } } },
 }
 ```
 
@@ -302,9 +307,20 @@ You are able to define custom error messages for each field rule.
     'pets.0.name': {
       required: `You first pet needs a name`
     },
+    // Unique index violations on insert/update
+    'email': {
+      index_unique: 'That email is already in use',
+    },
+    // Combined unique index violations (see the combined index definition example above)
+    // - `keyValue` will be the MongoDB keyValue object, e.g. { 'company': ObjectId('68c266...'), 'profile.email': 'email@example.com' }
+    'profile.email': {
+      index_unique: (keyValue) => `Duplicate: ${keyValue['profile.email']}`,
+    },
   },
 }
 ```
+
+For fields with `index: 'unique'`, use `index_unique` to return a JSON API error when a duplicate key is saved via [`insert`](../model/insert), [`update`](../model/update), or [`findOneAndUpdate`](../model/findOneAndUpdate). Without a custom message, the raw MongoDB E11000 error is thrown.
 
 ### Operation hooks
 

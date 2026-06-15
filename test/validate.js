@@ -1,6 +1,6 @@
 // Todo: split out basic 'type' tests
 const monastery = require('../lib/index.js')
-const Model = require('../lib/model.js')
+const util = require('../lib/util.js')
 
 let db
 beforeAll(async () => { db = monastery.manager('127.0.0.1/monastery', { timestamps: false }) })
@@ -518,7 +518,7 @@ test('validation getMostSpecificKeyMatchingPath', async () => {
     },
   })
 
-  let fn = Model.prototype._getMostSpecificKeyMatchingPath
+  let fn = util.getMostSpecificKeyMatchingPath
   // subdocument
   expect(fn(user.messages, 'cats.name')).toEqual('cats.name')
   // array subdocuments
@@ -583,7 +583,7 @@ test('validation default messages', async () => {
   })
 })
 
-test('validation custom messages', async () => {
+test('validation custom messages basic ', async () => {
   // Todo: Setup testing for array array subdocument field messages
   // let arrayWithSchema = (array, schema) => { array.schema = schema; return array }
   let user = db.model('user', {
@@ -621,6 +621,60 @@ test('validation custom messages', async () => {
     title: 'dogNames.0',
     meta: { ...mock.meta, field: '0' },
   })
+})
+
+test('validation custom messages unique index', async () => {
+  // Setup: Drop previously tested collections
+  if ((await db.db.listCollections().toArray()).find(o => o.name == 'userUniqueIndex')) {
+    await db.db.collection('userUniqueIndex').drop()
+  }
+  await db.model('userUniqueIndex', {
+    fields: {
+      id: { type: 'string', index: 'unique' },
+      uid: { type: 'string', index: 'unique' },
+      profile: { email: { type: 'string', index: 'unique' } },
+    },
+    messages: {
+      'uid': { index_unique: (value) => `Duplicate: ${value}` },
+      'profile.email': { index_unique: 'Oops email must be unique' },
+    },
+  }, { waitForIndexes: true })
+
+  const uidUniqueError = expect.objectContaining({
+    status: '400',
+    title: 'uid',
+    detail: 'Duplicate: 123',
+    meta: { rule: 'index_unique', model: 'userUniqueIndex', field: 'uid' },
+  })
+  const emailUniqueError = expect.objectContaining({
+    status: '400',
+    title: 'profile.email',
+    detail: 'Oops email must be unique',
+    meta: { rule: 'index_unique', model: 'userUniqueIndex', field: 'email' },
+  })
+
+  // First entries are valid
+  const [docA, docB] = await db.userUniqueIndex.insert({ data: [
+    { 'id': 1, 'uid': '123', profile: { email: 'a@b.com' }},
+    { id: 2, 'uid': '456', profile: { email: 'c@d.com' }},
+  ]})
+  expect(docA).toEqual({ _id: expect.any(Object), id: '1', uid: '123', profile: { email: 'a@b.com' }})
+  expect(docB).toEqual({ _id: expect.any(Object), id: '2', uid: '456', profile: { email: 'c@d.com' }})
+
+  // Error default
+  await expect(db.userUniqueIndex.insert({ data: { id: '1' } })).rejects.toThrow(/E11000 duplicate key error/)
+
+  // Error for inserting duplicate uid
+  await expect(db.userUniqueIndex.insert({ data: { 'uid': '123' }})).rejects.toEqual([uidUniqueError])
+
+  // Error for updating duplicate uid
+  await expect(db.userUniqueIndex.update({ query: docB._id, data: { 'uid': '123' }})).rejects.toEqual([uidUniqueError])
+
+  // Error for findOneAndUpdate to duplicate uid
+  await expect(db.userUniqueIndex.findOneAndUpdate({ query: docB._id, data: { 'uid': '123' }})).rejects.toEqual([uidUniqueError])
+
+  // Error for inserting duplicate nested email
+  await expect(db.userUniqueIndex.insert({ data: { uid: '8', profile: docA.profile }})).rejects.toEqual([emailUniqueError])
 })
 
 test('validation custom messages for arrays', async () => {
