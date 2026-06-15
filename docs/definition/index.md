@@ -173,10 +173,9 @@ fieldType: {
   index: { type: 1, ...(any mongodb index option) },
 
   // Combined unique index example defined in a nested field, e.g. profile.email
-  // - Index allowing multiple null values
   // - Since the index object simply spreads the default nitro index options, the default field name is used, e.g. `profile.email_1`
   // - Throws the duplicate error message: `E11000 duplicate key error collection: {myproject}.{mymodel} index: profile.email_1 dup key: { company: ObjectId('68c266...'), profile.email: 'email@example.com' }`
-  index: { type: 'unique', key: { 'company': 1, 'profile.email': 1 }, partialFilterExpression: { email: { $type: 'string' } } },
+  index: { type: 'unique', key: { 'company': 1, 'profile.email': 1 } },
 }
 ```
 
