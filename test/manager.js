@@ -82,7 +82,8 @@ test('manager > return a promise with uri error', async () => {
 })
 
 test('manager > reuse MongoDB Client', async () => {
-  const mongoClient = new MongoClient('mongodb://localhost/monastery', {})
+  // A reused client must set runtimeAdapters itself when running inside a CJS vm sandbox like Jest
+  const mongoClient = new MongoClient('mongodb://localhost/monastery', { runtimeAdapters: { os: require('os') } })
   const db = await monastery.manager(mongoClient, { serverSelectionTimeoutMS: 500, promise: true })
   expect(db).toEqual(expect.any(Object))
   expect(db.client).toEqual(expect.any(Object))

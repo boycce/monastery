@@ -80,8 +80,15 @@ You can view MongoDB's [compatibility table here](https://www.mongodb.com/docs/d
 
 | Monastery            | Mongo NodeJS Driver | MongoDB Server    | Node                |
 | :------------------- | :-----------------: | :---------------: | ------------------: |
+| `5.x` | [`7.6.x`](https://mongodb.github.io/node-mongodb-native/7.6/) | `>=4.4  <=8.x` | `>=20.19 <=latest` |
 | `3-4.x` | [`5.9.x`](https://mongodb.github.io/node-mongodb-native/5.9/) | `>=3.6  <=7.x` | `>=14.x <=latest` |
 | `2.x` | [`3.7.x`](https://mongodb.github.io/node-mongodb-native/3.7/api/) | `>=2.6  <=6.x` | `>=4.x  <=14.x` |
+
+## v5 Breaking Changes
+  - Upgraded the MongoDB NodeJS Driver to `7.x`, which requires Node `>=20.19`
+  - `collection.bulkWrite()` results now use `insertedCount`, `modifiedCount` and `deletedCount` instead of `nInserted`, `nModified` and `nRemoved`
+  - `collection.stats()` now returns the `$collStats` aggregation document, e.g. `{ storageStats, count }`, instead of the old `collStats` command output
+  - If you pass your own `MongoClient` to `manager()` and run inside a CommonJS vm sandbox such as Jest, create it with `{ runtimeAdapters: { os: require('os') } }`, otherwise the driver's dynamic `import('os')` fails and the connection handshake is rejected
 
 ## v4 Breaking Changes
   - Previously, subdocument properties were ignored when the parent value was `null` (with `nullObjects=true`). You now need to add `{ schema: { optionalEmbed: true } }` to achieve the same behaviour.

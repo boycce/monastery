@@ -421,7 +421,7 @@ test('aggregate > should work with option', async () => {
 
 test('bulkWrite', async () => {
   const r = await userCol.bulkWrite([{ insertOne: { document: { bulkWrite: 1 } } }])
-  expect(r.nInserted).toBe(1)
+  expect(r.insertedCount).toBe(1)
 })
 
 test('drop > should not throw when dropping an empty db', async () => {

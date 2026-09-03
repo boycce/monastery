@@ -26,10 +26,10 @@
     "lint": "eslint ./lib ./plugins ./test",
     "mona": "nodemon resources/mona.js",
     "mong": "nodemon resources/mong.js",
-    "major": "standard-version --release-as major && npm publish",
-    "minor": "standard-version --release-as minor && npm publish",
-    "patch": "standard-version --release-as patch && npm publish",
-    "release": "standard-version && npm publish && git push --tags",
+    "major": "standard-version --release-as major && npm publish && git push --follow-tags",
+    "minor": "standard-version --release-as minor && npm publish && git push --follow-tags",
+    "patch": "standard-version --release-as patch && npm publish && git push --follow-tags",
+    "release": "standard-version && npm publish && git push --follow-tags",
     "test": "npm run lint && jest",
     "test-one-example": "jest -t \"images addImages\" --watchAll",
     "types": "tsc"
@@ -40,7 +40,7 @@
     "@aws-sdk/s3-request-presigner": "3.549.0",
     "debug": "4.3.4",
     "file-type": "16.5.4",
-    "mongodb": "5.9.2",
+    "mongodb": "7.6.0",
     "nanoid": "3.2.0",
     "validator": "13.7.0"
   },
@@ -49,13 +49,13 @@
     "eslint": "8.7.0",
     "express": "^4.19.2",
     "express-fileupload": "^1.5.0",
-    "jest": "27.4.7",
+    "jest": "30.5.1",
     "nodemon": "^3.1.0",
     "standard-version": "github:boycce/standard-version",
-    "supertest": "4.0.2"
+    "supertest": "7.2.2"
   },
   "engines": {
-    "node": ">=14"
+    "node": ">=20.19.0"
   },
   "standard-version": {
     "infile": "changelog.md",
