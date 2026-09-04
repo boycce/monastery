@@ -5,7 +5,9 @@ parent: File Plugin
 
 # Migrating from the image plugin
 
-v5 renamed the image plugin to the file plugin. File objects stored in your database are unchanged, only your code needs updating.
+v5 renamed the image plugin to the file plugin.
+
+> **No database migration is needed.** File objects stored in your database are unchanged, only your source code needs updating.
 
 **Manager setup**
 
