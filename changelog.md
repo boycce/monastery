@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.0.1](https://github.com/boycce/monastery/compare/5.0.0...5.0.1) (2026-09-04)
+
+
+### Features
+
+* **files:** rename image plugin to file plugin and document non-image uploads ([316eb5b](https://github.com/boycce/monastery/commit/316eb5b1ea7615b6474a7700b328610b89cd36a3))
+
 ## [5.0.0](https://github.com/boycce/monastery/compare/4.0.7...5.0.0) (2026-09-03)
 
 ### [4.0.7](https://github.com/boycce/monastery/compare/4.0.6...4.0.7) (2026-09-03)
