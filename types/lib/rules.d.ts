@@ -34,7 +34,7 @@ export declare namespace isDate {
     export function fn_3(x: any): boolean;
     export { fn_3 as fn };
 }
-export declare namespace isImageObject {
+export declare namespace isFileObject {
     let validateEmptyString_4: boolean;
     export { validateEmptyString_4 as validateEmptyString };
     let message_4: string;

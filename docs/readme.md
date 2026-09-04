@@ -85,6 +85,9 @@ You can view MongoDB's [compatibility table here](https://www.mongodb.com/docs/d
 | `2.x` | [`3.7.x`](https://mongodb.github.io/node-mongodb-native/3.7/api/) | `>=2.6  <=6.x` | `>=4.x  <=14.x` |
 
 ## v5 Breaking Changes
+  - `imagePlugin` manager option renamed to `filePlugin`, and `manager.imagePlugin` to `manager.filePlugin`, see [migrating from the image plugin](./file-plugin-migration)
+  - `type: 'image'` field type renamed to `type: 'file'`
+  - Upload hook `ctx.image` and `ctx.imageField` renamed to `ctx.fileObject` and `ctx.fileField`
   - Upgraded the MongoDB NodeJS Driver to `7.x`, which requires Node `>=20.19`
   - `collection.bulkWrite()` results now use `insertedCount`, `modifiedCount` and `deletedCount` instead of `nInserted`, `nModified` and `nRemoved`
   - `collection.stats()` now returns the `$collStats` aggregation document, e.g. `{ storageStats, count }`, instead of the old `collStats` command output
@@ -134,11 +137,11 @@ You can view MongoDB's [compatibility table here](https://www.mongodb.com/docs/d
 - Docs: Make the implicit ID query conversion more apparent
 - ~~Split away from Monk so we can update the MongoDB NodeJS Driver version~~
 - Add a warning if an invalid model is referenced in jthe schema
-- Remove leading forward slashes from custom image paths (AWS adds this as a seperate folder)
+- Remove leading forward slashes from custom file paths (AWS adds this as a seperate folder)
 - Double check await db.model.remove({ query: idfromparam }) doesnt cause issues for null, undefined or '', but continue to allow {}
 - ~~Can't insert/update model id (maybe we can allow this and add _id to default insert/update blacklists)~~
 - timstamps are blacklisted by default (instead of the `timestamps` opt), and can be switched off via blacklisting
-- Allow rules on image types, e.g. `required`
+- Allow rules on file types, e.g. `required`
 - Test importing of models
 - ~~Docs: model.methods~~
 - ~~Convert hooks to promises~~

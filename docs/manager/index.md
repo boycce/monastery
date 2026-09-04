@@ -62,7 +62,7 @@ manager.onError((err) => {
 - `manager.models()`: [see models](./models.html)
 - `manager.onError(Function)`: Catches connection errors
 - `manager.onOpen(Function)`: Triggers on successful connection
-- `manager.getSignedUrl(path, expires, bucket)`: You can sign AWS S3 paths using this image plugin helper
+- `manager.getSignedUrl(path, expires, bucket)`: You can sign AWS S3 paths using this [file plugin](../file-plugin) helper
 
 ### Dates
 

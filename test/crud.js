@@ -55,7 +55,7 @@ test('insert option defaultObjects', async () => {
   let db2 = monastery.manager('127.0.0.1/monastery', { 
     defaultObjects: true, 
     timestamps: false, 
-    imagePlugin: {
+    filePlugin: {
       awsBucket: 'test',
       awsRegion: 'test',
       awsAccessKeyId: 'test',
@@ -64,7 +64,7 @@ test('insert option defaultObjects', async () => {
   })
   let schema = { 
     fields: {
-      avatar: { type: 'image' }, // its an object but should default to `undefined`
+      avatar: { type: 'file' }, // its an object but should default to `undefined`
       name: { type: 'string' },
       names: [{ type: 'string' }],
       animal: {
@@ -1509,7 +1509,7 @@ test('update set and unset with option skipValidation', async () => {
   await expect(user.findOne(userId)).resolves.toEqual({ _id: userId, profile: {} }) /////////unseeeet
 
   // $unset with skipValidation: true
-  await expect(user.update({ query: userId, $set: { 'profile.name': 'John Doe2' } })) // add age back
+  await user.update({ query: userId, $set: { 'profile.name': 'John Doe2' } }) // add name back
   const u8 = { query: userId, $unset: { 'profile.name': '' }, skipValidation: true }
   await expect(user.update(u8)).resolves.toEqual({})
   await expect(user.findOne(userId)).resolves.toEqual({ _id: userId, profile: {} })

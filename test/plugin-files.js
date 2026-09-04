@@ -1,23 +1,23 @@
-// Data no images doesn't throw error
+// Data no files doesn't throw error
 const util = require('../lib/util.js')
-const imagePluginFile = require('../plugins/images/index.js')
+const filePluginFile = require('../plugins/files/index.js')
 const monastery = require('../lib/index.js')
-const imagePluginFakeOpts = { awsBucket: 'fake', awsRegion: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
+const filePluginFakeOpts = { awsBucket: 'fake', awsRegion: 'fake', awsAccessKeyId: 'fake', awsSecretAccessKey: 'fake' }
 
 let db
 afterAll(async () => { db.close() })
 beforeAll(async () => { 
   db = monastery.manager('127.0.0.1/monastery', {
     timestamps: false, 
-    imagePlugin: imagePluginFakeOpts,
+    filePlugin: filePluginFakeOpts,
   }) 
 })
 
-test('images no initialisation', async () => {
+test('files no initialisation', async () => {
   const db2 = monastery.manager('127.0.0.1/monastery', { timestamps: false })
   db2.model('company', {
     fields: {
-      logo: { type: 'image' },
+      logo: { type: 'file' },
     },
   })
   db2.model('user', {
@@ -41,7 +41,7 @@ test('images no initialisation', async () => {
   // schema
   expect(db2.company.fields.logo).toEqual({
     schema: {
-      image: true,
+      file: true,
       isAny: true,
       isSchema: true,
       isType: 'isAny',
@@ -66,17 +66,17 @@ test('images no initialisation', async () => {
   db2.close()
 })
 
-test('images initialisation', async () => {
+test('files initialisation', async () => {
   let user = db.model('user', { 
     fields: {
-      logo: { type: 'image' },
-      logos: [{ type: 'image' }],
-      users: [{ logo: { type: 'image' } }],
+      logo: { type: 'file' },
+      logos: [{ type: 'file' }],
+      users: [{ logo: { type: 'file' } }],
     },
   })
 
   // Initialisation success
-  expect(db.opts.imagePlugin).toEqual(imagePluginFakeOpts)
+  expect(db.opts.filePlugin).toEqual(filePluginFakeOpts)
 
   function schemaForType(type) {
     return {
@@ -102,9 +102,9 @@ test('images initialisation', async () => {
       isSchema: true,
       isType: 'isObject',
       nullObject: true,
-      // Image rules
-      image: true, 
-      isImageObject: true,
+      // File rules
+      file: true, 
+      isFileObject: true,
     },
   }
 
@@ -114,55 +114,55 @@ test('images initialisation', async () => {
   expect(user.fields.users[0].logo).toEqual(expected)
 })
 
-test('images addImages helper functions', async () => {
+test('files addFiles helper functions', async () => {
   db.model('user', { fields: {
-    logo: { type: 'image' },
-    logos: [{ type: 'image' }],
-    users: [{ logo: { type: 'image' } }],
+    logo: { type: 'file' },
+    logos: [{ type: 'file' }],
+    users: [{ logo: { type: 'file' } }],
   }})
 
   // Adding
   let image = { file: 'test' }
 
   // lvl 1 property
-  expect(imagePluginFile._addImageObjectsToData('logo', {}, image))
+  expect(filePluginFile._addFileObjectsToData('logo', {}, image))
     .toEqual({ logo: image })
 
   // lvl 1 existing property
-  expect(imagePluginFile._addImageObjectsToData('logo', { logo: null }, image))
+  expect(filePluginFile._addFileObjectsToData('logo', { logo: null }, image))
     .toEqual({ logo: image })
 
   // lvl 1 array property
-  expect(imagePluginFile._addImageObjectsToData('logo.0', {}, image))
+  expect(filePluginFile._addFileObjectsToData('logo.0', {}, image))
     .toEqual({ logo: [image] })
 
   // lvl 1 array existing property
-  expect(imagePluginFile._addImageObjectsToData('logo.1', { logo: [image] }, image))
+  expect(filePluginFile._addFileObjectsToData('logo.1', { logo: [image] }, image))
     .toEqual({ logo: [image, image] })
 
   // lvl 2 property
-  expect(imagePluginFile._addImageObjectsToData('user.logo', {}, image))
+  expect(filePluginFile._addFileObjectsToData('user.logo', {}, image))
     .toEqual({ user: { logo: image }})
 
   // lvl 2 existing property
-  expect(imagePluginFile._addImageObjectsToData('user.logo', { user: { logo: null }}, image))
+  expect(filePluginFile._addFileObjectsToData('user.logo', { user: { logo: null }}, image))
     .toEqual({ user: { logo: image }})
 
   // lvl 2 array property
-  expect(imagePluginFile._addImageObjectsToData('user.1.logo', {}, image))
+  expect(filePluginFile._addFileObjectsToData('user.1.logo', {}, image))
     .toEqual({ user: [undefined, { logo: image }]})
 
   // lvl 5 property
-  expect(imagePluginFile._addImageObjectsToData('user.a.b.c.logo', {}, image))
+  expect(filePluginFile._addFileObjectsToData('user.a.b.c.logo', {}, image))
     .toEqual({ user: { a: { b: { c: { logo: image }}}}})
 })
 
-test('images addImages', async () => {
+test('files addFiles', async () => {
   let user = db.model('user', { 
     fields: {
-      logo: { type: 'image' },
-      logos: [{ type: 'image' }],
-      users: [{ logo: { type: 'image' } }],
+      logo: { type: 'file' },
+      logos: [{ type: 'file' }],
+      users: [{ logo: { type: 'file' } }],
     },
   })
   // console.log(db.opts, user.fields.logo)
@@ -178,7 +178,7 @@ test('images addImages', async () => {
     try {
       // Files exist
       expect(req.files.logo).toEqual(expect.any(Object))
-      let validFiles = await imagePluginFile._findValidImages.call(user, req.files)
+      let validFiles = await filePluginFile._findValidFiles.call(user, req.files)
       // Valid file count
       expect(validFiles).toEqual([
         expect.any(Array),
@@ -186,11 +186,11 @@ test('images addImages', async () => {
         expect.any(Array),
         expect.any(Array),
       ])
-      // Valid imageField
-      expect(validFiles[0].imageField).toEqual(expect.any(Object))
-      expect(validFiles[1].imageField).toEqual(expect.any(Object))
-      expect(validFiles[2].imageField).toEqual(expect.any(Object))
-      expect(validFiles[3].imageField).toEqual(expect.any(Object))
+      // Valid fileField
+      expect(validFiles[0].fileField).toEqual(expect.any(Object))
+      expect(validFiles[1].fileField).toEqual(expect.any(Object))
+      expect(validFiles[2].fileField).toEqual(expect.any(Object))
+      expect(validFiles[3].fileField).toEqual(expect.any(Object))
       // Valid inputPath
       expect(validFiles[0].inputPath).toEqual('logo')
       expect(validFiles[1].inputPath).toEqual('logos.0')
@@ -206,7 +206,7 @@ test('images addImages', async () => {
       expect(validFiles[2][0].mime).toEqual('image/png')
       expect(validFiles[3][0].mime).toEqual('image/png')
 
-      let response = await imagePluginFile.addImages.call(
+      let response = await filePluginFile.addFiles.call(
         { model: user, files: req.files, query: { _id: 1234 }},
         req.body,
         true
@@ -265,12 +265,12 @@ test('images addImages', async () => {
     .expect(200)
 })
 
-test('images removeImages', async () => {
+test('files removeFiles', async () => {
   let user = db.model('user', { fields: {
-    logo: { type: 'image' },
-    logos: [{ type: 'image' }],
-    users: [{ userlogo: { type: 'image' } }],
-    deep: { logo: { type: 'image' }},
+    logo: { type: 'file' },
+    logos: [{ type: 'file' }],
+    users: [{ userlogo: { type: 'file' } }],
+    deep: { logo: { type: 'file' }},
   }})
 
   let image = {
@@ -306,7 +306,7 @@ test('images removeImages', async () => {
       req.body.logos = JSON.parse(req.body.logos)
       req.body.users = JSON.parse(req.body.users)
       let options = { files: req.files, model: user, query: { _id: user1._id }}
-      let response = await imagePluginFile.removeImages.call(options, req.body, true)
+      let response = await filePluginFile.removeFiles.call(options, req.body, true)
       expect(response[0]).toEqual({ test1: 1, test2: 0, test3: 1, test4: 0 })
       expect(response[1]).toEqual([
         { Key: 'dir/test2.png' },
@@ -341,10 +341,10 @@ test('images removeImages', async () => {
     .expect(200)
 })
 
-test('images removeImages with no data', async () => {
+test('files removeFiles with no data', async () => {
   // NOTE: Redundent, leaving for now (test was needed to fix a project issue)
   let user = db.model('user', { fields: {
-    logo: { type: 'image' },
+    logo: { type: 'file' },
   }})
 
   // let image = {
@@ -367,7 +367,7 @@ test('images removeImages with no data', async () => {
   app.post('/', async function(req, res) {
     try {
       let options = { files: req.files, model: user, query: { _id: user1._id }}
-      let response = await imagePluginFile.removeImages.call(options, req.body, true)
+      let response = await filePluginFile.removeFiles.call(options, req.body, true)
       expect(response[0]).toEqual({})
       expect(response[1]).toEqual([])
       res.send()
@@ -384,11 +384,11 @@ test('images removeImages with no data', async () => {
     .expect(200)
 })
 
-test('images addImages bad file objects', async () => {
+test('files addFiles bad file objects', async () => {
   db.model('user', { fields: {
-    logo: { type: 'image' },
-    logos: [{ type: 'image' }],
-    users: [{ logo: { type: 'image' } }],
+    logo: { type: 'file' },
+    logos: [{ type: 'file' }],
+    users: [{ logo: { type: 'file' } }],
   }})
 
   let imageObjectMock = {
@@ -399,7 +399,7 @@ test('images addImages bad file objects', async () => {
     path: 'temp',
     uid: 'temp',
   }
-  let detailLongMock = 'Image fields need to either be null, undefined, file, or an object containing the '
+  let detailLongMock = 'File fields need to either be null, undefined, file, or an object containing the '
     + 'following fields \'{ bucket, date, filename, filesize, path, uid }\''
 
   let supertest = require('supertest')
@@ -435,18 +435,18 @@ test('images addImages bad file objects', async () => {
       // console.log(res.body)
       expect(res.body).toEqual([
         {
-          detail: 'Invalid image value',
-          meta: { rule: 'isImageObject', model: 'user', field: '2', detailLong: detailLongMock },
+          detail: 'Invalid file value',
+          meta: { rule: 'isFileObject', model: 'user', field: '2', detailLong: detailLongMock },
           status: '400',
           title: 'logos.2',
         }, {
-          detail: 'Invalid image value',
-          meta: { rule: 'isImageObject', model: 'user', field: 'logo', detailLong: detailLongMock },
+          detail: 'Invalid file value',
+          meta: { rule: 'isFileObject', model: 'user', field: 'logo', detailLong: detailLongMock },
           status: '400',
           title: 'users.0.logo',
         }, {
-          detail: 'Invalid image value',
-          meta: { rule: 'isImageObject', model: 'user', field: 'logo', detailLong: detailLongMock },
+          detail: 'Invalid file value',
+          meta: { rule: 'isFileObject', model: 'user', field: 'logo', detailLong: detailLongMock },
           status: '400',
           title: 'users.1.logo',
         },
@@ -454,9 +454,9 @@ test('images addImages bad file objects', async () => {
     })
 })
 
-test('images reorder', async () => {
+test('files reorder', async () => {
   let user = db.model('user', { fields: {
-    logos: [{ type: 'image' }],
+    logos: [{ type: 'file' }],
   }})
 
   let image = {
@@ -483,7 +483,7 @@ test('images reorder', async () => {
     try {
       req.body.logos = JSON.parse(req.body.logos)
       let options = { files: req.files, model: user, query: { _id: user1._id } }
-      let response = await imagePluginFile.removeImages.call(options, req.body, true)
+      let response = await filePluginFile.removeFiles.call(options, req.body, true)
       expect(response[0]).toEqual({ lion1: 1 })
       expect(response[1]).toEqual([])
       res.send()
@@ -498,10 +498,10 @@ test('images reorder', async () => {
     .expect(200)
 })
 
-test('images reorder and added image', async () => {
+test('files reorder and added image', async () => {
   // latest (2022.02)
   let user = db.model('user', { fields: {
-    photos: [{ type: 'image' }],
+    photos: [{ type: 'file' }],
   }})
 
   let image = {
@@ -535,16 +535,16 @@ test('images reorder and added image', async () => {
       expect(data.photos[1]).toEqual(image)
 
       // Remove images
-      let response = await imagePluginFile.removeImages.call(options, data, true)
+      let response = await filePluginFile.removeFiles.call(options, data, true)
       expect(response[0]).toEqual({ lion1: 1 }) // useCount
       expect(response[1]).toEqual([]) // unused
 
       // New file exists
-      let validFiles = await imagePluginFile._findValidImages.call(user, req.files)
+      let validFiles = await filePluginFile._findValidFiles.call(user, req.files)
       expect(((validFiles||[])[0]||{}).inputPath).toEqual('photos.0') // Valid inputPath
 
       // Add images
-      response = await imagePluginFile.addImages.call(options, data, true)
+      response = await filePluginFile.addFiles.call(options, data, true)
       expect(response[0]).toEqual({
         photos: [{
           bucket: 'fake',
@@ -586,11 +586,11 @@ test('images reorder and added image', async () => {
     .expect(200)
 })
 
-test('images option defaults', async () => {
+test('files option defaults', async () => {
   // testing (awsAcl filesize formats getSignedUrl path params)
   let user = db.model('user', {
     fields: {
-      logo: { type: 'image' },
+      logo: { type: 'file' },
     },
   })
 
@@ -601,13 +601,13 @@ test('images option defaults', async () => {
   app.use(upload({ limits: { fileSize: 1000 * 480, files: 10 }}))
 
   // Basic tests
-  expect(db.imagePlugin.awsAcl).toEqual('public-read')
-  expect(db.imagePlugin.filesize).toEqual(undefined)
-  expect(db.imagePlugin.formats).toEqual(['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff'])
-  expect(db.imagePlugin.getSignedUrlOption).toEqual(undefined)
-  expect(db.imagePlugin.metadata).toEqual(undefined)
-  expect(db.imagePlugin.path).toEqual(expect.any(Function))
-  expect(db.imagePlugin.params).toEqual({})
+  expect(db.filePlugin.awsAcl).toEqual('public-read')
+  expect(db.filePlugin.filesize).toEqual(undefined)
+  expect(db.filePlugin.formats).toEqual(['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tiff'])
+  expect(db.filePlugin.getSignedUrlOption).toEqual(undefined)
+  expect(db.filePlugin.metadata).toEqual(undefined)
+  expect(db.filePlugin.path).toEqual(expect.any(Function))
+  expect(db.filePlugin.params).toEqual({})
 
   // Images not signed
   let image
@@ -630,7 +630,7 @@ test('images option defaults', async () => {
     try {
       // Files exist
       expect(req.files.logo).toEqual(expect.any(Object))
-      let response = await imagePluginFile.addImages.call(
+      let response = await filePluginFile.addFiles.call(
         { model: user, files: req.files, query: { _id: 1234 }},
         req.body || {},
         true
@@ -670,25 +670,25 @@ test('images option defaults', async () => {
     .expect(200)
 })
 
-test('images options formats & filesizes', async () => {
+test('files options formats & filesizes', async () => {
   const db3 = monastery.manager('127.0.0.1/monastery', {
     timestamps: false, 
-    imagePlugin: { 
-      ...imagePluginFakeOpts,
+    filePlugin: { 
+      ...filePluginFakeOpts,
       formats: ['jpg', 'jpeg', 'png', 'ico'],
       filesize: 1000 * 270, 
     },
   })
 
   let user = db3.model('user', { fields: {
-    imageIco:     { type: 'image' },
-    imageWebp:    { type: 'image', formats: ['webp'] },
-    imageSvgBad:  { type: 'image' },
-    imageSvgGood: { type: 'image', formats: ['svg'] },
-    imageSvgAny:  { type: 'image', formats: ['any'] },
-    imageSize1:   { type: 'image', filesize: 1000 * 100 },
-    imageSize2:   { type: 'image' },
-    imageSize3:   { type: 'image' },
+    imageIco:     { type: 'file' },
+    imageWebp:    { type: 'file', formats: ['webp'] },
+    imageSvgBad:  { type: 'file' },
+    imageSvgGood: { type: 'file', formats: ['svg'] },
+    imageSvgAny:  { type: 'file', formats: ['any'] },
+    imageSize1:   { type: 'file', filesize: 1000 * 100 },
+    imageSize2:   { type: 'file' },
+    imageSize3:   { type: 'file' },
   }})
 
   let supertest = require('supertest')
@@ -708,20 +708,20 @@ test('images options formats & filesizes', async () => {
       delete req.files.imageSize2
       delete req.files.imageSize3
       // Ico, Webp, and imageSvgGood will throw an error first if it's not a valid type
-      await expect(imagePluginFile._findValidImages.call(user, req.files)).resolves.toEqual(expect.any(Array))
-      await expect(imagePluginFile._findValidImages.call(user, imageSvgBad)).rejects.toEqual({
+      await expect(filePluginFile._findValidFiles.call(user, req.files)).resolves.toEqual(expect.any(Array))
+      await expect(filePluginFile._findValidFiles.call(user, imageSvgBad)).rejects.toEqual({
         title: 'imageSvgBad',
         detail: 'The file format \'svg\' for \'bad.svg\' is not supported',
       })
-      await expect(imagePluginFile._findValidImages.call(user, imageSize1)).rejects.toEqual({
+      await expect(filePluginFile._findValidFiles.call(user, imageSize1)).rejects.toEqual({
         title: 'imageSize1',
         detail: 'The file size for \'lion1.png\' is bigger than 0.1MB.',
       })
-      await expect(imagePluginFile._findValidImages.call(user, imageSize2)).rejects.toEqual({
+      await expect(filePluginFile._findValidFiles.call(user, imageSize2)).rejects.toEqual({
         title: 'imageSize2',
         detail: 'The file size for \'lion2.jpg\' is bigger than 0.3MB.',
       })
-      await expect(imagePluginFile._findValidImages.call(user, imageSize3)).rejects.toEqual({
+      await expect(filePluginFile._findValidFiles.call(user, imageSize3)).rejects.toEqual({
         title: 'imageSize3',
         detail: 'The file size for \'house.jpg\' is too big.',
       })
@@ -748,20 +748,76 @@ test('images options formats & filesizes', async () => {
   db3.close()
 })
 
-test('images option getSignedUrls', async () => {
+test('files options non-image formats', async () => {
+  const db3 = monastery.manager('127.0.0.1/monastery', {
+    timestamps: false,
+    filePlugin: filePluginFakeOpts,
+  })
+
+  let user = db3.model('user', { fields: {
+    pdf:      { type: 'file', formats: ['pdf'] },
+    pdfBad:   { type: 'file' },
+    csv:      { type: 'file', formats: ['csv'] },
+    xlsx:     { type: 'file', formats: ['xlsx'] },
+    docAny:   { type: 'file', formats: ['any'] },
+  }})
+
+  let supertest = require('supertest')
+  let express = require('express')
+  let upload = require('express-fileupload')
+  let app = express()
+  app.use(upload())
+
+  app.post('/', async (req, res) => {
+    try {
+      let pdfBad = { pdfBad: req.files.pdfBad }
+      delete req.files.pdfBad
+      let validFiles = await filePluginFile._findValidFiles.call(user, req.files)
+      // Binary files are detected by content, text files fall back to the filename extension
+      expect(validFiles.map(o => [o[0].ext, o[0].mime])).toEqual([
+        ['pdf', 'application/pdf'],
+        ['csv', ''],
+        ['xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+        ['pdf', 'application/pdf'],
+      ])
+      // Default formats only allow images
+      await expect(filePluginFile._findValidFiles.call(user, pdfBad)).rejects.toEqual({
+        title: 'pdfBad',
+        detail: 'The file format \'pdf\' for \'doc.pdf\' is not supported',
+      })
+      res.send()
+    } catch (e) {
+      console.log(e.message || e)
+      res.status(500).send()
+    }
+  })
+
+  await supertest(app)
+    .post('/')
+    .attach('pdf', `${__dirname}/assets/doc.pdf`)
+    .attach('csv', `${__dirname}/assets/data.csv`)
+    .attach('xlsx', `${__dirname}/assets/data.xlsx`)
+    .attach('docAny', `${__dirname}/assets/doc.pdf`)
+    .attach('pdfBad', `${__dirname}/assets/doc.pdf`)
+    .expect(200)
+
+  db3.close()
+})
+
+test('files option getSignedUrls', async () => {
   // latest (2022.02)
   const db3 = monastery.manager('127.0.0.1/monastery', {
     timestamps: false, 
-    imagePlugin: { 
-      ...imagePluginFakeOpts,
+    filePlugin: { 
+      ...filePluginFakeOpts,
       awsRegion: 'ap-southeast-2',
       getSignedUrl: true,
     },
   })
 
   db3.model('user', { fields: {
-    photos: [{ type: 'image', getSignedUrl: false }],
-    photos2: [{ type: 'image' }],
+    photos: [{ type: 'file', getSignedUrl: false }],
+    photos2: [{ type: 'file' }],
   }})
 
   let image = {
@@ -806,11 +862,11 @@ test('images option getSignedUrls', async () => {
   db3.close()
 })
 
-test('images options awsAcl, awsBucket, metadata, params, path', async () => {
+test('files options awsAcl, awsBucket, metadata, params, path', async () => {
   const db3 = monastery.manager('127.0.0.1/monastery', {
     timestamps: false, 
-    imagePlugin: { 
-      ...imagePluginFakeOpts,
+    filePlugin: { 
+      ...filePluginFakeOpts,
       awsAcl: 'private',
       metadata: { small: '*x300' , medium: '*x800', large: '*x1200' },
       params: { ContentLanguage: 'DE'},
@@ -820,9 +876,9 @@ test('images options awsAcl, awsBucket, metadata, params, path', async () => {
 
   let user = db3.model('user', {
     fields: {
-      optionDefaults: { type: 'image' },
+      optionDefaults: { type: 'file' },
       optionOverrides: {
-        type: 'image',
+        type: 'file',
         awsAcl: 'public-read-write',
         awsBucket: 'fake2',
         metadata: { small: '*x100' , medium: '*x400', large: '*x800' },
@@ -843,7 +899,7 @@ test('images options awsAcl, awsBucket, metadata, params, path', async () => {
       // Files exist
       expect(req.files.optionDefaults).toEqual(expect.any(Object))
       expect(req.files.optionOverrides).toEqual(expect.any(Object))
-      let response = await imagePluginFile.addImages.call(
+      let response = await filePluginFile.addFiles.call(
         { model: user, files: req.files, query: { _id: 1234 }},
         req.body || {},
         true
@@ -907,28 +963,28 @@ test('images options awsAcl, awsBucket, metadata, params, path', async () => {
   db3.close()
 })
 
-test('images afterUploadBeforeUpdate must be an array', () => {
+test('files afterUploadBeforeUpdate must be an array', () => {
   expect(() => monastery.manager('127.0.0.1/monastery', {
     timestamps: false,
-    imagePlugin: { ...imagePluginFakeOpts, afterUploadBeforeUpdate: () => {} },
+    filePlugin: { ...filePluginFakeOpts, afterUploadBeforeUpdate: () => {} },
   })).toThrow('afterUploadBeforeUpdate must be an array of functions')
 })
 
-test('images afterUploadBeforeUpdate hook', async () => {
+test('files afterUploadBeforeUpdate hook', async () => {
   const payloads = []
   const dbHooks = monastery.manager('127.0.0.1/monastery', {
     timestamps: false,
-    imagePlugin: {
-      ...imagePluginFakeOpts,
+    filePlugin: {
+      ...filePluginFakeOpts,
       afterUploadBeforeUpdate: [
-        (ctx) => { payloads.push({ path: ctx.inputPath, fname: ctx.image.filename }) },
+        (ctx) => { payloads.push({ path: ctx.inputPath, fname: ctx.fileObject.filename }) },
         (ctx) => { payloads.push({ extra: ctx.test === true }) },
       ],
     },
   })
 
   const user = dbHooks.model('user', {
-    fields: { logo: { type: 'image' } },
+    fields: { logo: { type: 'file' } },
   })
 
   const supertest = require('supertest')
@@ -939,7 +995,7 @@ test('images afterUploadBeforeUpdate hook', async () => {
 
   app.post('/', async (req, res) => {
     try {
-      await imagePluginFile.addImages.call(
+      await filePluginFile.addFiles.call(
         { model: user, files: req.files, query: { _id: 1234 } },
         req.body || {},
         true
@@ -964,34 +1020,34 @@ test('images afterUploadBeforeUpdate hook', async () => {
   dbHooks.close()
 })
 
-test('images afterUploadAfterUpdate must be an array', () => {
+test('files afterUploadAfterUpdate must be an array', () => {
   expect(() => monastery.manager('127.0.0.1/monastery', {
     timestamps: false,
-    imagePlugin: { ...imagePluginFakeOpts, afterUploadAfterUpdate: () => {} },
+    filePlugin: { ...filePluginFakeOpts, afterUploadAfterUpdate: () => {} },
   })).toThrow('afterUploadAfterUpdate must be an array of functions')
 })
 
-test('images afterUploadAfterUpdate hook', async () => {
+test('files afterUploadAfterUpdate hook', async () => {
   const payloads = []
   const dbHooks = monastery.manager('127.0.0.1/monastery', {
     timestamps: false,
-    imagePlugin: {
-      ...imagePluginFakeOpts,
+    filePlugin: {
+      ...filePluginFakeOpts,
       afterUploadAfterUpdate: [
-        (ctx) => { payloads.push({ path: ctx.inputPath, fname: ctx.image.filename }) },
+        (ctx) => { payloads.push({ path: ctx.inputPath, fname: ctx.fileObject.filename }) },
         (ctx) => { payloads.push({ hasUpdateResult: ctx.updateResult != null }) },
       ],
     },
   })
 
-  const user = dbHooks.model('user', { fields: { logo: { type: 'image' } } })
+  const user = dbHooks.model('user', { fields: { logo: { type: 'file' } } })
 
   const fakePayload = {
     model: user,
     data: {},
-    image: { filename: 'logo.png', uid: 'abc', path: 'full/abc.png', bucket: 'fake', date: 0, filesize: 100 },
+    fileObject: { filename: 'logo.png', uid: 'abc', path: 'full/abc.png', bucket: 'fake', date: 0, filesize: 100 },
     file: { name: 'logo.png', size: 100 },
-    imageField: user.imageFields[0],
+    fileField: user.fileFields[0],
     inputPath: 'logo',
     query: { _id: 1234 },
     create: false,
@@ -999,7 +1055,7 @@ test('images afterUploadAfterUpdate hook', async () => {
     s3Result: { Location: 'fake' },
   }
 
-  await imagePluginFile._invokeAfterUploadAfterUpdate([fakePayload], { nModified: 1 })
+  await filePluginFile._invokeAfterUploadAfterUpdate([fakePayload], { nModified: 1 })
 
   expect(payloads).toEqual([
     { path: 'logo', fname: 'logo.png' },
@@ -1009,20 +1065,20 @@ test('images afterUploadAfterUpdate hook', async () => {
   dbHooks.close()
 })
 
-test('images option depreciations', async () => {
+test('files option depreciations', async () => {
   // testing (filename bucketDir)
   const db3 = monastery.manager('127.0.0.1/monastery', {
     logLevel: 1,
     timestamps: false, 
-    imagePlugin: { 
-      ...imagePluginFakeOpts,
+    filePlugin: { 
+      ...filePluginFakeOpts,
       bucketDir: 'old',
     },
   })
 
   let user = db3.model('user', {
     fields: {
-      logo: { type: 'image', filename: 'oldLogo' },
+      logo: { type: 'file', filename: 'oldLogo' },
     },
   })
 
@@ -1036,7 +1092,7 @@ test('images option depreciations', async () => {
     try {
       // Files exist
       expect(req.files.logo).toEqual(expect.any(Object))
-      let response = await imagePluginFile.addImages.call(
+      let response = await filePluginFile.addFiles.call(
         { model: user, files: req.files, query: { _id: 1234 }},
         req.body || {},
         true
@@ -1066,4 +1122,14 @@ test('images option depreciations', async () => {
     .expect(200)
 
   db3.close()
+})
+
+test('files imagePlugin option throws', () => {
+  expect(() => monastery.manager('127.0.0.1/monastery', { imagePlugin: filePluginFakeOpts }))
+    .toThrow('imagePlugin has been renamed to filePlugin')
+})
+
+test('files image type throws', () => {
+  expect(() => db.model('user', { fields: { logo: { type: 'image' } } }))
+    .toThrow('Type \'image\' has been renamed to \'file\'')
 })

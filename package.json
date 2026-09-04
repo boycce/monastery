@@ -31,7 +31,7 @@
     "patch": "standard-version --release-as patch && npm publish && git push --follow-tags",
     "release": "standard-version && npm publish && git push --follow-tags",
     "test": "npm run lint && jest",
-    "test-one-example": "jest -t \"images addImages\" --watchAll",
+    "test-one-example": "jest -t \"files addFiles\" --watchAll",
     "types": "tsc"
   },
   "dependencies": {

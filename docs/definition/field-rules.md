@@ -29,12 +29,12 @@ parent: Model Definition
   maxLength | number
   regex | see validator.matches
   required | boolean
-  type | string - 'string', 'boolean', 'number', 'integer', 'date', 'id', 'any', '[image](#image-type)'
+  type | string - 'string', 'boolean', 'number', 'integer', 'date', 'id', 'any', '[file](#file-type)'
 
   *See [validator](https://github.com/validatorjs/validator.js#validators) for their validator logic*
 
   *Dates are unix timestamps in seconds, you change this to milliseconds via the [manager configurations](./manager). We hope to support other string based timestamp variations soon..*
 
-### Image type
+### File type
 
-  `type: 'image'` will be converted to `type: 'any'` upon initialisation without any image plugins. This type allows plugins to hook into field type. See the corresponding plugins for more details or [monastery's default image plugin](./image-plugin).
+  `type: 'file'` will be converted to `type: 'any'` upon initialisation without any file plugins. This type allows plugins to hook into field type. See the corresponding plugins for more details or [monastery's default file plugin](./file-plugin).

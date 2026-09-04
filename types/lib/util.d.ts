@@ -4,6 +4,17 @@ export function deepCopy(obj: any): any;
 export function deepFind(obj: any, path: any): any;
 export function forEach(obj: any, iteratee: any, context: any): any;
 export function forceArray(value: any): any[];
+export function formatDuplicateKeyError(model: any, err: any, nullIfNoCustomMessage: any): {
+    status: string;
+    title: any;
+    detail: any;
+    meta: {
+        field?: any;
+        model?: any;
+        rule: string;
+    };
+}[];
+export function getMostSpecificKeyMatchingPath(object: any, path: any): string;
 export function id(value?: string | ObjectId): ObjectId;
 export function inArray(array: any, key: any, value: any): any;
 export function isArray(value: any): value is any[];

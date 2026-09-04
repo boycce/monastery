@@ -15,8 +15,19 @@ declare class Manager {
     onError(fn: any): Promise<any>;
     onOpen(fn: any): Promise<any>;
     open(): Promise<this>;
+    openTimestamp: number;
     db: any;
     parseData(obj: any, parseBracketToDotNotation: any, parseDotNotation: any): any;
+    formatDuplicateKeyError(model: any, err: any, alwaysReturnArray: any): {
+        status: string;
+        title: any;
+        detail: any;
+        meta: {
+            field?: any;
+            model?: any;
+            rule: string;
+        };
+    }[];
     model: typeof Model;
     getSignedUrl: (path: any, expires: number, bucket: any) => Promise<string>;
     _getSignedUrl(): never;

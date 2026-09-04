@@ -72,7 +72,7 @@ test('model setup basics', async () => {
       colors: { red: { type: 'string' } },
       points: [[{ type: 'number' }]],
       points2: [[{ x: { type: 'number' } }]],
-      logo: { type: 'image' },
+      logo: { type: 'file' },
     },
   })
 
@@ -91,9 +91,9 @@ test('model setup basics', async () => {
   expect(user.fields.name.schema)
     .toEqual({ type: 'string', isString: true, isSchema: true, isType: 'isString' })
 
-  // Image field (not processed by plugin)
+  // File field (not processed by plugin)
   expect(user.fields.logo.schema)
-    .toEqual({ type: 'any', isAny: true, image: true, isSchema: true, isType: 'isAny' })
+    .toEqual({ type: 'any', isAny: true, file: true, isSchema: true, isType: 'isAny' })
 
   // Array field
   expect(user.fields.pets)
@@ -381,7 +381,7 @@ test('model setup with reserved and invalid rules', async () => {
     fields: {
       name: {
         type: 'string',
-        params: {}, // reserved keyword (image plugin) 
+        params: {}, // reserved keyword (file plugin) 
         invalidRule: {}, // no rule function found
       },
     },
