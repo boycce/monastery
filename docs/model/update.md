@@ -14,6 +14,7 @@ Update document(s) in a collection and calls model hooks: `beforeValidate`,  `be
 - `query` *(object\|id)*: [`MongoDB query document`](https://www.mongodb.com/docs/v5.0/tutorial/query-documents/), or id
 - [`data`](#data) *(object)* - data that's validated against the model fields, which eventually gets wrapped in `{ $set: .. }`
 - [[`blacklist`](#blacklisting)]*(array\|string\|false)*: augment `definition.updateBL`. `false` will remove all blacklisting
+- [`files`] *(any)*: uploaded files to save to S3, e.g. `req.files`. Any value other than `undefined` also removes files missing from `data`, see [Updating documents](../file-plugin#updating-documents)
 - [`project`] *(string\|array\|object)*: project these fields, ignores blacklisting
 - [`skipValidation`] *(string\|array\|boolean)*:  skip validation for these fields, or pass `true` to skip all fields and validation hooks
 - [`sort`] *(string\|object\|array)*: same as the mongodb option, but  allows for string parsing e.g. 'name', 'name:1'

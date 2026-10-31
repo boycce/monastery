@@ -110,6 +110,14 @@ user.update({
 })
 ```
 
+### Removing documents
+
+Removing a document only deletes its files from S3 when `options.files` is set to any value other than `undefined`, e.g. `{}` or `true`, otherwise the files are left in your bucket.
+
+```js
+user.remove({ query: id, files: {} })
+```
+
 ### File types
 
 Uploads are checked against `formats` (per field, or the manager option). The default only allows images, `['any']` allows everything.
@@ -117,6 +125,8 @@ Uploads are checked against `formats` (per field, or the manager option). The de
 Binary files (images, pdf, docx, xlsx, zip, mp4, etc.) are identified by their contents using [file-type](https://github.com/sindresorhus/file-type/tree/v16.5.4#supported-file-types), not their filename. Text files (csv, txt, svg, json, etc.) can't be, so the filename extension is used instead.
 
 Files without an extension are rejected.
+
+Older Microsoft formats (`.msg`, `.doc`, `.xls` and `.ppt`) share one container, detected as `cfb`, so their type comes from the filename instead. Add them to `formats` by name, e.g. `['msg', 'doc']`, or add `cfb` to allow any of them.
 
 The S3 `ContentType` is set automatically from the detected type. You can override it via `params`, e.g. `params: { ContentType: 'text/plain' }`.
 

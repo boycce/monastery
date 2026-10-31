@@ -13,6 +13,7 @@ Validate and insert document(s) in a collection and calls model hooks: `beforeVa
 
 - `data` *(object\|array)* - Data that is validated against the model fields. Key names can be in dot or bracket notation which is handy for HTML FormData.
 - [[`blacklist`](#blacklisting)] *(array\|string\|false)*: augment `definition.insertBL`. `false` will remove all blacklisting
+- [`files`] *(object)*: uploaded files to save to S3, e.g. `req.files`, see [File Plugin](../file-plugin)
 - [`project`] *(string\|array\|object)*: project these fields, ignores blacklisting
 - [`skipValidation`] *(string\|array\|boolean)*: skip validation for these fields, or pass `true` to skip all fields and validation hooks
 - [`timestamps`] *(boolean)*: whether `createdAt` and `updatedAt` are automatically inserted, defaults to `manager.timestamps`

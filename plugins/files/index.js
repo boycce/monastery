@@ -14,6 +14,14 @@ const mimeMap = {
   js:   'application/javascript',
 }
 
+// Legacy Microsoft formats share the `cfb` container, so their real type comes from the filename
+const cfbMimeMap = {
+  msg: 'application/vnd.ms-outlook',
+  doc: 'application/msword',
+  xls: 'application/vnd.ms-excel',
+  ppt: 'application/vnd.ms-powerpoint',
+}
+
 let plugin = module.exports = {
 
   setup: function(manager, options) {
@@ -552,6 +560,12 @@ let plugin = module.exports = {
             file.format = res? res.ext : ''
             file.mime   = res? res.mime : ''
             file.ext = file.format || (file.name.match(/\.(.*)$/) || [])[1] || 'unknown'
+            let nameExt = ((file.name.match(/\.([^.]*)$/) || [])[1] || '').toLowerCase()
+            if (file.format == 'cfb' && cfbMimeMap[nameExt]) {
+              file.ext = nameExt
+              file.mime = cfbMimeMap[nameExt]
+            }
+            let allowCfb = file.format == 'cfb' && util.inArray(formats, 'cfb') // 'cfb' allows all legacy formats
             file.nameClipped = file.name.length > 14? file.name.substring(0, 14) + '..' : file.name
 
             if (file.truncated) reject({
@@ -566,7 +580,7 @@ let plugin = module.exports = {
               title: filesArr.inputPath + (i? `.${i}` : ''),
               detail: `Please add a file extension to your file '${file.nameClipped}'`,
             })
-            else if (!allowAny && !util.inArray(formats, file.ext)) reject({
+            else if (!allowAny && !allowCfb && !util.inArray(formats, file.ext)) reject({
               title: filesArr.inputPath + (i? `.${i}` : ''),
               detail: `The file format '${file.ext}' for '${file.nameClipped}' is not supported`,
             })

@@ -14,6 +14,7 @@ Remove document(s) in a collection and calls model hooks: `beforeRemove`,  `afte
 - `query` *(object\|id)*: [`MongoDB query document`](https://www.mongodb.com/docs/v5.0/tutorial/query-documents/), or id
 - [`sort`] *(string\|object\|array)*: same as the mongodb option, but  allows for string parsing e.g. 'name', 'name:1'
 - [`multi`] *(boolean)*: set to false remove only the first document that match the query criteria
+- [`files`] *(any)*: any value other than `undefined`, e.g. `{}` or `true`, also deletes the removed documents' files from S3, see [Removing documents](../file-plugin#removing-documents)
 - [[`any mongodb option`](https://mongodb.github.io/node-mongodb-native/5.9/classes/Collection.html#deleteMany)] *(any)*
 
 ### Returns

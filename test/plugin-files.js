@@ -804,6 +804,59 @@ test('files options non-image formats', async () => {
   db3.close()
 })
 
+test('files options cfb formats', async () => {
+  const db3 = monastery.manager('127.0.0.1/monastery', {
+    timestamps: false,
+    filePlugin: filePluginFakeOpts,
+  })
+
+  let user = db3.model('user', { fields: {
+    msg:       { type: 'file', formats: ['msg'] },
+    cfbMsg:    { type: 'file', formats: ['cfb'] },
+    cfbOther:  { type: 'file', formats: ['cfb'] },
+    msgBad:    { type: 'file', formats: ['doc'] },
+  }})
+
+  let supertest = require('supertest')
+  let express = require('express')
+  let upload = require('express-fileupload')
+  let app = express()
+  app.use(upload())
+
+  app.post('/', async (req, res) => {
+    try {
+      let msgBad = { msgBad: req.files.msgBad }
+      delete req.files.msgBad
+      let validFiles = await filePluginFile._findValidFiles.call(user, req.files)
+      // Legacy formats take their extension from the filename, other cfb files stay as cfb
+      expect(validFiles.map(o => [o[0].ext, o[0].mime])).toEqual([
+        ['msg', 'application/vnd.ms-outlook'],
+        ['msg', 'application/vnd.ms-outlook'],
+        ['cfb', 'application/x-cfb'],
+      ])
+      // A .msg isn't allowed by another legacy format
+      await expect(filePluginFile._findValidFiles.call(user, msgBad)).rejects.toEqual({
+        title: 'msgBad',
+        detail: 'The file format \'msg\' for \'email.msg\' is not supported',
+      })
+      res.send()
+    } catch (e) {
+      console.log(e.message || e)
+      res.status(500).send()
+    }
+  })
+
+  await supertest(app)
+    .post('/')
+    .attach('msg', `${__dirname}/assets/email.msg`)
+    .attach('cfbMsg', `${__dirname}/assets/email.msg`)
+    .attach('cfbOther', `${__dirname}/assets/legacy.bin`)
+    .attach('msgBad', `${__dirname}/assets/email.msg`)
+    .expect(200)
+
+  db3.close()
+})
+
 test('files option getSignedUrls', async () => {
   // latest (2022.02)
   const db3 = monastery.manager('127.0.0.1/monastery', {
