@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.0.3](https://github.com/boycce/monastery/compare/5.0.2...5.0.3) (2026-10-31)
+
+
+### Features
+
+* **files:** save msg, doc, xls and ppt files with their own extension ([025a829](https://github.com/boycce/monastery/commit/025a829c66d29f534d4f8a3e75e72ad7824cafdc))
+
 ### [5.0.2](https://github.com/boycce/monastery/compare/5.0.1...5.0.2) (2026-09-04)
 
 ### [5.0.1](https://github.com/boycce/monastery/compare/5.0.0...5.0.1) (2026-09-04)
