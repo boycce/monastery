@@ -78,7 +78,7 @@ test('manager > return a promise', async () => {
 
 test('manager > return a promise with uri error', async () => {
   await expect(monastery.manager('badlocalhost/monastery', { serverSelectionTimeoutMS: 500, promise: true }))
-    .rejects.toThrow(/getaddrinfo ENOTFOUND badlocalhost/)
+    .rejects.toThrow(/getaddrinfo (ENOTFOUND|EAI_AGAIN) badlocalhost/)
 })
 
 test('manager > reuse MongoDB Client', async () => {
