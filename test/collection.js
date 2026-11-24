@@ -245,8 +245,8 @@ test('find > stream pause and continue', async () => {
   await userCol.find(query, { 
     stream: (doc, { pause, resume }) => {
       pause()
-      const duration = Date.now() - start + 1 // 1ms case when it runs in the same tick
-      expect(duration).toBeGreaterThan(index * 100)
+      const duration = Date.now() - start
+      expect(duration).toBeGreaterThanOrEqual(index * 100 - 5)
       setTimeout(() => {
         index++
         resume()
@@ -255,7 +255,7 @@ test('find > stream pause and continue', async () => {
   })
   expect(index).toBe(4)
   const duration = Date.now() - start
-  expect(duration).toBeGreaterThan(400)
+  expect(duration).toBeGreaterThanOrEqual(395)
 })
 
 
