@@ -1,7 +1,7 @@
 ![](./assets/imgs/monastery.jpg)
 
 [![NPM](https://img.shields.io/npm/v/monastery.svg)](https://www.npmjs.com/package/monastery) 
-<!--[![Build Status](https://travis-ci.com/boycce/monastery.svg?branch=master)](https://app.travis-ci.com/github/boycce/monastery)-->
+[![Test](https://github.com/boycce/monastery/actions/workflows/test.yml/badge.svg)](https://github.com/boycce/monastery/actions/workflows/test.yml)
 
 > v3.0 has been released 🎉 refer to [breaking changes](#v3-breaking-changes) below when upgrading from v2.x.
 
@@ -80,7 +80,7 @@ You can view MongoDB's [compatibility table here](https://www.mongodb.com/docs/d
 
 | Monastery            | Mongo NodeJS Driver | MongoDB Server    | Node                |
 | :------------------- | :-----------------: | :---------------: | ------------------: |
-| `5.x` | [`7.6.x`](https://mongodb.github.io/node-mongodb-native/7.6/) | `>=4.4  <=8.x` | `>=20.19 <=latest` |
+| `5.x` | [`7.6.x`](https://mongodb.github.io/node-mongodb-native/7.6/) | `>=4.4  <=8.x` | `>=20.19 <=26.x` |
 | `3-4.x` | [`5.9.x`](https://mongodb.github.io/node-mongodb-native/5.9/) | `>=3.6  <=7.x` | `>=14.x <=latest` |
 | `2.x` | [`3.7.x`](https://mongodb.github.io/node-mongodb-native/3.7/api/) | `>=2.6  <=6.x` | `>=4.x  <=14.x` |
 
