@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.0.5](https://github.com/boycce/monastery/compare/5.0.4...5.0.5) (2026-11-24)
+
+
+### Features
+
+* support node 26 ([6d5a787](https://github.com/boycce/monastery/commit/6d5a787fc6b52107dc28c1dc470fa90e9a55658f))
+
 ### [5.0.4](https://github.com/boycce/monastery/compare/5.0.3...5.0.4) (2026-11-24)
 
 ### [5.0.3](https://github.com/boycce/monastery/compare/5.0.2...5.0.3) (2026-10-31)
